@@ -26,8 +26,10 @@ app.get("/", authMiddleware(), async (req, res) => {
   res.json({ message: "Hello World!" });
 });
 
-app.post("/clerk-webhook", authMiddleware(), async (req, res) => {
+app.post("/clerk-webhook", async (req, res) => {
   const { object, type } = req.body;
+
+  console.log(object, type);
 
   if (type === "user.created" || type === "user.updated") {
     const { id, email_addresses } = object;
