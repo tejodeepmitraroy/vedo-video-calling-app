@@ -28,22 +28,31 @@ app.get("/", authMiddleware(), async (req, res) => {
 
 app.post("/clerk-webhook", async (req, res) => {
   const { data, type } = req.body;
+  const { id, email_addresses } = data;
 
   console.log(data, type);
 
-  if (type === "user.created" || type === "user.updated") {
-    const { id, email_addresses } = data;
-;
-    const email = email_addresses[0]?email_addresses[0].email_address:"";
+  try {
+    if (type === "user.created" || type === "user.updated") {
+      const email = email_addresses[0].email_address;
 
-    const { error } = await supabase
-      .from("users")
-      .upsert({ id, email }, { onConflict: "id" });
+      const { data, error } = await supabase
+        .from("users")
+        .upsert({ id, email }, { onConflict: "id" })
+        .select();
 
-    if (error) {
-      console.error("Error inserting/updating user in Supabase:", error);
-      return res.status(500).send("Internal Server Error");
+      if (error) {
+        console.error("Error inserting/updating user in Supabase:", error);
+        return res.status(500).send("Internal Server Error");
+      }
+
+      console.log("User inserted/updated successfully:", data);
     }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).send("Internal Server Error");
   }
 
   res.sendStatus(200);
