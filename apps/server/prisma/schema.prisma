@@ -12,3 +12,45 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+model User {
+  id             Int           @id @default(autoincrement())
+  clerkUserId    String        @unique
+  firstName      String
+  lastName       String
+  meetings       Meeting[]     @relation("UserMeetings")
+  friends        Friendship[]  @relation("UserFriends", references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Meeting {
+  id        Int      @id @default(autoincrement())
+  title     String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  createdBy   User     @relation("UserMeetings", fields: [createdById], references: [id])
+  createdById Int
+  participants User[]  @relation("MeetingParticipants", references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Friendship {
+  id           Int      @id @default(autoincrement())
+  requester    User     @relation("FriendRequests", fields: [requesterId], references: [id])
+  requesterId  Int
+  requestee    User     @relation("UserFriends", fields: [requesteeId], references: [id])
+  requesteeId  Int
+  status       FriendshipStatus @default(PENDING)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}

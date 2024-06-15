@@ -19,8 +19,13 @@
         "typescript": "^5.4.5"
     },
     "dependencies": {
+        "@clerk/clerk-sdk-node": "^5.0.11",
+        "@supabase/supabase-js": "1.13.1",
+        "cors": "^2.8.5",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
+        "i": "^0.3.7",
+        "npm": "^10.8.1",
         "socket.io": "^4.7.5",
         "ts-node": "^10.9.2"
     }
