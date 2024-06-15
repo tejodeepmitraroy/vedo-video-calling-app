@@ -27,13 +27,14 @@ app.get("/", authMiddleware(), async (req, res) => {
 });
 
 app.post("/clerk-webhook", async (req, res) => {
-  const { object, type } = req.body;
+  const { data, type } = req.body;
 
-  console.log(object, type);
+  console.log(data, type);
 
   if (type === "user.created" || type === "user.updated") {
-    const { id, email_addresses } = object;
-    const email = email_addresses[0].email_address;
+    const { id, email_addresses } = data;
+;
+    const email = email_addresses[0]?email_addresses[0].email_address:"";
 
     const { error } = await supabase
       .from("users")
