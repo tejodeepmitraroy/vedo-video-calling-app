@@ -2,6 +2,7 @@ import http from "http";
 import * as dotenv from "dotenv";
 import SocketService from "./services/socket";
 import app from "./app";
+
 dotenv.config();
 
 const socketService = new SocketService();

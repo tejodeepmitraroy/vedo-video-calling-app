@@ -7,6 +7,9 @@ import {
 } from "@clerk/clerk-sdk-node";
 import authMiddleware from "./middleware/clerk-middleware";
 import supabase from "./lib/supabaseClient";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const app: Application = express();
 
