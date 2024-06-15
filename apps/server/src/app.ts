@@ -30,14 +30,14 @@ app.get("/", authMiddleware(), async (req, res) => {
 app.post("/clerk-webhook", async (req, res) => {
   const { data, type } = req.body;
   const { id, email_addresses, first_name, last_name, image_url } = data;
-  
+
   console.log(data, type);
-  
+
   if (typeof id === "string") {
     try {
-      const email = email_addresses[0] ?.email_address;
-      if (type === "user.created") {
+      const email = email_addresses[0] ? email_addresses[0].email_address : "";
 
+      if (type === "user.created") {
         const user = await prisma.user.create({
           data: {
             id,
@@ -47,7 +47,7 @@ app.post("/clerk-webhook", async (req, res) => {
             image_url,
           },
         });
-
+        console.log("User inserted successfully:", user);
       }
       if (type === "user.updated") {
         const data = await prisma.user.update({
@@ -62,14 +62,16 @@ app.post("/clerk-webhook", async (req, res) => {
           },
         });
 
-        // const { data, error } = await supabase
-        //   .from("users")
-        //   .upsert({ id, email }, { onConflict: "id" })
-        //   .select();
+        console.log("User updated successfully:", data);
+      }
+      if (type === "user.deleted") {
+        const data = await prisma.user.delete({
+          where: {
+            id,
+          },
+        });
 
-        
-
-        console.log("User inserted/updated successfully:", data);
+        console.log("User Deleted successfully:", data);
       }
 
       res.sendStatus(200);
@@ -80,7 +82,6 @@ app.post("/clerk-webhook", async (req, res) => {
 
     res.sendStatus(200);
   }
-  });
-  
-  export default app;
-  
+});
+
+export default app;
