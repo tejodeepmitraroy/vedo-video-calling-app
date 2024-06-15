@@ -35,7 +35,7 @@ app.post("/clerk-webhook", async (req, res) => {
   
   if (typeof id === "string") {
     try {
-      const email = email_addresses[0] ?.email_address ;
+      const email = email_addresses[0] ?.email_address;
       if (type === "user.created") {
 
         const user = await prisma.user.create({
