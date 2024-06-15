@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "@clerk/clerk-sdk-node": "^5.0.11",
+        "@prisma/client": "^5.15.0",
         "@supabase/supabase-js": "1.13.1",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
