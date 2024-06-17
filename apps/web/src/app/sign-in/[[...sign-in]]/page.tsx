@@ -3,9 +3,9 @@ import { SignIn } from '@clerk/nextjs';
 
 export default function Page() {
 	return (
-		<div className="w-full border lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-screen">
+		<div className="relative min-h-screen w-full lg:grid lg:grid-cols-2">
 			<div className="flex items-center justify-center py-12">
-				<div className="mx-auto grid w-[350px] gap-6">
+				<div className="relative mx-auto grid w-[350px] gap-6">
 					<SignIn path="/sign-in" signUpUrl="/sign-up" />
 				</div>
 			</div>
@@ -18,6 +18,7 @@ export default function Page() {
 					className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
 				/>
 			</div>
+			
 		</div>
 	);
 }
