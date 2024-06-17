@@ -1,12 +1,11 @@
 import {
   ClerkExpressRequireAuth,
+  ClerkMiddleware,
   RequireAuthProp,
   StrictAuthProp,
 } from "@clerk/clerk-sdk-node";
 
-import { clerkClient } from "@clerk/clerk-sdk-node";
-
-const authMiddleware = () =>
+const authMiddleware= () =>
   ClerkExpressRequireAuth({
     audience: "auth",
     onError: (error) => console.log("Unauthenticated", error),

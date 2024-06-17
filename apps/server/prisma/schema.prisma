@@ -15,25 +15,29 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(cuid())
+  id         String   @id @default(uuid())
+  clerkId    String   @unique
+  username   String   @unique
   first_name String
   last_name  String
-  email      String   
+  email      String   @unique
   image_url  String
-  friendsIds String[]
+  friendsIds Int[]
   meetings   Meeting[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Meeting {
-  id             Int      @id @default(autoincrement())
+  id             String       @id @default(uuid())
   title          String
   description    String?
   videoCallUrl   String
-  startTime      DateTime
-  endTime        DateTime
+  startTime      DateTime?
+  endTime        DateTime?
   createdById    String
   participantIds String[]
-  createdBy      User     @relation(fields: [createdById], references: [id])
+  createdBy      User     @relation(fields: [createdById], references: [clerkId])
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
