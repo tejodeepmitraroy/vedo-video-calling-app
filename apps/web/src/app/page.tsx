@@ -45,7 +45,7 @@ export default function Dashboard() {
 						<Link href="/" className="flex items-center gap-2 font-semibold">
 							<Video className="h-6 w-6" />
 							{/* <Package2 className="h-6 w-6" /> */}
-							<span className="">VEDO</span>
+							<span className=" font-bold">V.E.D.O</span>
 						</Link>
 						<Button variant="outline" size="icon" className="ml-auto h-8 w-8">
 							<Bell className="h-4 w-4" />
@@ -53,7 +53,7 @@ export default function Dashboard() {
 						</Button>
 					</div>
 					<div className="flex-1">
-						<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+						<nav className="grid items-start px-2 font-medium lg:px-4">
 							<Link
 								href="#"
 								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary"
@@ -75,16 +75,7 @@ export default function Dashboard() {
 								<Phone className="h-4 w-4" />
 								Call
 							</Link>
-							<Link
-								href="#"
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary"
-							>
-								<ShoppingCart className="h-4 w-4" />
-								Orders
-								<Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-									6
-								</Badge>
-							</Link>
+							
 							<Link
 								href="#"
 								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary"
