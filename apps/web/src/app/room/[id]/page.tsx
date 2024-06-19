@@ -1,5 +1,5 @@
 'use client';
-import * as React from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
 	Home,
@@ -22,9 +22,48 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import MeetingVideo from '@/components/ui/video';
+import MeetingVideo from './components/ui/VideoPanel';
+import ControlPanel from './components/ui/ControlPanel';
+import VideoPanel from './components/ui/VideoPanel';
+import { useRoomStore } from '@/store/useStore';
 
-export default function CallPannel() {
+interface SelectedDevices {
+	camera: string;
+	microphone: string;
+}
+
+export default function CallPanel() {
+	const setStream = useRoomStore((state) => state.setStream);
+	const selectedDevices = useRoomStore((state) => state.selectedDevices);
+	const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
+	const screenStream = useRoomStore((state) => state.screenStream);
+	const stream = useRoomStore((state) => state.stream);
+	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
+
+	const getUserMedia = useCallback(async () => {
+		const constraints = {
+			video: selectedDevices.camera
+				? { deviceId: { exact: selectedDevices.camera } }
+				: true,
+			audio: selectedDevices.microphone
+				? { deviceId: { exact: selectedDevices.microphone } }
+				: true,
+		};
+
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia(constraints);
+			setStream(stream);
+		} catch (error) {
+			console.error('Error accessing media devices:', error);
+		}
+	}, [selectedDevices.camera, selectedDevices.microphone, setStream]);
+
+	useEffect(() => {
+		if (selectedDevices.camera || selectedDevices.microphone) {
+			getUserMedia();
+		}
+	}, [getUserMedia, selectedDevices.camera, selectedDevices.microphone]);
+
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
 			<aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -116,7 +155,7 @@ export default function CallPannel() {
 					</TooltipProvider>
 				</nav>
 			</aside>
-			<div className="flex h-full w-full flex-col bg-black sm:pl-14">
+			<div className="flex h-full w-full flex-col sm:pl-14">
 				<header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 					<Sheet>
 						<SheetTrigger asChild>
@@ -173,17 +212,15 @@ export default function CallPannel() {
 						</SheetContent>
 					</Sheet>
 				</header>
-				<main className="relative min-h-screen w-full overflow-hidden px-5 py-10">
-					{/* <MeetingVideo /> */}
-					<div className="absolute bottom-0 left-0 flex h-16 w-full items-center justify-center border border-white bg-background">
-						<div className="flex gap-4">
-							<Button className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500">
-								<Video className="h-20 w-20 text-lg" />
-							</Button>
-							<Button className="h-10 w-10 rounded-full bg-blue-500">
-								<Mic />
-							</Button>
-						</div>
+				<main className="relative h-screen w-full overflow-hidden">
+					<div className="h-[91vh] w-full border-red-500 bg-black px-5 py-10">
+						<VideoPanel stream={screenStream ? screenStream: stream} muted={!isMicrophoneOn} />
+					</div>
+					<div className="h-[9vh] w-full">
+						<ControlPanel />
+					</div>
+					<div className="absolute bottom-[15vh] right-10 z-40 w-[14vw]">
+						<VideoPanel stream={screenStream} muted={false} />
 					</div>
 				</main>
 			</div>
