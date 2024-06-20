@@ -5,7 +5,12 @@ class SocketService {
 
   constructor() {
     console.log("Init Socket Server");
-    this._io = new Server();
+    this._io = new Server({
+      cors: {
+        allowedHeaders: ["*"],
+        origin: "*",
+      },
+    });
   }
 
   public initListeners() {
@@ -14,15 +19,21 @@ class SocketService {
     io.on("connection", (socket) => {
       console.log("New socket connected", socket.id);
 
-      socket.on("event:message",  ({ message }: { message: string }) => {
-        console.log("new Message rec", message);
-      });
+      const emailToSocketIdMap = new Map();
+      const socketIdToEmailMap = new Map();
 
+      socket.on(
+        "event:joinRoom",
+        ({ roomId, email }: { roomId: string; email: string }) => {
+          console.log("Room Id", roomId);
+          console.log("email", email);
 
+          emailToSocketIdMap.set(email, socket.id);
+          socketIdToEmailMap.set(socket.id, email);
 
-
-
-      
+          io.to(socket.id).emit("event:joinRoom", { roomId, email });
+        }
+      );
 
       // Disconnection Socket
       socket.on("disconnect", (reason) => {
