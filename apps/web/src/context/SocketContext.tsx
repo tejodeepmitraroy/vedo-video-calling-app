@@ -44,15 +44,13 @@ export const SocketProvider: FC<SocketProviderProps> = ({ children }) => {
 			if (socket) {
 				socket.emit('event:joinRoom', { roomId, email });
 
-				socket.on(
-					'event:joinRoom',
-					({ roomId, email }: { roomId: string; email: string }) =>
-						console.log(`Came form BE RoomId:${roomId}, Email ${email}`)
-				);
+				
 			}
 		},
 		[socket]
 	);
+
+	
 
 	return (
 		<SocketContext.Provider value={{ joinRoom, socket }}>

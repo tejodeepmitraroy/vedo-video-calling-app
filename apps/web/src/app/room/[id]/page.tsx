@@ -29,40 +29,18 @@ import UserVideoPanel from './components/ui/UserVideoPanel';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSocket } from '@/context/SocketContext';
 import { useUser } from '@clerk/nextjs';
-import { Socket } from 'socket.io-client';
+import UserProfile from '@/components/UserProfile';
 
 export default function CallPanel({ params }: { params: { id: string } }) {
 	const stream = useRoomStore((state) => state.stream);
 	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
-	const { user } = useUser();
-
-	console.log(params);
+	
 
 	const { joinRoom, socket } = useSocket();
 
-	useEffect(() => {
-		// joinRoom(params.id, user?.emailAddresses[0]?.emailAddress!);
+	useEffect(()=>{},[])
 
-		const roomId = params.id;
-		const email = user?.emailAddresses[0]?.emailAddress!;
-
-		socket?.emit('event:joinRoom', { roomId, email });
-	}, [params.id, socket, user?.emailAddresses]);
-
-	const handleJoinRoom = useCallback(
-		({ roomId, email }: { roomId: string; email: string }) => {
-			console.log(`Came form BE RoomId:${roomId}, Email ${email}`);
-		},
-		[]
-	);
-
-	useEffect(() => {
-		socket?.on('event:joinRoom', handleJoinRoom);
-		return () => {
-			socket?.off('event:joinRoom', handleJoinRoom);
-		};
-	}, [handleJoinRoom, socket]);
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
@@ -142,13 +120,14 @@ export default function CallPanel({ params }: { params: { id: string } }) {
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Link
+								{/* <Link
 									href="#"
 									className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
 								>
 									<Settings className="h-5 w-5" />
 									<span className="sr-only">Settings</span>
-								</Link>
+								</Link> */}
+								<UserProfile/>
 							</TooltipTrigger>
 							<TooltipContent side="right">Settings</TooltipContent>
 						</Tooltip>

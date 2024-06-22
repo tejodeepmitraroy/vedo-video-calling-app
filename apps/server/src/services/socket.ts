@@ -24,14 +24,16 @@ class SocketService {
 
       socket.on(
         "event:joinRoom",
-        ({ roomId, email }: { roomId: string; email: string }) => {
+        ({ roomId, userId }: { roomId: string; userId: string }) => {
           console.log("Room Id", roomId);
-          console.log("email", email);
+          console.log("userId", userId);
 
-          emailToSocketIdMap.set(email, socket.id);
-          socketIdToEmailMap.set(socket.id, email);
+          emailToSocketIdMap.set(userId, socket.id);
+          socketIdToEmailMap.set(socket.id, userId);
 
-          io.to(socket.id).emit("event:joinRoom", { roomId, email });
+          io.to(roomId).emit("event:UserJoined", { userId, id: socket.id });
+          socket.join(roomId);
+          io.to(socket.id).emit("event:joinRoom", { roomId, userId });
         }
       );
 

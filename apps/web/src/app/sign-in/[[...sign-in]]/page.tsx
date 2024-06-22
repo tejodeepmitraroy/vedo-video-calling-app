@@ -18,7 +18,6 @@ export default function Page() {
 					className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
 				/>
 			</div>
-			
 		</div>
 	);
 }

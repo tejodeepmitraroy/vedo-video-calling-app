@@ -10,14 +10,22 @@ dotenv.config();
 
 const app: Application = express();
 
-app.use(cors());
+// console.log(process.env.FRONTEND_URL);
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials:true,
+  
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/call", callRouter);
 
-app.get("/", authMiddleware(), async (req, res) => {
+app.get("/", authMiddleware, async (req, res) => {
   res.json({ message: "Hello World!" });
 });
 
