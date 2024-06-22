@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
-interface Device {
+export interface Device {
 	deviceId: string;
 	label: string;
 	groupId: string;
@@ -33,11 +33,7 @@ interface MediaDevices {
 }
 
 const ControlPanel = () => {
-	const [devices, setDevices] = useState<MediaDevices>({
-		cameras: [],
-		microphones: [],
-	});
-
+	const setStream = useRoomStore((state) => state.setStream);
 	const selectedDevices = useRoomStore((state) => state.selectedDevices);
 	const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
 	const toggleCamera = useRoomStore((state) => state.toggleCamera);
@@ -47,6 +43,11 @@ const ControlPanel = () => {
 	const toggleScreenShare = useRoomStore((state) => state.toggleScreenShare);
 	const isScreenSharing = useRoomStore((state) => state.isScreenSharing);
 
+	const [devices, setDevices] = useState<MediaDevices>({
+		cameras: [],
+		microphones: [],
+	});
+
 	console.log(
 		'camera--->',
 		isCameraOn,
@@ -54,6 +55,44 @@ const ControlPanel = () => {
 		isMicrophoneOn,
 		'Stream-------->',
 		isScreenSharing
+	);
+
+	const getUserMedia = useCallback(
+		// async (isCamera:boolean, isMicrophone:boolean) => {
+		// const constraints = {
+		// 	video: isCamera
+		// 		? selectedDevices.camera
+		// 			? { deviceId: { exact: selectedDevices.camera } }
+		// 			: true
+		// 		: false,
+		// 	audio: isMicrophone
+		// 		? selectedDevices.microphone
+		// 			? { deviceId: { exact: selectedDevices.microphone } }
+		// 			: true
+		// 		: false,
+		// };
+		async () => {
+			const constraints = {
+				video: selectedDevices.camera
+					? { deviceId: { exact: selectedDevices.camera } }
+					: true,
+
+				audio: selectedDevices.microphone
+					? { deviceId: { exact: selectedDevices.microphone } }
+					: true,
+			};
+
+			console.log('constraints', constraints);
+
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia(constraints);
+				setStream(stream);
+			} catch (error) {
+				console.error('Error accessing media devices:', error);
+			}
+		},
+	
+		[selectedDevices.camera, selectedDevices.microphone, setStream]
 	);
 
 	const getMediaDevices = useCallback(async () => {
@@ -86,6 +125,19 @@ const ControlPanel = () => {
 	useEffect(() => {
 		getMediaDevices();
 	}, [getMediaDevices]);
+
+	useEffect(() => {
+		if (selectedDevices.camera || selectedDevices.microphone) {
+			getUserMedia();
+		}
+		console.log('Devices-->', selectedDevices);
+		console.log(
+			'isCameraOn-->',
+			isCameraOn,
+			'isMicrophoneOn-->',
+			isMicrophoneOn
+		);
+	}, [getUserMedia, isCameraOn, isMicrophoneOn, selectedDevices]);
 
 	return (
 		<div className="flex h-[9vh] w-full items-center justify-center border border-white bg-background">

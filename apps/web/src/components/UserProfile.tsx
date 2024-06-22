@@ -14,7 +14,7 @@ const UserProfile = () => {
 				<SignInButton />
 			</SignedOut>
 			<SignedIn>
-				<UserButton afterSignOutUrl="/sign-in" showName />
+				<UserButton afterSignOutUrl="/sign-in"  />
 			</SignedIn>
 		</>
 	);

@@ -11,7 +11,6 @@ import {
 	ShoppingCart,
 	Users2,
 	Video,
-	Mic,
 	MessagesSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,47 +21,26 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import MeetingVideo from './components/ui/VideoPanel';
-import ControlPanel from './components/ui/ControlPanel';
-import VideoPanel from './components/ui/VideoPanel';
+import ControlPanel, { Device } from './components/ui/ControlPanel';
+
 import { useRoomStore } from '@/store/useStore';
+import ScreenSharePanel from './components/ui/ScreenSharePanel';
+import UserVideoPanel from './components/ui/UserVideoPanel';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSocket } from '@/context/SocketContext';
+import { useUser } from '@clerk/nextjs';
+import UserProfile from '@/components/UserProfile';
 
-interface SelectedDevices {
-	camera: string;
-	microphone: string;
-}
-
-export default function CallPanel() {
-	const setStream = useRoomStore((state) => state.setStream);
-	const selectedDevices = useRoomStore((state) => state.selectedDevices);
-	const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
-	const screenStream = useRoomStore((state) => state.screenStream);
+export default function CallPanel({ params }: { params: { id: string } }) {
 	const stream = useRoomStore((state) => state.stream);
+	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
+	
 
-	const getUserMedia = useCallback(async () => {
-		const constraints = {
-			video: selectedDevices.camera
-				? { deviceId: { exact: selectedDevices.camera } }
-				: true,
-			audio: selectedDevices.microphone
-				? { deviceId: { exact: selectedDevices.microphone } }
-				: true,
-		};
+	const { joinRoom, socket } = useSocket();
 
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia(constraints);
-			setStream(stream);
-		} catch (error) {
-			console.error('Error accessing media devices:', error);
-		}
-	}, [selectedDevices.camera, selectedDevices.microphone, setStream]);
+	useEffect(()=>{},[])
 
-	useEffect(() => {
-		if (selectedDevices.camera || selectedDevices.microphone) {
-			getUserMedia();
-		}
-	}, [getUserMedia, selectedDevices.camera, selectedDevices.microphone]);
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
@@ -142,21 +120,22 @@ export default function CallPanel() {
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Link
+								{/* <Link
 									href="#"
 									className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
 								>
 									<Settings className="h-5 w-5" />
 									<span className="sr-only">Settings</span>
-								</Link>
+								</Link> */}
+								<UserProfile/>
 							</TooltipTrigger>
 							<TooltipContent side="right">Settings</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
 				</nav>
 			</aside>
-			<div className="flex h-full w-full flex-col sm:pl-14">
-				<header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+			<div className="relative flex h-screen w-full flex-col sm:pl-14">
+				<header className="fixed top-0 z-30 flex h-14 w-full items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 					<Sheet>
 						<SheetTrigger asChild>
 							<Button size="icon" variant="outline" className="sm:hidden">
@@ -212,16 +191,32 @@ export default function CallPanel() {
 						</SheetContent>
 					</Sheet>
 				</header>
-				<main className="relative h-screen w-full overflow-hidden">
-					<div className="h-[91vh] w-full border-red-500 bg-black px-5 py-10">
-						<VideoPanel stream={screenStream ? screenStream: stream} muted={!isMicrophoneOn} />
+				<main className="relative h-full w-full overflow-hidden">
+					<div className="flex h-[91vh] w-full border-red-500 bg-black px-5 py-8">
+						{screenStream ? (
+							<div className="flex h-full w-full">
+								<div className="relative flex aspect-video w-[75%] items-center justify-center">
+									<ScreenSharePanel />
+								</div>
+								<div className="flex w-[25%] flex-col justify-center gap-5 p-5">
+									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+									<UserVideoPanel stream={stream} muted={false} />
+								</div>
+							</div>
+						) : (
+							<ScrollArea className="w-full">
+								<div className="grid h-full w-full grid-cols-2 items-center justify-center gap-4 overflow-y-auto border border-white p-5">
+									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+								</div>
+							</ScrollArea>
+						)}
 					</div>
 					<div className="h-[9vh] w-full">
 						<ControlPanel />
 					</div>
-					<div className="absolute bottom-[15vh] right-10 z-40 w-[14vw]">
-						<VideoPanel stream={screenStream} muted={false} />
-					</div>
+					{/* <div className="absolute bottom-[15vh] right-10 z-40 w-[14vw]">
+						<UserVideoPanel stream={stream} muted={true} />
+					</div> */}
 				</main>
 			</div>
 		</div>

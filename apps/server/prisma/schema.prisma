@@ -30,13 +30,14 @@ model User {
 
 model Meeting {
   id             String       @id @default(uuid())
+  meetingId      String       @unique
+  videoCallUrl   String       @unique
   title          String
   description    String?
-  videoCallUrl   String
   startTime      DateTime?
   endTime        DateTime?
   createdById    String
-  participantIds String[]
+  participantIds String[] 
   createdBy      User     @relation(fields: [createdById], references: [clerkId])
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
