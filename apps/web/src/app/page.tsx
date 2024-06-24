@@ -16,7 +16,7 @@ export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
 	const { getToken } = useAuth();
-	const { joinRoom, socket } = useSocket();
+	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
@@ -65,10 +65,15 @@ export default function Dashboard() {
 				const response = data.data;
 
 				if (response) {
-					router.push(response.videoCallUrl);
+					const roomId = data.data.meetingId;
+					const userId = data.data.createdById;
+
+					socketEmit('event:joinRoom', { roomId, userId });
+
+					// router.push(response.videoCallUrl);
 				} else {
 					toast.error('RoomId Does not Exists');
-					router.push('/');
+					// router.push('/');
 				}
 			} catch (error) {
 				console.log(error);
@@ -85,6 +90,7 @@ export default function Dashboard() {
 	);
 
 	useEffect(() => {
+		console.log("socket IO")
 		socket?.on('event:joinRoom', handleJoinRoom);
 		return () => {
 			socket?.off('event:joinRoom', handleJoinRoom);

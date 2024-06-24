@@ -32,8 +32,53 @@ class SocketService {
           socketIdToEmailMap.set(socket.id, userId);
 
           io.to(roomId).emit("event:UserJoined", { userId, id: socket.id });
+
           socket.join(roomId);
+          console.log("New User Joined in Room", { userId, id: socket.id });
           io.to(socket.id).emit("event:joinRoom", { roomId, userId });
+        }
+      );
+
+      socket.on(
+        "event:callUser",
+        ({ to, offer }: { to: string; offer: RTCSessionDescriptionInit }) => {
+          console.log("User CAlling", { to, offer });
+
+          io.to(to).emit("incoming:call", {
+            from: socket.id,
+            offer,
+          });
+        }
+      );
+
+      socket.on(
+        "call:accepted",
+        ({ to, answer }: { to: string; answer: RTCSessionDescriptionInit }) => {
+          console.log("User Accepted your Call", { to, answer });
+
+          io.to(to).emit("call:accepted", {
+            from: socket.id,
+            answer,
+          });
+        }
+      );
+
+      socket.on(
+        "peer:nego:needed",
+        ({ offer, to }: { offer: RTCSessionDescriptionInit; to: string }) => {
+          io.to(to).emit("peer:nego:needed", {
+            from: socket.id,
+            offer,
+          });
+        }
+      );
+      socket.on(
+        "peer:nego:done",
+        ({ to, answer }: {to: string, answer: RTCSessionDescriptionInit  }) => {
+         io.to(to).emit("peer:nego:final", {
+           from: socket.id,
+           answer,
+         });
         }
       );
 

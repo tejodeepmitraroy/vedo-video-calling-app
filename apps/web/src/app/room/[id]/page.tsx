@@ -30,17 +30,170 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSocket } from '@/context/SocketContext';
 import { useUser } from '@clerk/nextjs';
 import UserProfile from '@/components/UserProfile';
+import peer from '@/services/peer';
 
-export default function CallPanel({ params }: { params: { id: string } }) {
+export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const stream = useRoomStore((state) => state.stream);
 	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
-	
+	const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
+	const [remoteStream, setRemoteStream] = useState<readonly MediaStream[]>();
+	const { user } = useUser();
 
-	const { joinRoom, socket } = useSocket();
+	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
-	useEffect(()=>{},[])
+	const handleUserJoined = useCallback(
+		({ userId, id }: { userId: string; id: string }) => {
+			console.log('User Joined', userId);
+			console.log('Socket User Joined', id);
+			setRemoteSocketId(id);
+		},
+		[]
+	);
 
+	const handleCallUser = useCallback(async () => {
+		const offer = await peer.getOffer();
+		console.log(offer);
+		socket?.emit('event:callUser', { to: remoteSocketId, offer });
+	}, [remoteSocketId, socket]);
+
+	const handleIncomingCall = useCallback(
+		async ({
+			from,
+			offer,
+		}: {
+			from: string;
+			offer: RTCSessionDescriptionInit;
+		}) => {
+			setRemoteSocketId(from);
+			console.log('Incoming Call--->', { from, offer });
+
+			const answer = await peer.getAnswer(offer);
+
+			socket?.emit('call:accepted', { to: from, answer });
+		},
+		[socket]
+	);
+
+	const handleAcceptedCall = useCallback(
+		async ({
+			from,
+			answer,
+		}: {
+			from: string;
+			answer: RTCSessionDescriptionInit;
+		}) => {
+			await peer.setLocalDescription(answer);
+			console.log('call Accepted');
+
+			// sendStreams();
+			// for (const track of stream?.getTracks()) {
+			// 	peer.peer?.addTrack(track,stream);
+			// }
+			console.log('send stream-->', stream);
+			stream?.getTracks().forEach((track) => {
+				console.log('Send track-->', track);
+				peer.peer?.addTrack(track, stream);
+			});
+		},
+		[stream]
+	);
+
+	const handleNegoNeeded = useCallback(async () => {
+		const offer = await peer.getOffer();
+		socket?.emit('peer:nego:needed', { offer, to: remoteSocketId });
+	}, [remoteSocketId, socket]);
+
+	const handleNegoNeedIncoming = useCallback(
+		async ({
+			from,
+			offer,
+		}: {
+			from: string;
+			offer: RTCSessionDescriptionInit;
+		}) => {
+			const answer = await peer.getAnswer(offer);
+
+			console.log('peer:nego:done----> ', answer);
+			
+
+			socket?.emit('peer:nego:done', { to: from, answer });
+		},
+		[socket]
+	);
+
+	const handleNegoNeedFinal = useCallback(
+		async ({
+			from,
+			answer,
+		}: {
+			from: string;
+			answer: RTCSessionDescriptionInit;
+		}) => {
+
+			console.log("Final Answer---->",answer)
+			await peer.setLocalDescription(answer);
+		},
+		[]
+	);
+
+	const sendStreams = useCallback(() => {
+		console.log('send stream-->', stream);
+		stream?.getTracks().forEach((track) => {
+			console.log('Send track-->', track);
+			peer.peer?.addTrack(track, stream);
+		});
+	}, [stream]);
+
+	useEffect(() => {
+		peer.peer?.addEventListener('negotiationneeded', handleNegoNeeded);
+
+		return () => {
+			peer.peer?.removeEventListener('negotiationneeded', handleNegoNeeded);
+		};
+	}, [handleNegoNeeded]);
+
+	useEffect(() => {
+		peer.peer?.addEventListener('track', async (event) => {
+			const remoteStream = event.streams;
+
+			console.log('Remote Steram', remoteStream[0]);
+
+			setRemoteStream(remoteStream[0]);
+		});
+	}, []);
+
+	useEffect(() => {
+		socket?.on('event:UserJoined', handleUserJoined);
+		socket?.on('incoming:call', handleIncomingCall);
+		socket?.on('call:accepted', handleAcceptedCall);
+		socket?.on('peer:nego:needed', handleNegoNeedIncoming);
+		socket?.on('peer:nego:final', handleNegoNeedFinal);
+
+		return () => {
+			socket?.off('event:UserJoined', handleUserJoined);
+			socket?.off('incoming:call', handleIncomingCall);
+			socket?.off('call:accepted', handleAcceptedCall);
+			socket?.off('peer:nego:needed', handleNegoNeedIncoming);
+			socket?.off('peer:nego:final', handleNegoNeedFinal);
+		};
+	}, [
+		handleAcceptedCall,
+		handleIncomingCall,
+		handleNegoNeedFinal,
+		handleNegoNeedIncoming,
+		handleUserJoined,
+		socket,
+	]);
+
+	// useEffect(() => {
+	// 	console.log('Get User------>', user);
+	// 	const roomId = params.roomId;
+
+	// 	if (user) {
+	// 		socket?.emit('event:joinRoom', { roomId, userId: user.id });
+	// 	}
+	// }, [params.roomId, socket, user]);
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
@@ -127,7 +280,7 @@ export default function CallPanel({ params }: { params: { id: string } }) {
 									<Settings className="h-5 w-5" />
 									<span className="sr-only">Settings</span>
 								</Link> */}
-								<UserProfile/>
+								<UserProfile />
 							</TooltipTrigger>
 							<TooltipContent side="right">Settings</TooltipContent>
 						</Tooltip>
@@ -207,6 +360,9 @@ export default function CallPanel({ params }: { params: { id: string } }) {
 							<ScrollArea className="w-full">
 								<div className="grid h-full w-full grid-cols-2 items-center justify-center gap-4 overflow-y-auto border border-white p-5">
 									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+									{remoteStream && (
+										<UserVideoPanel stream={remoteStream} muted={false} />
+									)}
 								</div>
 							</ScrollArea>
 						)}
@@ -214,9 +370,17 @@ export default function CallPanel({ params }: { params: { id: string } }) {
 					<div className="h-[9vh] w-full">
 						<ControlPanel />
 					</div>
-					{/* <div className="absolute bottom-[15vh] right-10 z-40 w-[14vw]">
-						<UserVideoPanel stream={stream} muted={true} />
-					</div> */}
+					<div className="absolute bottom-[15vh] right-10 z-40 w-[14vw] bg-white">
+						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
+						{remoteSocketId && (
+							<Button onClick={() => handleCallUser()}>Call</Button>
+						)}
+
+						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
+
+						{}
+						{/* <UserVideoPanel stream={stream} muted={true} /> */}
+					</div>
 				</main>
 			</div>
 		</div>

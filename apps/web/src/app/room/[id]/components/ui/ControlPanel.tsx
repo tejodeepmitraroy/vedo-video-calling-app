@@ -48,14 +48,14 @@ const ControlPanel = () => {
 		microphones: [],
 	});
 
-	console.log(
-		'camera--->',
-		isCameraOn,
-		'Mic--->',
-		isMicrophoneOn,
-		'Stream-------->',
-		isScreenSharing
-	);
+	// console.log(
+	// 	'camera--->',
+	// 	isCameraOn,
+	// 	'Mic--->',
+	// 	isMicrophoneOn,
+	// 	'Stream-------->',
+	// 	isScreenSharing
+	// );
 
 	const getUserMedia = useCallback(
 		// async (isCamera:boolean, isMicrophone:boolean) => {
@@ -81,6 +81,10 @@ const ControlPanel = () => {
 					? { deviceId: { exact: selectedDevices.microphone } }
 					: true,
 			};
+			// const constraints = {
+			// 	video: true,
+			// 	audio: true,
+			// };
 
 			console.log('constraints', constraints);
 
@@ -91,7 +95,7 @@ const ControlPanel = () => {
 				console.error('Error accessing media devices:', error);
 			}
 		},
-	
+
 		[selectedDevices.camera, selectedDevices.microphone, setStream]
 	);
 
@@ -127,9 +131,9 @@ const ControlPanel = () => {
 	}, [getMediaDevices]);
 
 	useEffect(() => {
-		if (selectedDevices.camera || selectedDevices.microphone) {
-			getUserMedia();
-		}
+		getUserMedia();
+		// if (selectedDevices.camera || selectedDevices.microphone) {
+		// }
 		console.log('Devices-->', selectedDevices);
 		console.log(
 			'isCameraOn-->',
