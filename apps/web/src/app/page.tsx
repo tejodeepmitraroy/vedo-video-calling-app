@@ -90,7 +90,7 @@ export default function Dashboard() {
 	);
 
 	useEffect(() => {
-		console.log("socket IO")
+		console.log('socket IO');
 		socket?.on('event:joinRoom', handleJoinRoom);
 		return () => {
 			socket?.off('event:joinRoom', handleJoinRoom);
@@ -107,24 +107,16 @@ export default function Dashboard() {
 						<h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
 					</div>
 					<div
-						className="flex flex-1 items-start justify-start rounded-lg"
+						className="flex flex-1 items-start justify-start rounded-lg shadow-sm"
 						x-chunk="dashboard-02-chunk-1"
 					>
-						<div className="flex flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm">
+						<div className="flex w-full flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm md:w-auto">
 							<div className="flex items-center">
 								<h2 className="text-xl font-semibold tracking-tight">
 									Quick Settings
 								</h2>
 							</div>
-							<div className="grid grid-cols-2 gap-5">
-								<Button
-									variant={'outline'}
-									onClick={() => handleInstantCreateCall()}
-									className="flex items-center justify-center gap-3 border border-dashed p-10 text-center shadow-sm"
-								>
-									<Phone />
-									Create a Instant Room
-								</Button>
+							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 								<form
 									onSubmit={(event) => handleEnterRoom(event)}
 									className="flex items-center justify-center gap-3 rounded-lg border border-dashed p-2 text-center shadow-sm"
@@ -139,7 +131,14 @@ export default function Dashboard() {
 										Join
 									</Button>
 								</form>
-
+								<Button
+									variant={'outline'}
+									onClick={() => handleInstantCreateCall()}
+									className="flex items-center justify-center gap-3 border border-dashed p-10 text-center shadow-sm"
+								>
+									<Phone />
+									Create a 1:1 Instant Room
+								</Button>
 								<ScheduleCallForm />
 							</div>
 						</div>
