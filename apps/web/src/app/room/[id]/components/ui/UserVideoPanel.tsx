@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import React, { FC } from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 interface UserVideoPanelProps {
-	stream: MediaStream | null;
+	stream: MediaStream |readonly MediaStream[]| null;
 	muted: boolean;
 }
 
