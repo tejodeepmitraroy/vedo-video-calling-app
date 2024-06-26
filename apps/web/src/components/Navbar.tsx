@@ -42,7 +42,7 @@ const Navbar = () => {
 							<Phone className="h-4 w-4" />
 							Room
 						</Link>
-						<Link
+						{/* <Link
 							href="#"
 							className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary"
 						>
@@ -51,14 +51,14 @@ const Navbar = () => {
 							<Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
 								6
 							</Badge>
-						</Link>
-						<Link
+						</Link> */}
+						{/* <Link
 							href="#"
 							className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-primary"
 						>
 							<MessagesSquare className="h-4 w-4" />
 							Message
-						</Link>
+						</Link> */}
 					</nav>
 				</div>
 			</div>

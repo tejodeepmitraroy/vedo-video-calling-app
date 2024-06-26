@@ -74,7 +74,13 @@ const ControlPanel = () => {
 		async () => {
 			const constraints = {
 				video: selectedDevices.camera
-					? { deviceId: { exact: selectedDevices.camera } }
+					? {
+							deviceId: { exact: selectedDevices.camera },
+
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+							
+						}
 					: true,
 
 				audio: selectedDevices.microphone
@@ -86,7 +92,7 @@ const ControlPanel = () => {
 			// 	audio: true,
 			// };
 
-			console.log('constraints', constraints);
+			// console.log('constraints', constraints);
 
 			try {
 				const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -134,13 +140,13 @@ const ControlPanel = () => {
 		getUserMedia();
 		// if (selectedDevices.camera || selectedDevices.microphone) {
 		// }
-		console.log('Devices-->', selectedDevices);
-		console.log(
-			'isCameraOn-->',
-			isCameraOn,
-			'isMicrophoneOn-->',
-			isMicrophoneOn
-		);
+		// console.log('Devices-->', selectedDevices);
+		// console.log(
+		// 	'isCameraOn-->',
+		// 	isCameraOn,
+		// 	'isMicrophoneOn-->',
+		// 	isMicrophoneOn
+		// );
 	}, [getUserMedia, isCameraOn, isMicrophoneOn, selectedDevices]);
 
 	return (

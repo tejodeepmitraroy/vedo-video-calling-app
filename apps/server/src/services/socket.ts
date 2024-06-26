@@ -19,7 +19,7 @@ class SocketService {
     io.on("connection", (socket) => {
       console.log("New socket connected", socket.id);
 
-      const emailToSocketIdMap = new Map();
+      // const emailToSocketIdMap = new Map();
       const socketIdToEmailMap = new Map();
 
       socket.on(
@@ -28,7 +28,7 @@ class SocketService {
           console.log("Room Id", roomId);
           console.log("userId", userId);
 
-          emailToSocketIdMap.set(userId, socket.id);
+          // emailToSocketIdMap.set(userId, socket.id);
           socketIdToEmailMap.set(socket.id, userId);
 
           io.to(roomId).emit("event:UserJoined", { userId, id: socket.id });
@@ -74,17 +74,21 @@ class SocketService {
       );
       socket.on(
         "peer:nego:done",
-        ({ to, answer }: {to: string, answer: RTCSessionDescriptionInit  }) => {
-         io.to(to).emit("peer:nego:final", {
-           from: socket.id,
-           answer,
-         });
+        ({ to, answer }: { to: string; answer: RTCSessionDescriptionInit }) => {
+          io.to(to).emit("peer:nego:final", {
+            from: socket.id,
+            answer,
+          });
         }
       );
 
       // Disconnection Socket
       socket.on("disconnect", (reason) => {
         console.log(`User ${socket.id} disconnected. Reason: ${reason}`);
+
+        // emailToSocketIdMap.delete(userId, socket.id);
+        socketIdToEmailMap.delete(socket.id);
+
         // Additional cleanup or actions can be performed here
       });
     });

@@ -9,7 +9,7 @@ const ScreenSharePanel = () => {
 	const screenStream = useRoomStore((state) => state.screenStream);
 
 	return (
-		<div className="relative flex aspect-video w-full items-center justify-center border-2 border-white bg-black">
+		<div className="relative flex  w-full h-full items-center justify-center border-2 border-white bg-black">
 			<ReactPlayer
 				url={screenStream!}
 				playing
