@@ -74,7 +74,13 @@ const ControlPanel = () => {
 		async () => {
 			const constraints = {
 				video: selectedDevices.camera
-					? { deviceId: { exact: selectedDevices.camera } }
+					? {
+							deviceId: { exact: selectedDevices.camera },
+
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+							
+						}
 					: true,
 
 				audio: selectedDevices.microphone

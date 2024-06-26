@@ -38,7 +38,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
 	const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
 	const [remoteStream, setRemoteStream] = useState<readonly MediaStream[]>();
-	const { user } = useUser();
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -115,7 +114,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			const answer = await peer.getAnswer(offer);
 
 			console.log('peer:nego:done----> ', answer);
-			
 
 			socket?.emit('peer:nego:done', { to: from, answer });
 		},
@@ -130,8 +128,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			from: string;
 			answer: RTCSessionDescriptionInit;
 		}) => {
-
-			console.log("Final Answer---->",answer)
+			console.log('Final Answer---->', answer);
 			await peer.setLocalDescription(answer);
 		},
 		[]
@@ -197,7 +194,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
-			<aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+			{/* <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
 				<nav className="flex flex-col items-center gap-4 px-2 sm:py-4">
 					<Link
 						href="/"
@@ -279,16 +276,16 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 								>
 									<Settings className="h-5 w-5" />
 									<span className="sr-only">Settings</span>
-								</Link> */}
+								</Link> 
 								<UserProfile />
 							</TooltipTrigger>
 							<TooltipContent side="right">Settings</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
 				</nav>
-			</aside>
-			<div className="relative flex h-screen w-full flex-col sm:pl-14">
-				<header className="fixed top-0 z-30 flex h-14 w-full items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+			</aside> */}
+			<div className="relative flex h-screen w-full flex-col">
+				{/* <header className="fixed top-0 z-30 flex h-14 w-full items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
 					<Sheet>
 						<SheetTrigger asChild>
 							<Button size="icon" variant="outline" className="sm:hidden">
@@ -343,10 +340,27 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 							</nav>
 						</SheetContent>
 					</Sheet>
-				</header>
+				</header> */}
 				<main className="relative h-full w-full overflow-hidden">
-					<div className="flex h-[91vh] w-full border-red-500 bg-black px-5 py-8">
-						{screenStream ? (
+					<div className="flex h-[91vh] w-full items-center justify-center bg-black md:p-7">
+						<div className="h-full w-full max-w-[85rem] rounded-xl sm:aspect-video sm:border-2 sm:border-white">
+							{remoteStream ? (
+								<UserVideoPanel stream={remoteStream} muted={false} />
+							) : (
+								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+							)}
+							{/* <ScreenSharePanel /> */}
+						</div>
+						{/* <div className="flex h-full w-full flex-col gap-3 overflow-y-auto md:flex-row">
+							<div className="relative flex h-full w-full items-center justify-center rounded-xl border-2 border-white bg-black sm:h-1/2 md:aspect-video md:h-auto md:w-1/2">
+								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+							</div>
+							<div className="relative flex h-full w-full items-center justify-center rounded-xl border-2 border-white bg-black sm:h-1/2 md:aspect-video md:h-auto md:w-1/2">
+								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
+							</div>
+						</div> */}
+
+						{/* {screenStream ? (
 							<div className="flex h-full w-full">
 								<div className="relative flex aspect-video w-[75%] items-center justify-center">
 									<ScreenSharePanel />
@@ -365,22 +379,28 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 									)}
 								</div>
 							</ScrollArea>
-						)}
+						)} */}
 					</div>
-					<div className="h-[9vh] w-full">
+					<div className="h-[10vh] w-full md:h-[9vh]">
 						<ControlPanel />
 					</div>
-					<div className="absolute bottom-[15vh] right-10 z-40 w-[14vw] bg-white">
+					{/* <div className="absolute bottom-[15vh] right-10 z-40 w-1/6 bg-white">
 						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
 						{remoteSocketId && (
 							<Button onClick={() => handleCallUser()}>Call</Button>
 						)}
 
-						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
+						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} 
 
-						{}
-						{/* <UserVideoPanel stream={stream} muted={true} /> */}
-					</div>
+						
+							<UserVideoPanel stream={stream} muted={true} />
+						
+					</div> */}
+					{remoteStream && (
+						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+							<UserVideoPanel stream={stream} muted={true} />
+						</div>
+					)}
 				</main>
 			</div>
 		</div>

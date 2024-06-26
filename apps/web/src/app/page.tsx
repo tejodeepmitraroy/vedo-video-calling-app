@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
@@ -24,7 +25,7 @@ export default function Dashboard() {
 
 		try {
 			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_BACKEND_URL}/call/createInstantCall`,
+				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/createInstantCall`,
 				{},
 				{
 					headers: {
@@ -51,7 +52,7 @@ export default function Dashboard() {
 		if (roomId) {
 			try {
 				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_URL}/call/${roomId}`,
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
 
 					{
 						headers: {
