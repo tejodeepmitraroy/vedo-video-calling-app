@@ -64,7 +64,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 
 	const handleCallUser = useCallback(async () => {
 		const offer = await peer.getOffer();
-		console.log("creating a Offer--->",offer);
+		console.log('creating a Offer--->', offer);
 		socket?.emit('event:callUser', { to: remoteSocketId, offer });
 	}, [remoteSocketId, socket]);
 
@@ -81,7 +81,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 
 			const answer = await peer.getAnswer(offer);
 			console.log('Creating Answer--->', answer);
-
 
 			socket?.emit('call:accepted', { to: from, answer });
 		},
@@ -166,12 +165,9 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 
 	useEffect(() => {
 		peer.peer?.addEventListener('track', async (event) => {
-
-			
 			const [remoteStream] = event.streams;
-			
+
 			console.log('Remote Stream---->', remoteStream.getTracks());
-			
 
 			setRemoteStream(remoteStream);
 		});
@@ -361,11 +357,15 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				<main className="relative h-full w-full overflow-hidden">
 					<div className="flex h-[91vh] w-full items-center justify-center bg-black md:p-7">
 						<div className="h-full w-full max-w-[85rem] rounded-xl sm:aspect-video sm:border-2 sm:border-white">
-							{remoteStream ? (
+							{remoteStream && (
+								<UserVideoPanel stream={remoteStream} muted={false} />
+							)}
+
+							{/* {remoteStream ? (
 								<UserVideoPanel stream={remoteStream} muted={false} />
 							) : (
 								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-							)}
+							)} */}
 							{/* <ScreenSharePanel /> */}
 						</div>
 						{/* <div className="flex h-full w-full flex-col gap-3 overflow-y-auto md:flex-row">
@@ -402,19 +402,17 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 						<ControlPanel />
 					</div>
 
-					
-						<div className="absolute top-[15vh] right-10 z-40 w-1/6 bg-white">
-							<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
-							{remoteSocketId && (
-								<Button onClick={() => handleCallUser()}>Call</Button>
-							)}
+					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
+						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
+						{remoteSocketId && (
+							<Button onClick={() => handleCallUser()}>Call</Button>
+						)}
 
-							{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
-						</div>
-					
+						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
+					</div>
 
 					{remoteStream && (
-						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+						<div className=" resize absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
 							<UserVideoPanel stream={stream} muted={true} />
 						</div>
 					)}
