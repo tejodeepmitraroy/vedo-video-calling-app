@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
@@ -24,16 +23,34 @@ export default function Dashboard() {
 		console.log('Token---->', token);
 
 		try {
-			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/createInstantCall`,
-				{},
+			const { data } = await toast.promise(
+				axios.post(
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/createInstantCall`,
+					{},
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				),
+
 				{
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
+					pending: 'Wait to create a new Room',
+					success: 'Conneting with a new Room👌',
+					error: 'Promise rejected 🤯',
 				}
 			);
+			// const { data } = await axios.post(
+			// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/createInstantCall`,
+			// 	{},
+			// 	{
+			// 		headers: {
+			// 			'Content-Type': 'application/json',
+			// 			Authorization: `Bearer ${token}`,
+			// 		},
+			// 	}
+			// );
 			console.log(data.data);
 			const roomId = data.data.meetingId;
 			const userId = data.data.createdById;
@@ -51,16 +68,34 @@ export default function Dashboard() {
 
 		if (roomId) {
 			try {
-				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+				const { data } = await toast.promise(
+					axios(
+						`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+
+						{
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: `Bearer ${token}`,
+							},
+						}
+					),
 
 					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
+						pending: 'Wait to create a new Room',
+						success: 'Conneting with a new Room👌',
+						error: 'Promise rejected 🤯',
 					}
 				);
+				// const { data } = await axios(
+				// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+
+				// 	{
+				// 		headers: {
+				// 			'Content-Type': 'application/json',
+				// 			Authorization: `Bearer ${token}`,
+				// 		},
+				// 	}
+				// );
 
 				console.log(data);
 				const response = data.data;

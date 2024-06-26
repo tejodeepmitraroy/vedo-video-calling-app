@@ -31,13 +31,14 @@ import { useSocket } from '@/context/SocketContext';
 import { useUser } from '@clerk/nextjs';
 import UserProfile from '@/components/UserProfile';
 import peer from '@/services/peer';
+import { toast } from 'react-toastify';
 
 export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const stream = useRoomStore((state) => state.stream);
 	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
 	const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
-	const [remoteStream, setRemoteStream] = useState<readonly MediaStream[]>();
+	const [remoteStream, setRemoteStream] = useState<MediaStream>();
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -46,13 +47,24 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			console.log('User Joined', userId);
 			console.log('Socket User Joined', id);
 			setRemoteSocketId(id);
+
+			// toast(<Button onClick={handleCallUser}>Call</Button>, {
+			// 	position: 'top-right',
+			// 	autoClose: false,
+			// 	hideProgressBar: false,
+			// 	closeOnClick: true,
+			// 	pauseOnHover: true,
+			// 	draggable: true,
+			// 	progress: undefined,
+			// 	theme: 'light',
+			// });
 		},
 		[]
 	);
 
 	const handleCallUser = useCallback(async () => {
 		const offer = await peer.getOffer();
-		console.log(offer);
+		console.log("creating a Offer--->",offer);
 		socket?.emit('event:callUser', { to: remoteSocketId, offer });
 	}, [remoteSocketId, socket]);
 
@@ -68,6 +80,8 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			console.log('Incoming Call--->', { from, offer });
 
 			const answer = await peer.getAnswer(offer);
+			console.log('Creating Answer--->', answer);
+
 
 			socket?.emit('call:accepted', { to: from, answer });
 		},
@@ -83,15 +97,15 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			answer: RTCSessionDescriptionInit;
 		}) => {
 			await peer.setLocalDescription(answer);
-			console.log('call Accepted');
+			console.log('call Accepted and Now Sending Stream-->>');
 
 			// sendStreams();
 			// for (const track of stream?.getTracks()) {
 			// 	peer.peer?.addTrack(track,stream);
 			// }
-			console.log('send stream-->', stream);
-			stream?.getTracks().forEach((track) => {
-				console.log('Send track-->', track);
+			// console.log('stream-->', stream?.getTracks());
+			stream?.getTracks().forEach((track: MediaStreamTrack) => {
+				// console.log('Track---->', track);
 				peer.peer?.addTrack(track, stream);
 			});
 		},
@@ -152,11 +166,14 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 
 	useEffect(() => {
 		peer.peer?.addEventListener('track', async (event) => {
-			const remoteStream = event.streams;
 
-			console.log('Remote Steram', remoteStream[0]);
+			
+			const [remoteStream] = event.streams;
+			
+			console.log('Remote Stream---->', remoteStream.getTracks());
+			
 
-			setRemoteStream(remoteStream[0]);
+			setRemoteStream(remoteStream);
 		});
 	}, []);
 
@@ -384,18 +401,18 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 					<div className="h-[10vh] w-full md:h-[9vh]">
 						<ControlPanel />
 					</div>
-					{/* <div className="absolute bottom-[15vh] right-10 z-40 w-1/6 bg-white">
-						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
-						{remoteSocketId && (
-							<Button onClick={() => handleCallUser()}>Call</Button>
-						)}
 
-						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} 
+					
+						<div className="absolute top-[15vh] right-10 z-40 w-1/6 bg-white">
+							<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
+							{remoteSocketId && (
+								<Button onClick={() => handleCallUser()}>Call</Button>
+							)}
 
-						
-							<UserVideoPanel stream={stream} muted={true} />
-						
-					</div> */}
+							{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
+						</div>
+					
+
 					{remoteStream && (
 						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
 							<UserVideoPanel stream={stream} muted={true} />

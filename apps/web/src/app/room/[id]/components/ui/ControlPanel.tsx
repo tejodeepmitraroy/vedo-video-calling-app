@@ -92,7 +92,7 @@ const ControlPanel = () => {
 			// 	audio: true,
 			// };
 
-			console.log('constraints', constraints);
+			// console.log('constraints', constraints);
 
 			try {
 				const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -140,13 +140,13 @@ const ControlPanel = () => {
 		getUserMedia();
 		// if (selectedDevices.camera || selectedDevices.microphone) {
 		// }
-		console.log('Devices-->', selectedDevices);
-		console.log(
-			'isCameraOn-->',
-			isCameraOn,
-			'isMicrophoneOn-->',
-			isMicrophoneOn
-		);
+		// console.log('Devices-->', selectedDevices);
+		// console.log(
+		// 	'isCameraOn-->',
+		// 	isCameraOn,
+		// 	'isMicrophoneOn-->',
+		// 	isMicrophoneOn
+		// );
 	}, [getUserMedia, isCameraOn, isMicrophoneOn, selectedDevices]);
 
 	return (

@@ -15,7 +15,6 @@ class PeerService {
 				],
 			};
 			this.peer = new RTCPeerConnection(configuration);
-			console.log(this.peer);
 		}
 	}
 

@@ -4,7 +4,7 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,15 +25,14 @@ export default function RootLayout({
 					<body>
 						<ToastContainer
 							position="top-center"
-							autoClose={3000}
-							limit={1}
+							autoClose={5000}
 							hideProgressBar={false}
 							newestOnTop={false}
 							closeOnClick
 							rtl={false}
-							pauseOnFocusLoss
+							pauseOnFocusLoss={false}
 							draggable
-							pauseOnHover
+							pauseOnHover={false}
 							theme="light"
 						/>
 
