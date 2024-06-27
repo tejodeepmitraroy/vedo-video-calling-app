@@ -24,8 +24,8 @@ app.use(cookieParser());
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/call", callRouter);
 
-app.get("/", authMiddleware, async (req, res) => {
-  res.json({ message: "Hello World!" });
+app.get("/", async (req, res) => {
+  res.json({ message: "Server is 100% up running" });
 });
 
 export default app;
