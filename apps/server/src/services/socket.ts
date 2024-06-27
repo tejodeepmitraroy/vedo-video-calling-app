@@ -7,9 +7,9 @@ class SocketService {
     console.log("Init Socket Server");
     this._io = new Server({
       cors: {
-        allowedHeaders: ["*"],
-        origin: "*",
-      },
+        allowedHeaders: ['*'],
+        origin: process.env.FRONTEND_URL
+      }
     });
   }
 
