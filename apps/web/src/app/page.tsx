@@ -41,16 +41,7 @@ export default function Dashboard() {
 					error: 'Promise rejected 🤯',
 				}
 			);
-			// const { data } = await axios.post(
-			// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/createInstantCall`,
-			// 	{},
-			// 	{
-			// 		headers: {
-			// 			'Content-Type': 'application/json',
-			// 			Authorization: `Bearer ${token}`,
-			// 		},
-			// 	}
-			// );
+
 			console.log(data.data);
 			const roomId = data.data.meetingId;
 			const userId = data.data.createdById;
@@ -86,16 +77,6 @@ export default function Dashboard() {
 						error: 'Promise rejected 🤯',
 					}
 				);
-				// const { data } = await axios(
-				// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
-
-				// 	{
-				// 		headers: {
-				// 			'Content-Type': 'application/json',
-				// 			Authorization: `Bearer ${token}`,
-				// 		},
-				// 	}
-				// );
 
 				console.log(data);
 				const response = data.data;
@@ -175,7 +156,9 @@ export default function Dashboard() {
 									<Phone />
 									Create a 1:1 Instant Room
 								</Button>
+
 								<ScheduleCallForm />
+								
 							</div>
 						</div>
 					</div>
