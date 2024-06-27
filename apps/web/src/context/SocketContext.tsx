@@ -32,7 +32,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	useEffect(() => {
 		if (isSignedIn) {
 			let _socket;
-			_socket = io('http://localhost:8000');
+			_socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_SERVER_URL!);
 
 			setSocket(_socket);
 			return () => {
