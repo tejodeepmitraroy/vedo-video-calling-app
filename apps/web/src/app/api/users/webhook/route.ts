@@ -1,4 +1,3 @@
-
 import { NextResponse, NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -10,18 +9,10 @@ export async function POST(request: NextRequest) {
 	console.log('Supabase Url-->', supabaseUrl);
 
 	const supabase = createClient(supabaseUrl, supabaseKey);
-	
 
 	const { data, type } = payload;
-	const {
-		id,
-		email_addresses,
-		first_name,
-		last_name,
-		image_url,
-		username,
-		updated_at,
-	} = data;
+	const { id, email_addresses, first_name, last_name, image_url, username } =
+		data;
 
 	console.log('Type of Call-------------->', type);
 	console.log('This is DAta---------->', {
@@ -31,12 +22,11 @@ export async function POST(request: NextRequest) {
 		last_name,
 		image_url,
 		username,
-		// updated_at,
 	});
-	const email = email_addresses[0] ? email_addresses[0].email_address : '';
 
 	try {
 		if (type === 'user.created') {
+			const email = email_addresses[0] ? email_addresses[0].email_address : '';
 			console.log('Initiate creation');
 
 			const { data, error } = await supabase
@@ -67,10 +57,9 @@ export async function POST(request: NextRequest) {
 				},
 				{ status: 200 }
 			);
-		}
-
-		if (type === 'user.updated') {
+		} else if (type === 'user.updated') {
 			console.log('Initiate Updating');
+			const email = email_addresses[0] ? email_addresses[0].email_address : '';
 			const { data, error } = await supabase
 				.from('User')
 				.update({
@@ -95,9 +84,7 @@ export async function POST(request: NextRequest) {
 				},
 				{ status: 200 }
 			);
-		}
-
-		if (type === 'user.deleted') {
+		} else if (type === 'user.deleted') {
 			console.log('Initated Delete', type);
 
 			const response = await supabase.from('User').delete().eq('id', id);
