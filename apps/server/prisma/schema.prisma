@@ -15,30 +15,27 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  clerkId    String   @unique
-  username   String   @unique
+  id         String    @id @unique
   first_name String
   last_name  String
-  email      String   @unique
+  email      String    @unique
   image_url  String
-  friendsIds Int[]
   meetings   Meeting[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt  DateTime?  @default(now())
+  updatedAt  DateTime?  @updatedAt
 }
 
 model Meeting {
-  id             String       @id @default(uuid())
-  meetingId      String       @unique
-  videoCallUrl   String       @unique
+  id             String    @id @default(uuid())
+  meetingId      String    @unique
+  videoCallUrl   String    @unique
   title          String
   description    String?
   startTime      DateTime?
   endTime        DateTime?
   createdById    String
-  participantIds String[] 
-  createdBy      User     @relation(fields: [createdById], references: [clerkId])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  participantIds String[]
+  createdBy      User      @relation(fields: [createdById], references: [id])
+  createdAt      DateTime?  @default(now())
+  updatedAt      DateTime?  @updatedAt
 }
