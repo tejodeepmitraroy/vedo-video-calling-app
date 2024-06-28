@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
 
 	try {
 		if (type === 'user.created') {
+			console.log('Initiate creation');
+
 			const { data, error } = await supabase
 				.from('User')
 				.insert({
@@ -60,6 +62,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		if (type === 'user.updated') {
+			console.log('Initiate Updating');
 			const { data, error } = await supabase
 				.from('User')
 				.update({
@@ -73,6 +76,10 @@ export async function POST(request: NextRequest) {
 				.select();
 
 			console.log('User updated successfully:', data);
+			if (error) {
+				console.log('User Updated Data Error--->', error);
+				return NextResponse.json({ error: error.message }, { status: 500 });
+			}
 			return NextResponse.json(
 				{
 					success: true,
@@ -87,7 +94,8 @@ export async function POST(request: NextRequest) {
 
 			const response = await supabase.from('User').delete().eq('id', id);
 
-			console.log('User Deleted successfully:', response);
+			console.log('User Deleted status:', response);
+
 			return NextResponse.json(
 				{
 					success: true,
