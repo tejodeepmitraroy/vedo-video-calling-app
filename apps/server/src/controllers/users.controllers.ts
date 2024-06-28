@@ -88,9 +88,9 @@ export const clerkWebhook = asyncHandler(
 
           const user = await prisma.user.create({
             data: {
-              clerkId: id,
+              id,
               email,
-              username: username ? username : "",
+              // username: username ? username : "",
               first_name: first_name ? first_name : "",
               last_name: last_name ? last_name : "",
               image_url,
@@ -108,9 +108,9 @@ export const clerkWebhook = asyncHandler(
               id,
             },
             data: {
-              clerkId: id,
+              id,
               email,
-              username,
+              // username,
               first_name,
               last_name,
               image_url,
@@ -128,7 +128,7 @@ export const clerkWebhook = asyncHandler(
 
           const deletedUser = await prisma.user.delete({
             where: {
-              clerkId: id,
+              id,
             },
           });
 
