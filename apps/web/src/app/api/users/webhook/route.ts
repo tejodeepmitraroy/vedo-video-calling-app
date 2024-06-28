@@ -1,8 +1,16 @@
-import supabase from '@/lib/supabaseClient';
+
 import { NextResponse, NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
 	const payload = await request.json();
+	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+	const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY!;
+
+	console.log('Supabase Url-->', supabaseUrl);
+
+	const supabase = createClient(supabaseUrl, supabaseKey);
+	
 
 	const { data, type } = payload;
 	const {
