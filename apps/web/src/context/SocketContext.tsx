@@ -70,7 +70,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const socketEmit: ISocketContext['socketEmit'] = useCallback(
 		(event: string, data?: any) => {
 			if (socket) {
-				console.log('Socket Emmit');
+				console.log('Socket is Emit', event);
+				console.log('Socket is On Emit', data);
 				socket.emit(event, data);
 			}
 		},

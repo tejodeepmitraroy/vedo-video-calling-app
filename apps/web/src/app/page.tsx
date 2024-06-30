@@ -1,4 +1,5 @@
 'use client';
+import BottomNavigation from '@/components/BottomNavigation';
 import Navbar from '@/components/Navbar';
 import ScheduleCallForm from '@/components/ScheduleCallForm';
 import Sidebar from '@/components/Sidebar';
@@ -15,7 +16,7 @@ import { toast } from 'react-toastify';
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
-	const { getToken } = useAuth();
+	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
 	const handleInstantCreateCall = async () => {
@@ -83,7 +84,7 @@ export default function Dashboard() {
 
 				if (response) {
 					const roomId = data.data.meetingId;
-					const userId = data.data.createdById;
+					// const userId = data.data.createdById;
 
 					socketEmit('event:joinRoom', { roomId, userId });
 
@@ -119,6 +120,7 @@ export default function Dashboard() {
 			<Navbar />
 			<div className="flex flex-col">
 				<Sidebar />
+				{/* <BottomNavigation/> */}
 				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 					<div className="flex items-center">
 						<h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>

@@ -10,12 +10,16 @@ interface WebRTCStore {
 	stream: MediaStream | null;
 	screenStream: MediaStream | null;
 	selectedDevices: SelectedDevices;
+	selectedCamera: string
+	selectedMicrophone: string
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
 	setStream: (stream: MediaStream | null) => void;
 	setScreenStream: (stream: MediaStream | null) => void;
 	setSelectedDevices: (devices: SelectedDevices) => void;
+	setSelectedCamera: (devicesId: string) => void;
+	setSelectedMicrophone: (devicesId: string) => void;
 	toggleCamera: () => void;
 	toggleMicrophone: () => void;
 	toggleScreenShare: () => void;
@@ -25,12 +29,16 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 	stream: null,
 	screenStream: null,
 	selectedDevices: { camera: '', microphone: '' },
+	selectedCamera: "",
+	selectedMicrophone: "",
 	isCameraOn: false,
 	isMicrophoneOn: false,
 	isScreenSharing: false,
 	setStream: (stream) => set({ stream }),
 	setScreenStream: (screenStream) => set({ screenStream }),
 	setSelectedDevices: (selectedDevices) => set({ selectedDevices }),
+	setSelectedCamera: (deviceId: string) => set({selectedCamera:deviceId}),
+	setSelectedMicrophone: (deviceId: string) => set({selectedMicrophone:deviceId}),
 	toggleCamera: () => {
 		const { stream, isCameraOn } = get();
 		if (stream) {

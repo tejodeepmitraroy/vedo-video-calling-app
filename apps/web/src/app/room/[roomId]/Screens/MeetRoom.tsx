@@ -21,24 +21,32 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import ControlPanel, { Device } from './components/ui/ControlPanel';
 
-import { useRoomStore } from '@/store/useStore';
-import ScreenSharePanel from './components/ui/ScreenSharePanel';
-import UserVideoPanel from './components/ui/UserVideoPanel';
+
+
+
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSocket } from '@/context/SocketContext';
-import { useUser } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import UserProfile from '@/components/UserProfile';
 import peer from '@/services/peer';
 import { toast } from 'react-toastify';
+import { RWebShare } from 'react-web-share';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import ControlPanel from '../components/ui/ControlPanel';
+import UserVideoPanel from '../components/ui/UserVideoPanel';
+import { useRoomStore } from '@/store/useStreamStore';
 
-export default function CallPanel({ params }: { params: { roomId: string } }) {
+const MeetRoom = ({roomId}:{roomId: string}) => {
 	const stream = useRoomStore((state) => state.stream);
 	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
 	const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
 	const [remoteStream, setRemoteStream] = useState<MediaStream>();
+
+	const router = useRouter();
+	const { getToken, userId } = useAuth();
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -47,17 +55,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			console.log('User Joined', userId);
 			console.log('Socket User Joined', id);
 			setRemoteSocketId(id);
-
-			// toast(<Button onClick={handleCallUser}>Call</Button>, {
-			// 	position: 'top-right',
-			// 	autoClose: false,
-			// 	hideProgressBar: false,
-			// 	closeOnClick: true,
-			// 	pauseOnHover: true,
-			// 	draggable: true,
-			// 	progress: undefined,
-			// 	theme: 'light',
-			// });
 		},
 		[]
 	);
@@ -154,6 +151,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			peer.peer?.addTrack(track, stream);
 		});
 	}, [stream]);
+	
 
 	useEffect(() => {
 		peer.peer?.addEventListener('negotiationneeded', handleNegoNeeded);
@@ -197,14 +195,89 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	]);
 
 	// useEffect(() => {
-	// 	console.log('Get User------>', user);
-	// 	const roomId = params.roomId;
+	// 	const url = window.location.href;
+	// 	toast(
+	// 		<div className="">
+	// 			<span>Share Url</span>
+	// 			<div>
+	// 				<RWebShare
+	// 					data={{
+	// 						text: 'Like humans, flamingos make friends for life',
+	// 						url,
+	// 						title: 'Room Id',
+	// 					}}
+	// 					onClick={() => console.log('shared successfully!')}
+	// 				>
+	// 					<Button>Share 🔗</Button>
+	// 				</RWebShare>
+	// 			</div>
+	// 		</div>,
+	// 		{
+	// 			position: 'top-right',
+	// 			autoClose: false,
+	// 			hideProgressBar: false,
+	// 			closeOnClick: true,
+	// 			pauseOnHover: true,
+	// 			draggable: true,
+	// 			progress: undefined,
+	// 			theme: 'light',
+	// 		}
+	// 	);
+	// }, []);
 
-	// 	if (user) {
-	// 		socket?.emit('event:joinRoom', { roomId, userId: user.id });
+	// const handleEnterRoom = useCallback(async () => {
+	// 	const token = await getToken();
+	// 	console.log('Enter Room number', roomId);
+
+	// 	console.log('User Id', userId);
+
+	// 	if (roomId) {
+	// 		try {
+	// 			const { data } = await toast.promise(
+	// 				axios(
+	// 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+
+	// 					{
+	// 						headers: {
+	// 							'Content-Type': 'application/json',
+	// 							Authorization: `Bearer ${token}`,
+	// 						},
+	// 					}
+	// 				),
+
+	// 				{
+	// 					pending: `Hold no, we're Connecting`,
+	// 					success: 'Connection succesfull👌',
+	// 					error: 'Connection rejected 🤯',
+	// 				}
+	// 			);
+
+	// 			console.log(data);
+	// 			const response = data.data;
+
+	// 			if (response) {
+	// 				const roomId = data.data.meetingId;
+
+	// 				socketEmit('event:joinRoom', { roomId, userId });
+
+	// 				// router.push(response.videoCallUrl);
+	// 			} else {
+	// 				toast.error('RoomId Does not Exists');
+	// 				// router.push('/');
+	// 			}
+	// 		} catch (error) {
+	// 			console.log(error);
+	// 		}
 	// 	}
-	// }, [params.roomId, socket, user]);
+	// }, [getToken, roomId, socketEmit, userId]);
 
+	// useEffect(() => {
+	// 	handleEnterRoom();
+
+	// 	return () => {
+	// 		handleEnterRoom();
+	// 	};
+	// }, [handleEnterRoom]);
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
 			{/* <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -356,6 +429,9 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				</header> */}
 				<main className="relative h-full w-full overflow-hidden">
 					<div className="flex h-[91vh] w-full items-center justify-center bg-black md:p-7">
+						<div className="absolute top-2 rounded-xl bg-white p-5 text-black">
+							{roomId}
+						</div>
 						<div className="h-full w-full max-w-[85rem] rounded-xl sm:aspect-video sm:border-2 sm:border-white">
 							{remoteStream && (
 								<UserVideoPanel stream={remoteStream} muted={false} />
@@ -376,7 +452,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
 							</div>
 						</div> */}
-
 						{/* {screenStream ? (
 							<div className="flex h-full w-full">
 								<div className="relative flex aspect-video w-[75%] items-center justify-center">
@@ -412,7 +487,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 					</div>
 
 					{remoteStream && (
-						<div className=" resize absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
 							<UserVideoPanel stream={stream} muted={true} />
 						</div>
 					)}
@@ -420,4 +495,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			</div>
 		</div>
 	);
-}
+};
+
+export default MeetRoom;

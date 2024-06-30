@@ -8,7 +8,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useRoomStore } from '@/store/useStore';
+import { useRoomStore } from '@/store/useStreamStore';
 import {
 	Mic,
 	Phone,
@@ -79,7 +79,6 @@ const ControlPanel = () => {
 
 							width: { ideal: 1280 },
 							height: { ideal: 720 },
-							
 						}
 					: true,
 
