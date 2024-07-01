@@ -5,6 +5,8 @@ import MeetRoom from './Screens/MeetRoom';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import { useSocket } from '@/context/SocketContext';
+import { toast } from 'react-toastify';
+import { useRoomStore } from '@/store/useStreamStore';
 
 interface MeetingDetails {
 	createdAt: Date;
@@ -23,6 +25,7 @@ interface MeetingDetails {
 export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
 	const [enterRoom, setEnterRoom] = useState<boolean>(false);
+	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 
 	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
@@ -56,23 +59,39 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 		getRoomDetails();
 	}, [getRoomDetails]);
 
-	const handleUserJoined = useCallback(
+	const handleJoinRoom = useCallback(
 		({ userId, id }: { userId: string; id: string }) => {
 			console.log('User Joined', userId);
 			console.log('Socket User Joined', id);
+			setRemoteSocketId(id);
 			setEnterRoom(true);
 		},
-		[]
+		[setRemoteSocketId]
+	);
+	const handleInformAllNewUserAdded = useCallback(
+		({ id, socketId }: { id: string; socketId: string }) => {
+			console.log('Notiof', { id, socketId });
+			if (id === userId) {
+				toast(`suceesfully joined ${socketId}`);
+			} else {
+				toast(`User Joined, his/her -> ${userId} & ${socketId} `);
+			}
+		},
+		[userId]
 	);
 
 	useEffect(() => {
-		// socket?.on('event:UserJoined', handleUserJoined);
-		socketOn('event:UserJoined', handleUserJoined);
+		socketOn('event:joinRoom', handleJoinRoom);
 
+		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
 		return () => {
-			socketOff('event:UserJoined', handleUserJoined);
+			socketOff('event:joinRoom', handleJoinRoom);
+			socketOff(
+				'notification:informAllNewUserAdded',
+				handleInformAllNewUserAdded
+			);
 		};
-	}, [handleUserJoined, socketOff, socketOn]);
+	}, [handleInformAllNewUserAdded, handleJoinRoom, socketOff, socketOn]);
 
 	return (
 		<>

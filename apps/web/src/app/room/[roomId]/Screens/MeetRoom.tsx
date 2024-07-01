@@ -22,9 +22,6 @@ import {
 } from '@/components/ui/tooltip';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 
-
-
-
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth, useUser } from '@clerk/nextjs';
@@ -38,12 +35,14 @@ import ControlPanel from '../components/ui/ControlPanel';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useRoomStore } from '@/store/useStreamStore';
 
-const MeetRoom = ({roomId}:{roomId: string}) => {
+const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const stream = useRoomStore((state) => state.stream);
 	const screenStream = useRoomStore((state) => state.screenStream);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
-	const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
+	// const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
 	const [remoteStream, setRemoteStream] = useState<MediaStream>();
+	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
+	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 
 	const router = useRouter();
 	const { getToken, userId } = useAuth();
@@ -54,7 +53,7 @@ const MeetRoom = ({roomId}:{roomId: string}) => {
 		({ userId, id }: { userId: string; id: string }) => {
 			console.log('User Joined', userId);
 			console.log('Socket User Joined', id);
-			setRemoteSocketId(id);
+			// setRemoteSocketId(id);
 		},
 		[]
 	);
@@ -151,7 +150,6 @@ const MeetRoom = ({roomId}:{roomId: string}) => {
 			peer.peer?.addTrack(track, stream);
 		});
 	}, [stream]);
-	
 
 	useEffect(() => {
 		peer.peer?.addEventListener('negotiationneeded', handleNegoNeeded);
@@ -225,59 +223,66 @@ const MeetRoom = ({roomId}:{roomId: string}) => {
 	// 	);
 	// }, []);
 
-	// const handleEnterRoom = useCallback(async () => {
-	// 	const token = await getToken();
-	// 	console.log('Enter Room number', roomId);
+	const roomEnterPermissionAccepted = useCallback(
+		async (userId: string, requestedUserId: string) => {
+			console.log(userId, requestedUserId);
+			socketEmit('event:roomEnterPermissionAccepted', {
+				roomId,
+				userId,
+				id: requestedUserId,
+			});
+		},
+		[roomId, socketEmit]
+	);
+	const roomEnterPermissionDenied = useCallback(
+		(requestedUserId: string) => {
+			socketEmit('event:roomEnterPermissionDenied', { id: requestedUserId });
+		},
+		[socketEmit]
+	);
 
-	// 	console.log('User Id', userId);
+	const userWantToEnter = useCallback(
+		async ({ userId, id }: { userId: string; id: string }) => {
+			toast(
+				<div className="">
+					<span>A User Want to Enter </span>
+					<span>{userId}</span>
+					<span>{id}</span>
+					<div className="">
+						<Button onClick={() => roomEnterPermissionAccepted(userId, id)}>
+							Accept
+						</Button>
+						<Button
+							variant={'destructive'}
+							onClick={() => roomEnterPermissionDenied(id)}
+						>
+							Reject
+						</Button>
+					</div>
+				</div>,
+				{
+					position: 'top-right',
+					autoClose: false,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+					theme: 'light',
+				}
+			);
+		},
+		[]
+	);
 
-	// 	if (roomId) {
-	// 		try {
-	// 			const { data } = await toast.promise(
-	// 				axios(
-	// 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+	useEffect(() => {
+		socketOn('event:userWantToEnter', userWantToEnter);
 
-	// 					{
-	// 						headers: {
-	// 							'Content-Type': 'application/json',
-	// 							Authorization: `Bearer ${token}`,
-	// 						},
-	// 					}
-	// 				),
+		return () => {
+			socketOff('event:userWantToEnter', userWantToEnter);
+		};
+	}, [socketOff, socketOn, userWantToEnter]);
 
-	// 				{
-	// 					pending: `Hold no, we're Connecting`,
-	// 					success: 'Connection succesfull👌',
-	// 					error: 'Connection rejected 🤯',
-	// 				}
-	// 			);
-
-	// 			console.log(data);
-	// 			const response = data.data;
-
-	// 			if (response) {
-	// 				const roomId = data.data.meetingId;
-
-	// 				socketEmit('event:joinRoom', { roomId, userId });
-
-	// 				// router.push(response.videoCallUrl);
-	// 			} else {
-	// 				toast.error('RoomId Does not Exists');
-	// 				// router.push('/');
-	// 			}
-	// 		} catch (error) {
-	// 			console.log(error);
-	// 		}
-	// 	}
-	// }, [getToken, roomId, socketEmit, userId]);
-
-	// useEffect(() => {
-	// 	handleEnterRoom();
-
-	// 	return () => {
-	// 		handleEnterRoom();
-	// 	};
-	// }, [handleEnterRoom]);
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
 			{/* <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">

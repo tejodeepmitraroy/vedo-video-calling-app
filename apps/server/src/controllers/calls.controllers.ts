@@ -80,7 +80,7 @@ export const createInstantCall = asyncHandler(
         }
       });
 
-      console.log(meetingDetails);
+      // console.log(meetingDetails);
       // return response.redirect(`${meetingDetails.videoCallUrl}`);
       // return response.status(200).redirect("https://youtu.be/Y_GrZ5cIipg?si=EEzUZ2uPK7UQbBJr");
       return response.status(200).json(new ApiResponse(200, meetingDetails));

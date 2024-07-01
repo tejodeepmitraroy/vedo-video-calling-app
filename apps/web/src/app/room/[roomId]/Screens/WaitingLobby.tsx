@@ -121,18 +121,18 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		[setStream]
 	);
 
-	const handleEnterRoom = async () => {
-		console.log('Enter Room number', roomId);
+	const handleHostEnterRoom = async () => {
+		console.log('Room number--->', roomId);
 
-		console.log('User Id', userId);
+		console.log('User Id--->', userId);
 
-		socketEmit('event:joinRoom', { roomId, userId });
+		socketEmit('event:hostEnterRoom', { roomId, userId });
 	};
 
 	const handleAskedToEnter = async () => {
-		console.log('Enter Room number', roomId);
+		console.log('Room number--->', roomId);
 
-		console.log('User Id', userId);
+		console.log('User Id--->', userId);
 
 		socketEmit('event:askToEnter', { roomId, userId });
 	};
@@ -149,6 +149,17 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 	useEffect(() => {
 		getMediaDevices();
 	}, [getMediaDevices]);
+
+	const roomEnterPermissionDenied = useCallback(() => {
+		toast("Sorry host don't want to Enter you");
+	}, []);
+
+	useEffect(() => {
+		socketOn('roomEnterPermissionDenied', roomEnterPermissionDenied);
+		return () => {
+			socketOff('roomEnterPermissionDenied', roomEnterPermissionDenied);
+		};
+	}, [roomEnterPermissionDenied, socketOff, socketOn]);
 
 	return (
 		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -235,7 +246,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 							</CardContent>
 							<CardFooter className="item-center flex flex-col">
 								{MeetingDetails?.createdById === userId ? (
-									<Button onClick={() => handleEnterRoom()}>
+									<Button onClick={() => handleHostEnterRoom()}>
 										Join Room
 									</Button>
 								) : (

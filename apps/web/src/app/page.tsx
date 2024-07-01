@@ -38,8 +38,8 @@ export default function Dashboard() {
 
 				{
 					pending: 'Wait to create a new Room',
-					success: 'Conneting with a new Room👌',
-					error: 'Promise rejected 🤯',
+					success: 'New Room Created👌',
+					error: 'Error happend, New Room Creation rejected 🤯',
 				}
 			);
 
@@ -47,7 +47,9 @@ export default function Dashboard() {
 			const roomId = data.data.meetingId;
 			const userId = data.data.createdById;
 
-			socket?.emit('event:joinRoom', { roomId, userId });
+			router.push(`/room/${roomId}`);
+
+			
 		} catch (error) {
 			console.log(error);
 		}
@@ -74,8 +76,8 @@ export default function Dashboard() {
 
 					{
 						pending: 'Wait to create a new Room',
-						success: 'Conneting with a new Room👌',
-						error: 'Promise rejected 🤯',
+						success: 'Room Found👌',
+						error: 'Error happend, New Room Creation rejected 🤯',
 					}
 				);
 
@@ -86,12 +88,12 @@ export default function Dashboard() {
 					const roomId = data.data.meetingId;
 					// const userId = data.data.createdById;
 
-					socketEmit('event:joinRoom', { roomId, userId });
+					// socketEmit('event:joinRoom', { roomId, userId });
 
-					// router.push(response.videoCallUrl);
+					router.push(`/room/${roomId}`);
 				} else {
 					toast.error('RoomId Does not Exists');
-					// router.push('/');
+					
 				}
 			} catch (error) {
 				console.log(error);
@@ -99,21 +101,21 @@ export default function Dashboard() {
 		}
 	};
 
-	const handleJoinRoom = useCallback(
-		({ roomId, userId }: { roomId: string; userId: string }) => {
-			console.log(`Came form BE RoomId:${roomId}, Email ${userId}`);
-			router.push(`/room/${roomId}`);
-		},
-		[router]
-	);
+	// const handleJoinRoom = useCallback(
+	// 	({ roomId, userId }: { roomId: string; userId: string }) => {
+	// 		console.log(`Came form BE RoomId:${roomId}, Email ${userId}`);
+	// 		router.push(`/room/${roomId}`);
+	// 	},
+	// 	[router]
+	// );
 
-	useEffect(() => {
-		console.log('socket IO');
-		socket?.on('event:joinRoom', handleJoinRoom);
-		return () => {
-			socket?.off('event:joinRoom', handleJoinRoom);
-		};
-	}, [handleJoinRoom, socket]);
+	// useEffect(() => {
+	// 	console.log('socket IO');
+	// 	socket?.on('event:joinRoom', handleJoinRoom);
+	// 	return () => {
+	// 		socket?.off('event:joinRoom', handleJoinRoom);
+	// 	};
+	// }, [handleJoinRoom, socket]);
 
 	return (
 		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -160,7 +162,6 @@ export default function Dashboard() {
 								</Button>
 
 								<ScheduleCallForm />
-								
 							</div>
 						</div>
 					</div>
