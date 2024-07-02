@@ -24,7 +24,7 @@ import UserProfile from './UserProfile';
 
 const BottomNavigation = () => {
 	return (
-		<div className="fixed bottom-0 left-0 md:hidden flex h-16 w-full items-center border border-t bg-background">
+		<div className="fixed bottom-0 left-0 md:hidden flex h-14 w-full items-center border border-t bg-background">
 			<nav className="flex w-full justify-evenly gap-1">
 				<Tooltip>
 					<TooltipTrigger asChild>

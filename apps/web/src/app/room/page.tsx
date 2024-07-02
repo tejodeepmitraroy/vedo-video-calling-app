@@ -48,7 +48,7 @@ const page = () => {
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Room" />
-				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+				<main className="mb-14 flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 					{/* <div className="flex items-center">
 						<h1 className="text-lg font-semibold md:text-2xl">
 							Create a new Room
@@ -58,7 +58,7 @@ const page = () => {
 						className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
 						x-chunk="dashboard-02-chunk-1"
 					>
-						<div className="flex flex-col md:flex-row gap-10 p-4">
+						<div className="flex flex-col gap-10 p-4 md:flex-row">
 							<div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-10 text-center shadow-sm">
 								<h3 className="text-2xl font-bold tracking-tight">
 									Create a Meeting Room

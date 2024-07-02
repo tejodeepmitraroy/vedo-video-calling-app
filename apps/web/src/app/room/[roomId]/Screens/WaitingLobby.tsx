@@ -4,7 +4,7 @@ import ScheduleCallForm from '@/components/ScheduleCallForm';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Phone } from 'lucide-react';
+import { Phone, Share } from 'lucide-react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import ControlPanel from '../components/ui/ControlPanel';
@@ -33,6 +33,7 @@ import { useSocket } from '@/context/SocketContext';
 import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
+import { RWebShare } from 'react-web-share';
 
 interface WaitingLobbyProps {
 	MeetingDetails:
@@ -80,6 +81,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		cameras: [],
 		microphones: [],
 	});
+	const [roomUrl, setRoomUrl] = useState('');
 	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -159,6 +161,10 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 	}, []);
 
 	useEffect(() => {
+		setRoomUrl(window.location.href);
+	}, []);
+
+	useEffect(() => {
 		socketOn('roomEnterPermissionDenied', roomEnterPermissionDenied);
 		return () => {
 			socketOff('roomEnterPermissionDenied', roomEnterPermissionDenied);
@@ -170,12 +176,31 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Waiting Lobby" />
-				<main className="flex flex-1 flex-col-reverse gap-4 p-4 md:flex-row lg:gap-6 lg:p-6 overflow-y-auto">
+				<main className="mb-14 flex flex-1 flex-col-reverse gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
 					<div className="flex h-full w-full flex-col items-center md:w-[40%]">
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
 						<Card className="w-full border border-dashed">
 							<CardHeader>
-								<div>Title</div>
+								<div className="flex items-center justify-between">
+									Title{' '}
+									<RWebShare
+										data={{
+											text: 'Share',
+											url: roomUrl,
+											title: 'roomUrl',
+										}}
+										onClick={() => console.log('roomUrl shared successfully!')}
+									>
+										<Button
+											variant="outline"
+											size="sm"
+											className="ml-auto gap-1.5 text-sm"
+										>
+											<Share className="size-3.5" />
+											Share
+										</Button>
+									</RWebShare>
+								</div>
 								<CardTitle>{MeetingDetails?.title}</CardTitle>
 								<div>Description</div>
 								<CardDescription>{MeetingDetails?.description}</CardDescription>

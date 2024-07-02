@@ -122,7 +122,7 @@ export default function Dashboard() {
 			<div className="flex flex-col">
 				<NavBar heading="Dashboard" />
 
-				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+				<main className="mb-14 flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 					<div className="flex flex-1 items-start justify-start rounded-lg shadow-sm">
 						<div className="flex w-full flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm md:w-auto">
 							<div className="flex items-center">
