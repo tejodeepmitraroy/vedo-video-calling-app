@@ -133,8 +133,6 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		socketEmit('event:hostEnterRoom', { roomId, userId });
 	};
 
-
-	
 	const handleAskedToEnter = async () => {
 		console.log('Room number--->', roomId);
 
@@ -172,8 +170,8 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Waiting Lobby" />
-				<main className="flex flex-1 flex-col-reverse gap-4 p-4 md:flex-row lg:gap-6 lg:p-6">
-					<div className="flex h-full w-full flex-col items-center md:w-[30%]">
+				<main className="flex flex-1 flex-col-reverse gap-4 p-4 md:flex-row lg:gap-6 lg:p-6 overflow-y-auto">
+					<div className="flex h-full w-full flex-col items-center md:w-[40%]">
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
 						<Card className="w-full border border-dashed">
 							<CardHeader>
@@ -262,10 +260,9 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 							</CardFooter>
 						</Card>
 					</div>
-					<div className="flex h-full w-full flex-col items-center p-5 md:w-[70%]">
-						<h1 className="text-lg font-semibold md:text-2xl">Preview Page</h1>
-
-						<div>Video source</div>
+					<div className="flex h-full w-full flex-col items-center p-5 md:w-[60%]">
+						<h1 className="text-lg font-semibold md:text-2xl">Video source</h1>
+						{/* <div>Video source</div> */}
 						<div className="aspect-video w-full">
 							<UserVideoPanel stream={stream} muted={false} />
 						</div>

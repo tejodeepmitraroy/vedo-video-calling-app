@@ -44,21 +44,21 @@ import BottomNavigation from '@/components/BottomNavigation';
 
 const page = () => {
 	return (
-		<div className="grid h-screen w-full pl-[60px]">
+		<div className="grid h-screen w-full md:pl-[60px]">
 			<Sidebar />
 			<div className="flex flex-col">
-				<NavBar heading="Call" />
+				<NavBar heading="Room" />
 				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-					<div className="flex items-center">
+					{/* <div className="flex items-center">
 						<h1 className="text-lg font-semibold md:text-2xl">
 							Create a new Room
 						</h1>
-					</div>
+					</div> */}
 					<div
 						className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
 						x-chunk="dashboard-02-chunk-1"
 					>
-						<div className="flex gap-10">
+						<div className="flex flex-col md:flex-row gap-10 p-4">
 							<div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-10 text-center shadow-sm">
 								<h3 className="text-2xl font-bold tracking-tight">
 									Create a Meeting Room
