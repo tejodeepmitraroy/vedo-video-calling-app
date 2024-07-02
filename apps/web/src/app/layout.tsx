@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,8 +36,7 @@ export default function RootLayout({
 							pauseOnHover={false}
 							theme="light"
 						/>
-
-						{children}
+						<TooltipProvider>{children}</TooltipProvider>
 					</body>
 				</SocketProvider>
 			</ClerkProvider>

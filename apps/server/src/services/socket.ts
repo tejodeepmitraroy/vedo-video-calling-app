@@ -30,27 +30,29 @@ class SocketService {
         ({ roomId, userId }: { roomId: string; userId: string }) => {
           console.log('Host Enter the room-->', { roomId, userId });
           // this.userIdToSocketIdMap.set(userId, socket.id);
-          this.socketIdToUserIdMap.set(socket.id, userId);
-          this.hostSocketIdToRoomId.set(socket.id, roomId);
+          // this.socketIdToUserIdMap.set(socket.id, userId);
+          // this.hostSocketIdToRoomId.set(socket.id, roomId);
 
-          socket.join(roomId);
-          io.to(socket.id).emit('event:joinRoom', { roomId, userId });
-          io.to(roomId).emit('notification:informAllNewUserAdded', {
-            id: userId,
-            socketId: socket.id
+          // socket.join(roomId);
+          io.to(socket.id).emit('event:joinRoom', {
+            roomId,
+            id: socket.id,
+            userId,
+            hostUser: true
           });
-          // console.log('Host User Joined in Room', {
-          //   userId,
-          //   roomId,
-          //   id: socket.id
-          // });
+
+          console.log('Host User Joined in Room', {
+            userId,
+            roomId,
+            id: socket.id
+          });
         }
       );
 
       function KeyByValue(map: Map<string, string>, KeyValue: string) {
         let result: string | undefined;
 
-        console.log("KeyByValue",map)
+        console.log('KeyByValue', map);
         map.forEach((value, key) => {
           result = value === KeyValue ? key : result;
         });
@@ -62,7 +64,7 @@ class SocketService {
         ({ roomId, userId }: { roomId: string; userId: string }) => {
           console.log('User want to ask-->', { roomId, userId });
           // this.userIdToSocketIdMap.set(userId, socket.id);
-          this.socketIdToUserIdMap.set(socket.id, userId);
+          // this.socketIdToUserIdMap.set(socket.id, userId);
 
           console.log(
             'Host User Id--->',
@@ -72,10 +74,14 @@ class SocketService {
 
           const hostSocketId = KeyByValue(this.hostSocketIdToRoomId, roomId);
 
-          io.to(hostSocketId!).emit('event:userWantToEnter', {
-            userId,
-            id: socket.id
-          });
+          if (hostSocketId) {
+            io.to(hostSocketId!).emit('event:userWantToEnter', {
+              userId,
+              id: socket.id
+            });
+          } else {
+            io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+          }
         }
       );
       socket.on('event:roomEnterPermissionDenied', ({ id }: { id: string }) => {
@@ -93,18 +99,13 @@ class SocketService {
           userId: string;
           id: string;
         }) => {
-          socket.join(roomId);
-          // io.to(socket.id).emit('event:joinRoom', { roomId, userId });
+          io.to(id).emit('event:joinRoom', {
+            roomId,
+            id,
+            userId,
+            hostUser: false
+          });
 
-          io.to(id).emit('event:joinRoom', { userId, id });
-          io.to(roomId).emit('notification:informAllNewUserAdded', {
-            id: userId,
-            socketId: id
-          });
-          io.to(id).emit('notification:informAllNewUserAdded', {
-            id: userId,
-            socketId: id
-          });
           console.log('User Joined in Room', {
             userId,
             roomId,
@@ -115,9 +116,44 @@ class SocketService {
 
       socket.on(
         'event:joinRoom',
-        ({ roomId, userId }: { roomId: string; userId: string }) => {
+        ({
+          roomId,
+          userId,
+          hostUser,
+          id
+        }: {
+          roomId: string;
+          userId: string;
+          hostUser: boolean;
+          id: string;
+        }) => {
           console.log('Room Id', roomId);
           console.log('userId', userId);
+          console.log('hostUser', hostUser);
+          console.log('Incommimng socket ID--->', id);
+          console.log('Current socket ID--->', socket.id);
+
+          this.socketIdToUserIdMap.set(socket.id, userId);
+
+          if (hostUser) {
+            this.hostSocketIdToRoomId.set(socket.id, roomId);
+            console.log('Host User socket Id is add');
+          }
+
+          socket.join(roomId);
+
+          io.to(socket.id).emit('event:enterRoom', {});
+
+          io.to(roomId).emit('notification:informAllNewUserAdded', {
+            id: userId,
+            socketId: socket.id
+          });
+
+          console.log('User Joined in Room', {
+            userId,
+            roomId,
+            id: socket.id
+          });
 
           // if (!socketIdToEmailMap.get(userId)) {
           //   emailToSocketIdMap.set(userId, socket.id);
@@ -179,6 +215,23 @@ class SocketService {
             from: socket.id,
             answer
           });
+        }
+      );
+
+      socket.on(
+        'event:callEnd',
+        ({ roomId, userId }: { roomId: string; userId: string }) => {
+          io.to(roomId).emit('notification:userLeftTheRoom', { id:userId });
+          socket.leave(roomId);
+          console.log(
+            'Leaving before hostSocketIdToRoomId',
+            this.hostSocketIdToRoomId
+          );
+          this.hostSocketIdToRoomId.delete(socket.id);
+          console.log(
+            ' Leaving after hostSocketIdToRoomId',
+            this.hostSocketIdToRoomId
+          );
         }
       );
 

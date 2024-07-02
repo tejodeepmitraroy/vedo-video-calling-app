@@ -1,7 +1,7 @@
 'use client';
-import Navbar from '@/components/Navbar';
+
 import ScheduleCallForm from '@/components/ScheduleCallForm';
-import Sidebar from '@/components/Sidebar';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Phone } from 'lucide-react';
@@ -30,6 +30,9 @@ import { useRoomStore } from '@/store/useStreamStore';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useSocket } from '@/context/SocketContext';
+import Sidebar from '@/components/Sidebar';
+import NavBar from '@/components/Navbar';
+import BottomNavigation from '@/components/BottomNavigation';
 
 interface WaitingLobbyProps {
 	MeetingDetails:
@@ -121,6 +124,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		[setStream]
 	);
 
+	//Host join Room
 	const handleHostEnterRoom = async () => {
 		console.log('Room number--->', roomId);
 
@@ -129,6 +133,8 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		socketEmit('event:hostEnterRoom', { roomId, userId });
 	};
 
+
+	
 	const handleAskedToEnter = async () => {
 		console.log('Room number--->', roomId);
 
@@ -162,14 +168,13 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 	}, [roomEnterPermissionDenied, socketOff, socketOn]);
 
 	return (
-		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<Navbar />
+		<div className="grid h-screen w-full md:pl-[60px]">
+			<Sidebar />
 			<div className="flex flex-col">
-				<Sidebar />
-				<main className="flex flex-1 flex-row gap-4 p-4 lg:gap-6 lg:p-6">
-					<div className="flex h-full w-[30%] flex-col items-center">
+				<NavBar heading="Waiting Lobby" />
+				<main className="flex flex-1 flex-col-reverse gap-4 p-4 md:flex-row lg:gap-6 lg:p-6">
+					<div className="flex h-full w-full flex-col items-center md:w-[30%]">
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
-
 						<Card className="w-full border border-dashed">
 							<CardHeader>
 								<div>Title</div>
@@ -257,7 +262,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 							</CardFooter>
 						</Card>
 					</div>
-					<div className="flex h-full w-[70%] flex-col items-center border border-dashed p-5">
+					<div className="flex h-full w-full flex-col items-center p-5 md:w-[70%]">
 						<h1 className="text-lg font-semibold md:text-2xl">Preview Page</h1>
 
 						<div>Video source</div>
@@ -267,6 +272,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 					</div>
 				</main>
 			</div>
+			<BottomNavigation />
 		</div>
 	);
 };

@@ -38,15 +38,16 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Navbar from '@/components/Navbar';
+import NavBar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
+import BottomNavigation from '@/components/BottomNavigation';
+
 const page = () => {
 	return (
-		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<Navbar />
+		<div className="grid h-screen w-full pl-[60px]">
+			<Sidebar />
 			<div className="flex flex-col">
-				
-				<Sidebar />
+				<NavBar heading="Call" />
 				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
 					<div className="flex items-center">
 						<h1 className="text-lg font-semibold md:text-2xl">
@@ -93,6 +94,7 @@ const page = () => {
 					</div>
 				</main>
 			</div>
+			<BottomNavigation />
 		</div>
 	);
 };

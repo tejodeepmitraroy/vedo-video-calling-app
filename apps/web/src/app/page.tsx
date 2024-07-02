@@ -1,8 +1,10 @@
 'use client';
 import BottomNavigation from '@/components/BottomNavigation';
-import Navbar from '@/components/Navbar';
+import NavBar from '@/components/Navbar';
+
 import ScheduleCallForm from '@/components/ScheduleCallForm';
 import Sidebar from '@/components/Sidebar';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSocket } from '@/context/SocketContext';
@@ -48,8 +50,6 @@ export default function Dashboard() {
 			const userId = data.data.createdById;
 
 			router.push(`/room/${roomId}`);
-
-			
 		} catch (error) {
 			console.log(error);
 		}
@@ -93,7 +93,6 @@ export default function Dashboard() {
 					router.push(`/room/${roomId}`);
 				} else {
 					toast.error('RoomId Does not Exists');
-					
 				}
 			} catch (error) {
 				console.log(error);
@@ -118,19 +117,13 @@ export default function Dashboard() {
 	// }, [handleJoinRoom, socket]);
 
 	return (
-		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<Navbar />
+		<div className="grid h-screen w-full md:pl-[60px]">
+			<Sidebar />
 			<div className="flex flex-col">
-				<Sidebar />
-				{/* <BottomNavigation/> */}
+				<NavBar heading="Dashboard" />
+
 				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-					<div className="flex items-center">
-						<h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
-					</div>
-					<div
-						className="flex flex-1 items-start justify-start rounded-lg shadow-sm"
-						x-chunk="dashboard-02-chunk-1"
-					>
+					<div className="flex flex-1 items-start justify-start rounded-lg shadow-sm">
 						<div className="flex w-full flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm md:w-auto">
 							<div className="flex items-center">
 								<h2 className="text-xl font-semibold tracking-tight">
@@ -167,6 +160,7 @@ export default function Dashboard() {
 					</div>
 				</main>
 			</div>
+			<BottomNavigation />
 		</div>
 	);
 }

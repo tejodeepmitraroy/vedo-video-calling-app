@@ -2,7 +2,10 @@ import {
 	Book,
 	Bot,
 	Code2,
+	Home,
 	LifeBuoy,
+	Phone,
+	Presentation,
 	Settings2,
 	SquareTerminal,
 	SquareUser,
@@ -16,90 +19,77 @@ import {
 	TooltipTrigger,
 } from './ui/tooltip';
 import { Button } from './ui/button';
+import Link from 'next/link';
+import UserProfile from './UserProfile';
 
 const BottomNavigation = () => {
 	return (
-			<TooltipProvider>
-		<div className="fixed bottom-0 left-0 h-20 w-full border border-red-300">
-				<nav className="flex justify-evenly bg-background gap-1 p-2">
-					<Tooltip>
-						<TooltipTrigger asChild>
+		<div className="fixed bottom-0 left-0 md:hidden flex h-16 w-full items-center border border-t bg-background">
+			<nav className="flex w-full justify-evenly gap-1">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link href="/">
 							<Button
 								variant="ghost"
-								size="icon"
-								className="rounded-lg bg-muted"
-								aria-label="Playground"
+								className="rounded-lg hover:bg-primary hover:text-white"
+								aria-label="Dashboard"
 							>
-								<SquareTerminal className="size-5" />
+								<Home className="size-7" />
 							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="right" sideOffset={5}>
-							Playground
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
+						</Link>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Dashboard
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link href="/room">
 							<Button
 								variant="ghost"
-								size="icon"
-								className="rounded-lg"
-								aria-label="Models"
+								className="rounded-lg hover:bg-primary hover:text-white"
+								aria-label="Room"
 							>
-								<Bot className="size-5" />
+								<Phone className="size-7" />
 							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="right" sideOffset={5}>
-							Models
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
+						</Link>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Room
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link href="/meet">
 							<Button
 								variant="ghost"
-								size="icon"
-								className="rounded-lg"
-								aria-label="API"
+								className="rounded-lg hover:bg-primary hover:text-white"
+								aria-label="Room"
 							>
-								<Code2 className="size-5" />
+								<Presentation className="size-7" />
 							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="right" sideOffset={5}>
-							API
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="rounded-lg"
-								aria-label="Documentation"
-							>
-								<Book className="size-5" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="right" sideOffset={5}>
-							Documentation
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="rounded-lg"
-								aria-label="Settings"
-							>
-								<Settings2 className="size-5" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="right" sideOffset={5}>
-							Settings
-						</TooltipContent>
-					</Tooltip>
-				</nav>
+						</Link>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Meeting
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							className="mt-auto rounded-lg hover:bg-primary hover:text-white"
+							aria-label="Account"
+						>
+							<UserProfile />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Account
+					</TooltipContent>
+				</Tooltip>
+			</nav>
 		</div>
-			</TooltipProvider>
 
 		// <TooltipProvider>
 		// 	<aside className="inset-y fixed left-0 z-20 flex h-full flex-col border-r">

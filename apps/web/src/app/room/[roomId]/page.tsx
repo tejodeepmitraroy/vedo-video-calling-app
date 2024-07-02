@@ -7,6 +7,8 @@ import axios from 'axios';
 import { useSocket } from '@/context/SocketContext';
 import { toast } from 'react-toastify';
 import { useRoomStore } from '@/store/useStreamStore';
+import { useRouter } from 'next/navigation';
+import OutsideLobby from './Screens/OutsideLobby';
 
 interface MeetingDetails {
 	createdAt: Date;
@@ -28,6 +30,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 
 	const { getToken, userId } = useAuth();
+	const router = useRouter();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
 	const getRoomDetails = useCallback(async () => {
@@ -47,61 +50,121 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				);
 
 				const response = data.data;
-				setRoomDetails(response);
 				console.log('Room Details---->', response);
+
+				if (response) {
+					setRoomDetails(response);
+				} else {
+					toast.error('Room Id Not Exsisted');
+					router.push('/');
+				}
 			} catch (error) {
 				console.log(error);
 			}
 		}
-	}, [getToken, params.roomId]);
+	}, [getToken, params.roomId, router]);
 
 	useEffect(() => {
 		getRoomDetails();
 	}, [getRoomDetails]);
 
 	const handleJoinRoom = useCallback(
-		({ userId, id }: { userId: string; id: string }) => {
+		({
+			roomId,
+			userId,
+			id,
+			hostUser,
+		}: {
+			roomId: string;
+			userId: string;
+			id: string;
+			hostUser: boolean;
+		}) => {
 			console.log('User Joined', userId);
 			console.log('Socket User Joined', id);
-			setRemoteSocketId(id);
-			setEnterRoom(true);
+			// setRemoteSocketId(id);
+			socketEmit('event:joinRoom', {
+				roomId,
+				userId,
+				id,
+				hostUser,
+			});
 		},
-		[setRemoteSocketId]
+		[socketEmit]
 	);
 	const handleInformAllNewUserAdded = useCallback(
 		({ id, socketId }: { id: string; socketId: string }) => {
 			console.log('Notiof', { id, socketId });
+			setRemoteSocketId(socketId);
+
+			console.log('Remote Socket ID--->', socketId);
 			if (id === userId) {
 				toast(`suceesfully joined ${socketId}`);
 			} else {
 				toast(`User Joined, his/her -> ${userId} & ${socketId} `);
 			}
 		},
+		[setRemoteSocketId, userId]
+	);
+
+	const handleHostIsNoExistInRoom = useCallback(() => {
+		toast.warn(`Host is Not Existed in Room. Please wait`);
+	}, []);
+
+	const handleUserLeftTheRoom = useCallback(
+		({ id }: { id: string }) => {
+			if (id === userId) {
+				toast.info(`You Left the Room`);
+			} else {
+				toast.info(`${id} Left the Room`);
+			}
+		},
 		[userId]
 	);
 
+	const handleEnterRoom = useCallback(
+		({ userId, id }: { userId: string; id: string }) => {
+			setEnterRoom(true);
+		},
+		[]
+	);
+
+	//All Notifications Event state here
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
+		socketOn('event:enterRoom', handleEnterRoom);
 
 		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
+		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
 		return () => {
 			socketOff('event:joinRoom', handleJoinRoom);
+			socketOff('event:enterRoom', handleEnterRoom);
 			socketOff(
 				'notification:informAllNewUserAdded',
 				handleInformAllNewUserAdded
 			);
+			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
 		};
-	}, [handleInformAllNewUserAdded, handleJoinRoom, socketOff, socketOn]);
+	}, [
+		handleEnterRoom,
+		handleHostIsNoExistInRoom,
+		handleInformAllNewUserAdded,
+		handleJoinRoom,
+		handleUserLeftTheRoom,
+		socketOff,
+		socketOn,
+	]);
 
 	return (
 		<>
 			{enterRoom ? (
-				// <>Meeting Room</>
 				<MeetRoom roomId={params.roomId} />
 			) : (
-				// <>Waiting Room</>
 				<WaitingLobby MeetingDetails={roomDetails} roomId={params.roomId} />
 			)}
+			{/* <OutsideLobby/> */}
 		</>
 	);
 }
