@@ -1,89 +1,141 @@
-import React from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Button } from './ui/button';
-import {
-	Badge,
-	Home,
-	LineChart,
-	Menu,
-	Package,
-	Package2,
-	Phone,
-	ShoppingCart,
-	Users,
-} from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
+import { Button } from './ui/button';
+import { Home, LifeBuoy, Phone, Triangle, Video } from 'lucide-react';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from './ui/tooltip';
 import UserProfile from './UserProfile';
 
 const Sidebar = () => {
 	return (
-		<header className="flex h-14 items-center justify-between md:justify-end gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-			<Sheet>
-				<SheetTrigger asChild>
-					<Button variant="outline" size="icon" className="shrink-0 md:hidden">
-						<Menu className="h-5 w-5" />
-						<span className="sr-only">Toggle navigation menu</span>
-					</Button>
-				</SheetTrigger>
-				<SheetContent side="left" className="flex flex-col">
-					<nav className="grid gap-2 text-lg font-medium">
-						<Link
-							href="#"
-							className="flex items-center gap-2 text-lg font-semibold"
-						>
-							<Package2 className="h-6 w-6" />
-							<span>VEDO - Video call</span>
+		<aside className=" hidden inset-y fixed left-0 z-20 md:flex h-full w-[60px] flex-col border-r">
+			<div className="flex h-[60px] items-center justify-center border-b p-2">
+				<Button
+					variant="outline"
+					size="icon"
+					aria-label="Home"
+					className="group hover:bg-primary hover:text-white"
+				>
+					<Video className="group-hover:fill-white size-5 fill-foreground" />
+				</Button>
+			</div>
+			<nav className="grid gap-3 p-2">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link href="/">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="rounded-lg hover:bg-primary hover:text-white"
+								aria-label="Playground"
+							>
+								<Home className="size-5" />
+							</Button>
 						</Link>
-						<Link
-							href="/"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-						>
-							<Home className="h-5 w-5" />
-							Dashboard
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Dashboard
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Link href="/room">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="rounded-lg hover:bg-primary hover:text-white"
+								aria-label="Models"
+							>
+								<Phone className="size-5" />
+							</Button>
 						</Link>
-						<Link
-							href="/room"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Room
+					</TooltipContent>
+				</Tooltip>
+				{/*<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="rounded-lg"
+							aria-label="API"
 						>
-							<Phone className="h-4 w-4" />
-							Room
-						</Link>
-						{/* <Link
-							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
+							<Code2 className="size-5" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						API
+					</TooltipContent>
+				</Tooltip>
+				 <Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="rounded-lg"
+							aria-label="Documentation"
 						>
-							<ShoppingCart className="h-5 w-5" />
-							Orders
-							<Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-								6
-							</Badge>
-						</Link> */}
-						{/* <Link
-							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							<Book className="size-5" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Documentation
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="rounded-lg"
+							aria-label="Settings"
 						>
-							<Package className="h-5 w-5" />
-							Products
-						</Link> */}
-						{/* <Link
-							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							<Settings2 className="size-5" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Settings
+					</TooltipContent>
+				</Tooltip> */}
+			</nav>
+			<nav className="mt-auto grid gap-1 p-2">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="mt-auto rounded-lg"
+							aria-label="Help"
 						>
-							<Users className="h-5 w-5" />
-							Customers
-						</Link>
-						<Link
-							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							<LifeBuoy className="size-5" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Help
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="mt-auto rounded-lg"
+							aria-label="Account"
 						>
-							<LineChart className="h-5 w-5" />
-							Analytics
-						</Link> */}
-					</nav>
-				</SheetContent>
-			</Sheet>
-			<UserProfile />
-		</header>
+							<UserProfile />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Account
+					</TooltipContent>
+				</Tooltip>
+			</nav>
+		</aside>
 	);
 };
 

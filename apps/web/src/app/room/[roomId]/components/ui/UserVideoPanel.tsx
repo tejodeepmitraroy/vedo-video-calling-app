@@ -8,6 +8,7 @@ interface UserVideoPanelProps {
 }
 
 const UserVideoPanel: FC<UserVideoPanelProps> = ({ stream, muted }) => {
+	console.log("steam in Video component---->",stream);
 	return (
 		<div className=" relative overflow-hidden aspect-video flex h-full w-full items-center justify-center rounded-xl bg-black">
 		{/* <div className=" relative flex h-full w-full items-center justify-center rounded-xl border-2 border-red-500 bg-black"> */}

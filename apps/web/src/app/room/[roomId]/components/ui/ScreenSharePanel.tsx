@@ -1,5 +1,6 @@
 'use client';
-import { useRoomStore } from '@/store/useStore';
+
+import { useRoomStore } from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
 import React from 'react';
 

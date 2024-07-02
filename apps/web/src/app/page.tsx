@@ -1,7 +1,10 @@
 'use client';
-import Navbar from '@/components/Navbar';
+import BottomNavigation from '@/components/BottomNavigation';
+import NavBar from '@/components/Navbar';
+
 import ScheduleCallForm from '@/components/ScheduleCallForm';
 import Sidebar from '@/components/Sidebar';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSocket } from '@/context/SocketContext';
@@ -15,7 +18,7 @@ import { toast } from 'react-toastify';
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
-	const { getToken } = useAuth();
+	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
 	const handleInstantCreateCall = async () => {
@@ -37,8 +40,8 @@ export default function Dashboard() {
 
 				{
 					pending: 'Wait to create a new Room',
-					success: 'Conneting with a new Room👌',
-					error: 'Promise rejected 🤯',
+					success: 'New Room Created👌',
+					error: 'Error happend, New Room Creation rejected 🤯',
 				}
 			);
 
@@ -46,7 +49,7 @@ export default function Dashboard() {
 			const roomId = data.data.meetingId;
 			const userId = data.data.createdById;
 
-			socket?.emit('event:joinRoom', { roomId, userId });
+			router.push(`/room/${roomId}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -73,8 +76,8 @@ export default function Dashboard() {
 
 					{
 						pending: 'Wait to create a new Room',
-						success: 'Conneting with a new Room👌',
-						error: 'Promise rejected 🤯',
+						success: 'Room Found👌',
+						error: 'Error happend, New Room Creation rejected 🤯',
 					}
 				);
 
@@ -83,14 +86,13 @@ export default function Dashboard() {
 
 				if (response) {
 					const roomId = data.data.meetingId;
-					const userId = data.data.createdById;
+					// const userId = data.data.createdById;
 
-					socketEmit('event:joinRoom', { roomId, userId });
+					// socketEmit('event:joinRoom', { roomId, userId });
 
-					// router.push(response.videoCallUrl);
+					router.push(`/room/${roomId}`);
 				} else {
 					toast.error('RoomId Does not Exists');
-					// router.push('/');
 				}
 			} catch (error) {
 				console.log(error);
@@ -98,35 +100,30 @@ export default function Dashboard() {
 		}
 	};
 
-	const handleJoinRoom = useCallback(
-		({ roomId, userId }: { roomId: string; userId: string }) => {
-			console.log(`Came form BE RoomId:${roomId}, Email ${userId}`);
-			router.push(`/room/${roomId}`);
-		},
-		[router]
-	);
+	// const handleJoinRoom = useCallback(
+	// 	({ roomId, userId }: { roomId: string; userId: string }) => {
+	// 		console.log(`Came form BE RoomId:${roomId}, Email ${userId}`);
+	// 		router.push(`/room/${roomId}`);
+	// 	},
+	// 	[router]
+	// );
 
-	useEffect(() => {
-		console.log('socket IO');
-		socket?.on('event:joinRoom', handleJoinRoom);
-		return () => {
-			socket?.off('event:joinRoom', handleJoinRoom);
-		};
-	}, [handleJoinRoom, socket]);
+	// useEffect(() => {
+	// 	console.log('socket IO');
+	// 	socket?.on('event:joinRoom', handleJoinRoom);
+	// 	return () => {
+	// 		socket?.off('event:joinRoom', handleJoinRoom);
+	// 	};
+	// }, [handleJoinRoom, socket]);
 
 	return (
-		<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<Navbar />
+		<div className="grid h-screen w-full md:pl-[60px]">
+			<Sidebar />
 			<div className="flex flex-col">
-				<Sidebar />
-				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-					<div className="flex items-center">
-						<h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
-					</div>
-					<div
-						className="flex flex-1 items-start justify-start rounded-lg shadow-sm"
-						x-chunk="dashboard-02-chunk-1"
-					>
+				<NavBar heading="Dashboard" />
+
+				<main className="mb-14 flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+					<div className="flex flex-1 items-start justify-start rounded-lg shadow-sm">
 						<div className="flex w-full flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm md:w-auto">
 							<div className="flex items-center">
 								<h2 className="text-xl font-semibold tracking-tight">
@@ -158,12 +155,12 @@ export default function Dashboard() {
 								</Button>
 
 								<ScheduleCallForm />
-								
 							</div>
 						</div>
 					</div>
 				</main>
 			</div>
+			<BottomNavigation />
 		</div>
 	);
 }

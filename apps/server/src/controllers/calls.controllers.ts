@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import asyncHandler from "../utils/asyncHandler";
-import { nanoid } from "nanoid";
-import prisma from "../lib/prismaClient";
-import ApiResponse from "../utils/ApiResponse";
-import ApiError from "../utils/ApiError";
-import { WithAuthProp } from "@clerk/clerk-sdk-node";
+import { Request, Response } from 'express';
+import asyncHandler from '../utils/asyncHandler';
+import { nanoid } from 'nanoid';
+import prisma from '../lib/prismaClient';
+import ApiResponse from '../utils/ApiResponse';
+import ApiError from '../utils/ApiError';
+import { WithAuthProp } from '@clerk/clerk-sdk-node';
 
 interface ClerkUser {
   id: string;
@@ -41,16 +41,16 @@ interface AuthenticatedRequest extends Request {
 export const getACall = asyncHandler(
   async (request: AuthenticatedRequest, response: Response) => {
     const roomId = request.params.roomId;
-    console.log(roomId);
+    // console.log(roomId);
 
     try {
       const meetingData = await prisma.meeting.findUnique({
         where: {
-          meetingId: roomId,
-        },
+          meetingId: roomId
+        }
       });
 
-      console.log(meetingData);
+      // console.log(meetingData);
 
       // if (!meetingData) {
       //   return response.status(400).redirect(`${process.env.FRONTEND_URL}`);
@@ -60,7 +60,7 @@ export const getACall = asyncHandler(
     } catch (error) {
       return response
         .status(400)
-        .json(new ApiError(400, "Error While getting a Call", error));
+        .json(new ApiError(400, 'Error While getting a Call', error));
     }
   }
 );
@@ -73,21 +73,21 @@ export const createInstantCall = asyncHandler(
     try {
       const meetingDetails = await prisma.meeting.create({
         data: {
-          title: "Instant Meeting",
+          title: 'Instant Meeting',
           meetingId: shortId,
           videoCallUrl: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-          createdById: user!,
-        },
+          createdById: user!
+        }
       });
 
-      console.log(meetingDetails);
+      // console.log(meetingDetails);
       // return response.redirect(`${meetingDetails.videoCallUrl}`);
       // return response.status(200).redirect("https://youtu.be/Y_GrZ5cIipg?si=EEzUZ2uPK7UQbBJr");
       return response.status(200).json(new ApiResponse(200, meetingDetails));
     } catch (error) {
       return response
         .status(400)
-        .json(new ApiError(400, "Error Happened", error));
+        .json(new ApiError(400, 'Error Happened', error));
     }
   }
 );
@@ -110,18 +110,18 @@ export const createScheduleCall = asyncHandler(
           participantIds: participantIds ? participantIds : [user!],
           meetingId: shortId,
           videoCallUrl: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-          createdById: user!,
-        },
+          createdById: user!
+        }
       });
 
-    console.log(meetingDetails);
+      console.log(meetingDetails);
 
       return response.status(200).json(new ApiResponse(200, meetingDetails));
     } catch (error) {
       console.log(error);
       return response
         .status(400)
-        .json(new ApiError(400, "Error Happened", error));
+        .json(new ApiError(400, 'Error Happened', error));
     }
   }
 );

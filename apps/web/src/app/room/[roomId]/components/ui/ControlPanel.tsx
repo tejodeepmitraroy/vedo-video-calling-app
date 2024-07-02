@@ -8,7 +8,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useRoomStore } from '@/store/useStore';
+import { useSocket } from '@/context/SocketContext';
+import { useRoomStore } from '@/store/useStreamStore';
 import {
 	Mic,
 	Phone,
@@ -19,6 +20,7 @@ import {
 	ScreenShare,
 	ScreenShareOff,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
 export interface Device {
@@ -32,7 +34,7 @@ interface MediaDevices {
 	microphones: Device[];
 }
 
-const ControlPanel = () => {
+const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => {
 	const setStream = useRoomStore((state) => state.setStream);
 	const selectedDevices = useRoomStore((state) => state.selectedDevices);
 	const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
@@ -48,6 +50,9 @@ const ControlPanel = () => {
 		microphones: [],
 	});
 
+	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const router = useRouter();
+
 	// console.log(
 	// 	'camera--->',
 	// 	isCameraOn,
@@ -57,53 +62,52 @@ const ControlPanel = () => {
 	// 	isScreenSharing
 	// );
 
-	const getUserMedia = useCallback(
-		// async (isCamera:boolean, isMicrophone:boolean) => {
-		// const constraints = {
-		// 	video: isCamera
-		// 		? selectedDevices.camera
-		// 			? { deviceId: { exact: selectedDevices.camera } }
-		// 			: true
-		// 		: false,
-		// 	audio: isMicrophone
-		// 		? selectedDevices.microphone
-		// 			? { deviceId: { exact: selectedDevices.microphone } }
-		// 			: true
-		// 		: false,
-		// };
-		async () => {
-			const constraints = {
-				video: selectedDevices.camera
-					? {
-							deviceId: { exact: selectedDevices.camera },
+	// const getUserMedia = useCallback(
+	// 	// async (isCamera:boolean, isMicrophone:boolean) => {
+	// 	// const constraints = {
+	// 	// 	video: isCamera
+	// 	// 		? selectedDevices.camera
+	// 	// 			? { deviceId: { exact: selectedDevices.camera } }
+	// 	// 			: true
+	// 	// 		: false,
+	// 	// 	audio: isMicrophone
+	// 	// 		? selectedDevices.microphone
+	// 	// 			? { deviceId: { exact: selectedDevices.microphone } }
+	// 	// 			: true
+	// 	// 		: false,
+	// 	// };
+	// 	async () => {
+	// 		const constraints = {
+	// 			video: selectedDevices.camera
+	// 				? {
+	// 						deviceId: { exact: selectedDevices.camera },
 
-							width: { ideal: 1280 },
-							height: { ideal: 720 },
-							
-						}
-					: true,
+	// 						width: { ideal: 1280 },
+	// 						height: { ideal: 720 },
+	// 					}
+	// 				: true,
 
-				audio: selectedDevices.microphone
-					? { deviceId: { exact: selectedDevices.microphone } }
-					: true,
-			};
-			// const constraints = {
-			// 	video: true,
-			// 	audio: true,
-			// };
+	// 			audio: selectedDevices.microphone
+	// 				? { deviceId: { exact: selectedDevices.microphone } }
+	// 				: true,
+	// 		};
+	// 		// const constraints = {
+	// 		// 	video: true,
+	// 		// 	audio: true,
+	// 		// };
 
-			// console.log('constraints', constraints);
+	// 		// console.log('constraints', constraints);
 
-			try {
-				const stream = await navigator.mediaDevices.getUserMedia(constraints);
-				setStream(stream);
-			} catch (error) {
-				console.error('Error accessing media devices:', error);
-			}
-		},
+	// 		try {
+	// 			const stream = await navigator.mediaDevices.getUserMedia(constraints);
+	// 			setStream(stream);
+	// 		} catch (error) {
+	// 			console.error('Error accessing media devices:', error);
+	// 		}
+	// 	},
 
-		[selectedDevices.camera, selectedDevices.microphone, setStream]
-	);
+	// 	[selectedDevices.camera, selectedDevices.microphone, setStream]
+	// );
 
 	const getMediaDevices = useCallback(async () => {
 		try {
@@ -132,22 +136,30 @@ const ControlPanel = () => {
 		});
 	};
 
+	const handleCallEnd = useCallback(() => {
+		socketEmit('event:callEnd', {
+			roomId,
+			userId,
+		});
+		router.push('/');
+	}, [roomId, router, socketEmit, userId]);
+
 	useEffect(() => {
 		getMediaDevices();
 	}, [getMediaDevices]);
 
-	useEffect(() => {
-		getUserMedia();
-		// if (selectedDevices.camera || selectedDevices.microphone) {
-		// }
-		// console.log('Devices-->', selectedDevices);
-		// console.log(
-		// 	'isCameraOn-->',
-		// 	isCameraOn,
-		// 	'isMicrophoneOn-->',
-		// 	isMicrophoneOn
-		// );
-	}, [getUserMedia, isCameraOn, isMicrophoneOn, selectedDevices]);
+	// useEffect(() => {
+	// 	getUserMedia();
+	// 	// if (selectedDevices.camera || selectedDevices.microphone) {
+	// 	// }
+	// 	// console.log('Devices-->', selectedDevices);
+	// 	// console.log(
+	// 	// 	'isCameraOn-->',
+	// 	// 	isCameraOn,
+	// 	// 	'isMicrophoneOn-->',
+	// 	// 	isMicrophoneOn
+	// 	// );
+	// }, [getUserMedia, isCameraOn, isMicrophoneOn, selectedDevices]);
 
 	return (
 		<div className="flex h-[9vh] w-full items-center justify-center border border-white bg-background">
@@ -231,7 +243,11 @@ const ControlPanel = () => {
 					)}
 				</Button>
 
-				<Button variant={'destructive'} className="">
+				<Button
+					variant={'destructive'}
+					onClick={() => handleCallEnd()}
+					className=""
+				>
 					<Phone className="h-6 w-7" />
 				</Button>
 			</div>
