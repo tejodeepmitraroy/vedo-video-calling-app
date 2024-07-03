@@ -1,14 +1,14 @@
 'use client';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import WaitingLobby from './Screens/WaitingLobby';
-import MeetRoom from './Screens/MeetRoom';
+
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import { useSocket } from '@/context/SocketContext';
 import { toast } from 'react-toastify';
 import { useRoomStore } from '@/store/useStreamStore';
 import { useRouter } from 'next/navigation';
-import OutsideLobby from './Screens/OutsideLobby';
+import MeetRoom from './Screens/MeetRoom';
+import WaitingLobby from './Screens/WaitingLobby';
 
 interface MeetingDetails {
 	createdAt: Date;
@@ -27,17 +27,22 @@ interface MeetingDetails {
 export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
 	const [enterRoom, setEnterRoom] = useState<boolean>(false);
-	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
+	const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
+		useState<boolean>(false);
 
-	const { getToken, userId } = useAuth();
+	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
+	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
+	const { getToken, userId: id } = useAuth();
 	const router = useRouter();
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { socketOn, socketEmit, socketOff } = useSocket();
 
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
 
 		if (params.roomId) {
 			try {
+				setIsFetchingRoomDetails(true);
+
 				const { data } = await axios(
 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${params.roomId}`,
 					{
@@ -47,7 +52,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 						},
 					}
 				);
-
+				setIsFetchingRoomDetails(false);
 				const response = data.data;
 				console.log('Room Details---->', response);
 
@@ -71,17 +76,26 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 		({
 			roomId,
 			userId,
-			id,
+			socketId,
+			hostUserId,
 			hostUser,
 		}: {
 			roomId: string;
 			userId: string;
-			id: string;
+			hostUserId: string;
+			socketId: string;
 			hostUser: boolean;
 		}) => {
 			console.log('User Joined', userId);
-			console.log('Socket User Joined', id);
-			// setRemoteSocketId(id);
+			console.log('Socond Socket User Joined', socketId);
+			console.log('Host User Id-->', hostUserId);
+			// if (userId !== id) setRemoteSocketId(socketId);
+			if (hostUserId){
+
+				setRemoteSocketId(socketId);
+				console.log('SET  Remote Socket ID--->', remoteSocketId);
+			} 
+
 			socketEmit('event:joinRoom', {
 				roomId,
 				userId,
@@ -89,36 +103,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				hostUser,
 			});
 		},
-		[socketEmit]
-	);
-	const handleInformAllNewUserAdded = useCallback(
-		({ id, socketId }: { id: string; socketId: string }) => {
-			console.log('Notiof', { id, socketId });
-			setRemoteSocketId(socketId);
-
-			console.log('Remote Socket ID--->', socketId);
-			if (id === userId) {
-				toast(`suceesfully joined ${socketId}`);
-			} else {
-				toast(`User Joined, his/her -> ${userId} & ${socketId} `);
-			}
-		},
-		[setRemoteSocketId, userId]
-	);
-
-	const handleHostIsNoExistInRoom = useCallback(() => {
-		toast.warn(`Host is Not Existed in Room. Please wait`);
-	}, []);
-
-	const handleUserLeftTheRoom = useCallback(
-		({ id }: { id: string }) => {
-			if (id === userId) {
-				toast.info(`You Left the Room`);
-			} else {
-				toast.info(`${id} Left the Room`);
-			}
-		},
-		[userId]
+		[id, socketEmit]
 	);
 
 	const handleEnterRoom = useCallback(
@@ -128,39 +113,66 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 		[]
 	);
 
-	//All Notifications Event state here
+	//// All socket Notification Function are Define Here
+	const handleInformAllNewUserAdded = useCallback(
+		({ userId, socketId }: { userId: string; socketId: string }) => {
+			console.log('Notiof', { userId, socketId });
+
+			if (id === userId) {
+				// toast.success(`suceesfully joined ${socketId}`);
+				toast.success(`suceesfully joined`);
+			} else {
+				toast(`User Joined, his/her -> ${userId} `);
+			}
+		},
+		[id]
+	);
+
+	const handleUserLeftTheRoom = useCallback(
+		({ userId }: { userId: string }) => {
+			if (id === userId) {
+				toast.success(`You Left the Room`);
+			} else {
+				toast.info(`${id} Left the Room`);
+			}
+		},
+		[id]
+	);
+
+	//All Event state here
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
-		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
-		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
-		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
+
 		return () => {
 			socketOff('event:joinRoom', handleJoinRoom);
 			socketOff('event:enterRoom', handleEnterRoom);
+		};
+	}, [handleEnterRoom, handleJoinRoom, socketOff, socketOn]);
+
+	//All Notifications Event state here
+	useEffect(() => {
+		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
+		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
+		return () => {
 			socketOff(
 				'notification:informAllNewUserAdded',
 				handleInformAllNewUserAdded
 			);
-			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
 		};
-	}, [
-		handleEnterRoom,
-		handleHostIsNoExistInRoom,
-		handleInformAllNewUserAdded,
-		handleJoinRoom,
-		handleUserLeftTheRoom,
-		socketOff,
-		socketOn,
-	]);
+	}, [handleInformAllNewUserAdded, handleUserLeftTheRoom, socketOff, socketOn]);
 
 	return (
 		<>
 			{enterRoom ? (
 				<MeetRoom roomId={params.roomId} />
 			) : (
-				<WaitingLobby MeetingDetails={roomDetails} roomId={params.roomId} />
+				<WaitingLobby
+					MeetingDetails={roomDetails}
+					roomId={params.roomId}
+					isFetchingRoomDetails={isFetchingRoomDetails}
+				/>
 			)}
 			{/* <OutsideLobby/> */}
 		</>

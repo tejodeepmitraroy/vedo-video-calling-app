@@ -34,6 +34,13 @@ import axios from 'axios';
 import ControlPanel from '../components/ui/ControlPanel';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useRoomStore } from '@/store/useStreamStore';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
 
 const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const stream = useRoomStore((state) => state.stream);
@@ -43,7 +50,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 
-	console.log('Remote socket ID', remoteSocketId);
+	console.log('Remote socket ID------>>>>>', remoteSocketId);
 
 	const router = useRouter();
 	const { getToken, userId } = useAuth();
@@ -178,7 +185,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		socket?.on('peer:nego:final', handleNegoNeedFinal);
 
 		return () => {
-			socket?.off('event:UserJoined', handleUserJoined);
+			// socket?.off('event:UserJoined', handleUserJoined);
 			socket?.off('incoming:call', handleIncomingCall);
 			socket?.off('call:accepted', handleAcceptedCall);
 			socket?.off('peer:nego:needed', handleNegoNeedIncoming);
@@ -193,17 +200,23 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		socket,
 	]);
 
+	console.log('Meetroom--------->', stream);
+
+	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
-		(userId: string, requestedUserId: string) => {
-			console.log(userId, requestedUserId);
+		(id: string, requestedUserId: string) => {
+			console.log(id, requestedUserId);
+			setRemoteSocketId(requestedUserId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				roomId,
-				userId,
+				userId: id,
+				hostUserId: userId,
 				id: requestedUserId,
 			});
 		},
-		[roomId, socketEmit]
+		[roomId, setRemoteSocketId, socketEmit, userId]
 	);
+
 	const roomEnterPermissionDenied = useCallback(
 		(requestedUserId: string) => {
 			socketEmit('event:roomEnterPermissionDenied', { id: requestedUserId });
@@ -214,22 +227,28 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const userWantToEnter = useCallback(
 		async ({ userId, id }: { userId: string; id: string }) => {
 			toast(
-				<div className="">
-					<span>A User Want to Enter </span>
-					<span>{userId}</span>
-					<span>{id}</span>
-					<div className="">
-						<Button onClick={() => roomEnterPermissionAccepted(userId, id)}>
+				<Card>
+					<CardHeader>
+						<CardDescription>{userId} Want to Enter</CardDescription>
+					</CardHeader>
+
+					<CardContent className="flex items-center justify-evenly">
+						<Button
+							size={'sm'}
+							onClick={() => roomEnterPermissionAccepted(userId, id)}
+						>
 							Accept
 						</Button>
 						<Button
+							size={'sm'}
 							variant={'destructive'}
 							onClick={() => roomEnterPermissionDenied(id)}
 						>
 							Reject
 						</Button>
-					</div>
-				</div>,
+					</CardContent>
+				</Card>,
+
 				{
 					position: 'top-center',
 					autoClose: false,
@@ -245,6 +264,8 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
 
+	///// All socket Event Function are Executed Here
+
 	useEffect(() => {
 		socketOn('event:userWantToEnter', userWantToEnter);
 
@@ -252,7 +273,6 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			socketOff('event:userWantToEnter', userWantToEnter);
 		};
 	}, [socketOff, socketOn, userWantToEnter]);
-	console.log('Meetroom--------->', stream);
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-muted/40">
@@ -308,14 +328,14 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 						<ControlPanel roomId={roomId} userId={userId!} />
 					</div>
 
-					{/* <div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
+					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
 						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
 						{remoteSocketId && (
 							<Button onClick={() => handleCallUser()}>Call</Button>
 						)}
 
-						 {stream && <Button onClick={sendStreams}>Send Stream</Button>} 
-					</div> */}
+						{stream && <Button onClick={sendStreams}>Send Stream</Button>}
+					</div>
 
 					{remoteStream && (
 						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">

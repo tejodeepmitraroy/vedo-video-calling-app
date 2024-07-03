@@ -34,6 +34,7 @@ import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import { RWebShare } from 'react-web-share';
+import Spinner from '@/components/ui/spinner';
 
 interface WaitingLobbyProps {
 	MeetingDetails:
@@ -52,6 +53,7 @@ interface WaitingLobbyProps {
 		  }
 		| undefined;
 	roomId: string;
+	isFetchingRoomDetails: boolean;
 }
 
 export interface Device {
@@ -65,7 +67,11 @@ interface MediaDevices {
 	microphones: Device[];
 }
 
-const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
+const WaitingLobby: FC<WaitingLobbyProps> = ({
+	MeetingDetails,
+	roomId,
+	isFetchingRoomDetails,
+}) => {
 	const stream = useRoomStore((state) => state.stream);
 	const setStream = useRoomStore((state) => state.setStream);
 	const isCameraOn = useRoomStore((state) => state.isCameraOn);
@@ -87,6 +93,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 	const [roomUrl, setRoomUrl] = useState('');
 	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const [askToEnter, setAskToEnter] = useState(false);
 
 	const getMediaDevices = useCallback(async () => {
 		try {
@@ -120,10 +127,10 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 					audio: microphoneId ? { deviceId: { exact: microphoneId } } : true,
 				};
 
-				console.log(' constraints', constraints);
+				// console.log(' constraints', constraints);
 
 				const stream = await navigator.mediaDevices.getUserMedia(constraints);
-				console.log(' Stream -->', stream);
+				// console.log(' Stream -->', stream);
 				setStream(stream);
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
@@ -147,6 +154,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		console.log('User Id--->', userId);
 
 		socketEmit('event:askToEnter', { roomId, userId });
+		setAskToEnter(true);
 	};
 
 	useEffect(() => {
@@ -157,25 +165,51 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		getUserMedia(selectedCamera, selectedMicrophone);
 	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
-	console.log('Device---->', mediaDevices.cameras.length);
 	useEffect(() => {
 		getMediaDevices();
 	}, [getMediaDevices]);
-
-	const roomEnterPermissionDenied = useCallback(() => {
-		toast("Sorry host don't want to Enter you");
-	}, []);
 
 	useEffect(() => {
 		setRoomUrl(window.location.href);
 	}, []);
 
+	//// All socket Notification Function are Define Here
+	const roomEnterPermissionDenied = useCallback(() => {
+		setAskToEnter(false);
+		toast.error("Sorry host don't want to Enter you");
+	}, []);
+
+	const handleHostIsNoExistInRoom = useCallback(() => {
+		setAskToEnter(false);
+		toast.warn(`Host is Not Existed in Room. Please wait`);
+	}, []);
+
+	///// All socket Events are Executed Here
 	useEffect(() => {
-		socketOn('roomEnterPermissionDenied', roomEnterPermissionDenied);
+		return () => {};
+	}, [socketOff, socketOn]);
+
+	//// All socket Notification are Executed Here
+
+	useEffect(() => {
+		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+		socketOn(
+			'notification:roomEnterPermissionDenied',
+			roomEnterPermissionDenied
+		);
 		return () => {
-			socketOff('roomEnterPermissionDenied', roomEnterPermissionDenied);
+			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+			socketOff(
+				'notification:roomEnterPermissionDenied',
+				roomEnterPermissionDenied
+			);
 		};
-	}, [roomEnterPermissionDenied, socketOff, socketOn]);
+	}, [
+		handleHostIsNoExistInRoom,
+		roomEnterPermissionDenied,
+		socketOff,
+		socketOn,
+	]);
 
 	return (
 		<div className="grid h-screen w-full md:pl-[60px]">
@@ -185,7 +219,9 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 				<main className="mb-14 flex flex-1 flex-col-reverse gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
 					<div className="flex h-full w-full flex-col items-center md:w-[40%]">
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
+
 						<Card className="w-full border border-dashed">
+							{isFetchingRoomDetails ? <Spinner /> : <></>}
 							<CardHeader>
 								<div className="flex items-center justify-between">
 									Title{' '}
@@ -207,88 +243,105 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 										</Button>
 									</RWebShare>
 								</div>
-								<CardTitle>{MeetingDetails?.title}</CardTitle>
+								<CardTitle>
+									{isFetchingRoomDetails ? <Spinner /> : MeetingDetails?.title}
+								</CardTitle>
 								<div>Description</div>
-								<CardDescription>{MeetingDetails?.description}</CardDescription>
+								<CardDescription>
+									{isFetchingRoomDetails ? (
+										<Spinner />
+									) : (
+										MeetingDetails?.description
+									)}
+								</CardDescription>
 							</CardHeader>
-							<CardContent className="mt-5 flex flex-col gap-3">
-								<div className="flex w-full items-center justify-between">
-									<span>Select your Camera</span>
-									<Select
-										onValueChange={(value) => {
-											setSelectedCamera(value);
-										}}
-										defaultValue={selectedCamera}
-									>
-										<SelectTrigger className="w-1/2">
-											<SelectValue placeholder="Select a Camera" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectGroup>
-												<SelectLabel>Camera</SelectLabel>
-												{mediaDevices.cameras.length === 1 ? (
-													<SelectItem value={'NoCamera'}>
-														No gitCamera Detected
-													</SelectItem>
-												) : (
-													mediaDevices.cameras.map((camera) => (
-														<SelectItem
-															value={camera.deviceId}
-															key={camera.deviceId}
-														>
-															{camera.label || `Camera ${camera.deviceId}`}
-														</SelectItem>
-													))
-												)}
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div>
-								<div className="flex w-full items-center justify-between">
-									<span>Select your Mic</span>
-									<Select
-										onValueChange={(value) => {
-											setSelectedMicrophone(value);
-										}}
-										defaultValue={selectedMicrophone}
-									>
-										<SelectTrigger className="w-1/2">
-											<SelectValue placeholder="Select a Microphone" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectGroup>
-												<SelectLabel>Microphone</SelectLabel>
-												{mediaDevices.microphones.length === 1 ? (
-													<SelectItem value={'NoMicrophone'}>
-														No Microphone Detected
-													</SelectItem>
-												) : (
-													mediaDevices.microphones.map((microphone) => (
-														<SelectItem
-															key={microphone.deviceId}
-															value={microphone.deviceId}
-														>
-															{microphone.label ||
-																`Microphone ${microphone.deviceId}`}
-														</SelectItem>
-													))
-												)}
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div>
-							</CardContent>
-							<CardFooter className="item-center flex flex-col">
-								{MeetingDetails?.createdById === userId ? (
-									<Button onClick={() => handleHostEnterRoom()}>
-										Join Room
-									</Button>
-								) : (
-									<Button onClick={() => handleAskedToEnter()}>
-										ask to Join
-									</Button>
-								)}
-							</CardFooter>
+							{isFetchingRoomDetails ? (
+								<Spinner />
+							) : (
+								<>
+									<CardContent className="mt-5 flex flex-col gap-3">
+										<div className="flex w-full items-center justify-between">
+											<span>Select your Camera</span>
+											<Select
+												onValueChange={(value) => {
+													setSelectedCamera(value);
+												}}
+												defaultValue={selectedCamera}
+											>
+												<SelectTrigger className="w-1/2">
+													<SelectValue placeholder="Select a Camera" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectGroup>
+														<SelectLabel>Camera</SelectLabel>
+														{mediaDevices.cameras.length === 1 ? (
+															<SelectItem value={'NoCamera'}>
+																No gitCamera Detected
+															</SelectItem>
+														) : (
+															mediaDevices.cameras.map((camera) => (
+																<SelectItem
+																	value={camera.deviceId}
+																	key={camera.deviceId}
+																>
+																	{camera.label || `Camera ${camera.deviceId}`}
+																</SelectItem>
+															))
+														)}
+													</SelectGroup>
+												</SelectContent>
+											</Select>
+										</div>
+										<div className="flex w-full items-center justify-between">
+											<span>Select your Mic</span>
+											<Select
+												onValueChange={(value) => {
+													setSelectedMicrophone(value);
+												}}
+												defaultValue={selectedMicrophone}
+											>
+												<SelectTrigger className="w-1/2">
+													<SelectValue placeholder="Select a Microphone" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectGroup>
+														<SelectLabel>Microphone</SelectLabel>
+														{mediaDevices.microphones.length === 1 ? (
+															<SelectItem value={'NoMicrophone'}>
+																No Microphone Detected
+															</SelectItem>
+														) : (
+															mediaDevices.microphones.map((microphone) => (
+																<SelectItem
+																	key={microphone.deviceId}
+																	value={microphone.deviceId}
+																>
+																	{microphone.label ||
+																		`Microphone ${microphone.deviceId}`}
+																</SelectItem>
+															))
+														)}
+													</SelectGroup>
+												</SelectContent>
+											</Select>
+										</div>
+									</CardContent>
+									<CardFooter className="item-center flex flex-col">
+										{MeetingDetails?.createdById === userId ? (
+											<Button onClick={() => handleHostEnterRoom()}>
+												Join Room
+											</Button>
+										) : (
+											<Button
+												disabled={askToEnter}
+												onClick={() => handleAskedToEnter()}
+											>
+												{askToEnter ? <Spinner /> : <>ask to Join</>}
+											</Button>
+										)}
+									</CardFooter>
+								</>
+							)}
 						</Card>
 					</div>
 					<div className="flex h-full w-full flex-col items-center p-5 px-20 md:w-[60%]">
