@@ -77,10 +77,13 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 		(state) => state.setSelectedMicrophone
 	);
 
-	const [devices, setDevices] = useState<MediaDevices>({
-		cameras: [],
-		microphones: [],
-	});
+	const setMediaDevices = useRoomStore((state) => state.setMediaDevices);
+	const mediaDevices = useRoomStore((state) => state.mediaDevices);
+
+	// const [devices, setDevices] = useState<MediaDevices>({
+	// 	cameras: [],
+	// 	microphones: [],
+	// });
 	const [roomUrl, setRoomUrl] = useState('');
 	const { getToken, userId } = useAuth();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
@@ -93,11 +96,11 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 				(device) => device.kind === 'audioinput'
 			);
 
-			setDevices({ cameras, microphones });
+			setMediaDevices({ cameras, microphones });
 		} catch (error) {
 			console.error('Error opening video camera.', error);
 		}
-	}, []);
+	}, [setMediaDevices]);
 
 	const getUserMedia = useCallback(
 		async (cameraId: string, microphoneId: string) => {
@@ -109,7 +112,10 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 								width: { ideal: 1280 },
 								height: { ideal: 720 },
 							}
-						: true,
+						: {
+								width: { ideal: 1280 },
+								height: { ideal: 720 },
+							},
 
 					audio: microphoneId ? { deviceId: { exact: microphoneId } } : true,
 				};
@@ -144,14 +150,14 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 	};
 
 	useEffect(() => {
-		if (selectedCamera || selectedMicrophone) {
-			console.log('Camera-->', selectedCamera);
-			console.log('Microphone-->', selectedMicrophone);
-			getUserMedia(selectedCamera, selectedMicrophone);
-		}
+		// if (selectedCamera || selectedMicrophone) {
+		// 	console.log('Camera-->', selectedCamera);
+		// 	console.log('Microphone-->', selectedMicrophone);
+		// }
+		getUserMedia(selectedCamera, selectedMicrophone);
 	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
-	console.log('Device---->', devices);
+	console.log('Device---->', mediaDevices.cameras.length);
 	useEffect(() => {
 		getMediaDevices();
 	}, [getMediaDevices]);
@@ -205,7 +211,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 								<div>Description</div>
 								<CardDescription>{MeetingDetails?.description}</CardDescription>
 							</CardHeader>
-							<CardContent className="flex flex-col gap-3">
+							<CardContent className="mt-5 flex flex-col gap-3">
 								<div className="flex w-full items-center justify-between">
 									<span>Select your Camera</span>
 									<Select
@@ -220,12 +226,12 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 										<SelectContent>
 											<SelectGroup>
 												<SelectLabel>Camera</SelectLabel>
-												{devices.cameras.length === 1 ? (
-													<SelectItem value={'NoMicrophone'}>
-														No Microphone
+												{mediaDevices.cameras.length === 1 ? (
+													<SelectItem value={'NoCamera'}>
+														No gitCamera Detected
 													</SelectItem>
 												) : (
-													devices.cameras.map((camera) => (
+													mediaDevices.cameras.map((camera) => (
 														<SelectItem
 															value={camera.deviceId}
 															key={camera.deviceId}
@@ -252,12 +258,12 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 										<SelectContent>
 											<SelectGroup>
 												<SelectLabel>Microphone</SelectLabel>
-												{devices.microphones.length === 1 ? (
+												{mediaDevices.microphones.length === 1 ? (
 													<SelectItem value={'NoMicrophone'}>
-														No Microphone
+														No Microphone Detected
 													</SelectItem>
 												) : (
-													devices.microphones.map((microphone) => (
+													mediaDevices.microphones.map((microphone) => (
 														<SelectItem
 															key={microphone.deviceId}
 															value={microphone.deviceId}
@@ -285,11 +291,11 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ MeetingDetails, roomId }) => {
 							</CardFooter>
 						</Card>
 					</div>
-					<div className="flex h-full w-full flex-col items-center p-5 md:w-[60%]">
-						<h1 className="text-lg font-semibold md:text-2xl">Video source</h1>
+					<div className="flex h-full w-full flex-col items-center p-5 px-20 md:w-[60%]">
+						{/* <h1 className="text-lg font-semibold md:text-2xl">Video source</h1> */}
 						{/* <div>Video source</div> */}
 						<div className="aspect-video w-full">
-							<UserVideoPanel stream={stream} muted={false} />
+							<UserVideoPanel stream={stream} muted={true} />
 						</div>
 					</div>
 				</main>

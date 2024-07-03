@@ -2,16 +2,16 @@
 import { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 
-interface SelectedDevices {
-	camera: string;
-	microphone: string;
+interface MediaDevices {
+	cameras: MediaDeviceInfo[];
+	microphones: MediaDeviceInfo[];
 }
 
 interface WebRTCStore {
 	remoteSocketId: string | null;
 	stream: MediaStream | null;
 	screenStream: MediaStream | null;
-	selectedDevices: SelectedDevices;
+	mediaDevices: MediaDevices;
 	selectedCamera: string;
 	selectedMicrophone: string;
 	isCameraOn: boolean;
@@ -20,7 +20,7 @@ interface WebRTCStore {
 	setRemoteSocketId: (remoteSocketId: string) => void;
 	setStream: (stream: MediaStream | null) => void;
 	setScreenStream: (stream: MediaStream | null) => void;
-	setSelectedDevices: (devices: SelectedDevices) => void;
+	setMediaDevices: (mediaDevices: MediaDevices) => void;
 	setSelectedCamera: (devicesId: string) => void;
 	setSelectedMicrophone: (devicesId: string) => void;
 	toggleCamera: () => void;
@@ -32,7 +32,7 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 	remoteSocketId: null,
 	stream: null,
 	screenStream: null,
-	selectedDevices: { camera: '', microphone: '' },
+	mediaDevices: { cameras: [], microphones: [] },
 	selectedCamera: '',
 	selectedMicrophone: '',
 	isCameraOn: false,
@@ -41,7 +41,7 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 	setRemoteSocketId: (remoteSocketId) => set({ remoteSocketId }),
 	setStream: (stream) => set({ stream }),
 	setScreenStream: (screenStream) => set({ screenStream }),
-	setSelectedDevices: (selectedDevices) => set({ selectedDevices }),
+	setMediaDevices: (mediaDevices) => set( {mediaDevices} ),
 	setSelectedCamera: (deviceId: string) => set({ selectedCamera: deviceId }),
 	setSelectedMicrophone: (deviceId: string) =>
 		set({ selectedMicrophone: deviceId }),

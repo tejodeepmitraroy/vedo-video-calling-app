@@ -8,29 +8,29 @@ interface UserVideoPanelProps {
 }
 
 const UserVideoPanel: FC<UserVideoPanelProps> = ({ stream, muted }) => {
-	console.log("steam in Video component---->",stream);
+	console.log('steam in Video component---->', stream);
 	return (
-		<div className=" relative overflow-hidden aspect-video flex h-full w-full items-center justify-center rounded-xl bg-black">
-		{/* <div className=" relative flex h-full w-full items-center justify-center rounded-xl border-2 border-red-500 bg-black"> */}
-			<ReactPlayer
-				url={stream!}
-				playing
-				style={{
-					position: 'absolute',
-					top: '0',
-					left: '0',
-					width: '100%',
-					height: '100%',
-					objectFit: "contain",
-					
-				}}
-				muted={muted}
-				width={'100%'}
-				height={'100%'}
-			/>
-			{/* <div className="absolute bottom-2 right-2 rounded-3xl bg-white px-3 py-1 text-[1.4vw] font-semibold">
+		<div className="relative z-20 flex aspect-[16/9] h-full w-full">
+			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-black">
+				<ReactPlayer
+					url={stream!}
+					playing
+					style={{
+						position: 'relative',
+						top: '0',
+						left: '0',
+						width: '100%',
+						height: '100%',
+						objectFit: 'contain',
+					}}
+					muted={muted}
+					width={'100%'}
+					height={'100%'}
+				/>
+				{/* <div className="absolute bottom-2 right-2 rounded-3xl bg-white px-3 py-1 text-[1.4vw] font-semibold">
 				Tejodeep Mitra Roy
-			</div> */}
+				</div> */}
+			</div>
 		</div>
 	);
 };

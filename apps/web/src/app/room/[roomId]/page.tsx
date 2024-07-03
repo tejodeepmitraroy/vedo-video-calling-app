@@ -40,7 +40,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			try {
 				const { data } = await axios(
 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${params.roomId}`,
-
 					{
 						headers: {
 							'Content-Type': 'application/json',
@@ -133,7 +132,6 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
-
 		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
 		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);

@@ -194,7 +194,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	]);
 
 	const roomEnterPermissionAccepted = useCallback(
-		 (userId: string, requestedUserId: string) => {
+		(userId: string, requestedUserId: string) => {
 			console.log(userId, requestedUserId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				roomId,
@@ -258,23 +258,20 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		<div className="flex h-screen w-full flex-col bg-muted/40">
 			<div className="relative flex h-screen w-full flex-col">
 				<main className="relative h-full w-full overflow-hidden">
-					<div className="flex h-[91vh] w-full items-center justify-center bg-black md:p-7">
+					<div className="flex h-[91vh] w-full items-center justify-center bg-black">
 						<div className="absolute top-2 z-30 rounded-xl bg-white p-5 text-black">
 							{roomId}
 						</div>
-						<div className="h-full w-full max-w-[85rem] rounded-xl sm:aspect-video sm:border-2 sm:border-white">
+						{/* <div className="flex h-full w-full max-w-7xl items-center justify-center rounded-xl sm:aspect-video sm:border-2 sm:border-white"> */}
+						<div className="flex h-full w-full max-w-[90rem] items-center justify-center rounded-xl">
 							{/* {remoteStream && (
 								<UserVideoPanel stream={remoteStream} muted={false} />
 							)} */}
 
 							{remoteStream ? (
-								<div className="aspect-video w-full">
-									<UserVideoPanel stream={remoteStream} muted={false} />
-								</div>
+								<UserVideoPanel stream={remoteStream} muted={false} />
 							) : (
-								<div className="aspect-video w-full">
-									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-								</div>
+								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
 							)}
 							{/* <ScreenSharePanel /> */}
 						</div>
@@ -308,7 +305,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 						)} */}
 					</div>
 					<div className="h-[10vh] w-full md:h-[9vh]">
-						<ControlPanel roomId={roomId} userId={userId!}/>
+						<ControlPanel roomId={roomId} userId={userId!} />
 					</div>
 
 					{/* <div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">

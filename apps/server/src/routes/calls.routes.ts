@@ -4,7 +4,7 @@ import { createInstantCall, createScheduleCall, getACall } from "../controllers/
 
 const router = Router();
 
-router.route("/:roomId").get(authMiddleware, getACall);
+router.route("/:roomId").get( getACall);
 router.route("/createInstantCall").post(authMiddleware, createInstantCall);
 router.route("/createScheduleCall").post(authMiddleware, createScheduleCall);
 // router.route('/scheduleCall').post();
