@@ -1,5 +1,4 @@
 'use client';
-import { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 
 interface MediaDevices {
@@ -41,7 +40,7 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 	setRemoteSocketId: (remoteSocketId) => set({ remoteSocketId }),
 	setStream: (stream) => set({ stream }),
 	setScreenStream: (screenStream) => set({ screenStream }),
-	setMediaDevices: (mediaDevices) => set( {mediaDevices} ),
+	setMediaDevices: (mediaDevices) => set({ mediaDevices }),
 	setSelectedCamera: (deviceId: string) => set({ selectedCamera: deviceId }),
 	setSelectedMicrophone: (deviceId: string) =>
 		set({ selectedMicrophone: deviceId }),
@@ -62,7 +61,7 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 		set({ isMicrophoneOn: !isMicrophoneOn });
 	},
 	toggleScreenShare: async () => {
-		const { screenStream, isScreenSharing, setScreenStream } = get();
+		const { stream, screenStream, isScreenSharing, setScreenStream } = get();
 
 		if (isScreenSharing && screenStream) {
 			screenStream.getTracks().forEach((track) => track.stop());
@@ -74,6 +73,18 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 					audio: true,
 				});
 
+
+				const mergedStream = new MediaStream();
+				stream!.getTracks().forEach((track) => mergedStream.addTrack(track));
+				screenStream
+					.getTracks()
+					.forEach((track) => mergedStream.addTrack(track));
+
+
+
+
+				
+				console.log('Video Stream-------->>', screenStream);
 				setScreenStream(screenStream);
 			} catch (error) {
 				console.error('Error starting screen share:', error);

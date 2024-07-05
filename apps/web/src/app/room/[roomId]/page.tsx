@@ -10,67 +10,14 @@ import { useRouter } from 'next/navigation';
 import MeetRoom from './Screens/MeetRoom';
 import WaitingLobby from './Screens/WaitingLobby';
 
-interface MeetingDetails {
-	createdAt: Date;
-	createdById: string;
-	description: string | null;
-	endTime: Date | null;
-	id: string;
-	meetingId: string;
-	participantIds: string[];
-	startTime: Date | null;
-	title: string;
-	updatedAt: Date;
-	videoCallUrl: string;
-}
-
 export default function CallPanel({ params }: { params: { roomId: string } }) {
-	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
 	const [enterRoom, setEnterRoom] = useState<boolean>(false);
-	const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
-		useState<boolean>(false);
 
 	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
-	const { getToken, userId: id } = useAuth();
-	const router = useRouter();
+	const { userId: id } = useAuth();
+
 	const { socketOn, socketEmit, socketOff } = useSocket();
-
-	const getRoomDetails = useCallback(async () => {
-		const token = await getToken();
-
-		if (params.roomId) {
-			try {
-				setIsFetchingRoomDetails(true);
-
-				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${params.roomId}`,
-					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
-					}
-				);
-				setIsFetchingRoomDetails(false);
-				const response = data.data;
-				console.log('Room Details---->', response);
-
-				if (response) {
-					setRoomDetails(response);
-				} else {
-					toast.error('Room Id Not Exsisted');
-					router.push('/');
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	}, [getToken, params.roomId, router]);
-
-	useEffect(() => {
-		getRoomDetails();
-	}, [getRoomDetails]);
 
 	const handleJoinRoom = useCallback(
 		({
@@ -90,11 +37,10 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			console.log('Socond Socket User Joined', socketId);
 			console.log('Host User Id-->', hostUserId);
 			// if (userId !== id) setRemoteSocketId(socketId);
-			if (hostUserId){
-
+			if (hostUserId) {
 				setRemoteSocketId(socketId);
 				console.log('SET  Remote Socket ID--->', remoteSocketId);
-			} 
+			}
 
 			socketEmit('event:joinRoom', {
 				roomId,
@@ -123,6 +69,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				toast.success(`suceesfully joined`);
 			} else {
 				toast(`User Joined, his/her -> ${userId} `);
+				
 			}
 		},
 		[id]
@@ -169,9 +116,9 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 				<MeetRoom roomId={params.roomId} />
 			) : (
 				<WaitingLobby
-					MeetingDetails={roomDetails}
+					// MeetingDetails={roomDetails}
 					roomId={params.roomId}
-					isFetchingRoomDetails={isFetchingRoomDetails}
+					// isFetchingRoomDetails={isFetchingRoomDetails}
 				/>
 			)}
 			{/* <OutsideLobby/> */}

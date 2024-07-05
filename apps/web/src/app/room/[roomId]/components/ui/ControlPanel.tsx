@@ -36,23 +36,35 @@ interface MediaDevices {
 
 const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => {
 	const setStream = useRoomStore((state) => state.setStream);
-	const selectedDevices = useRoomStore((state) => state.selectedDevices);
-	const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
+	// const selectedDevices = useRoomStore((state) => state.selectedDevices);
+	// const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
 	const toggleCamera = useRoomStore((state) => state.toggleCamera);
 	const toggleMicrophone = useRoomStore((state) => state.toggleMicrophone);
 	const isCameraOn = useRoomStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
 	const toggleScreenShare = useRoomStore((state) => state.toggleScreenShare);
 	const isScreenSharing = useRoomStore((state) => state.isScreenSharing);
+	const mediaDevices = useRoomStore((state) => state.mediaDevices);
+	const selectedCamera = useRoomStore((state) => state.selectedCamera);
+	const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
+	const setSelectedCamera = useRoomStore((state) => state.setSelectedCamera);
+	const setSelectedMicrophone = useRoomStore(
+		(state) => state.setSelectedMicrophone
+	);
 
-	const [devices, setDevices] = useState<MediaDevices>({
-		cameras: [],
-		microphones: [],
-	});
+	// const [devices, setDevices] = useState<MediaDevices>({
+	// 	cameras: [],
+	// 	microphones: [],
+	// });
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 	const router = useRouter();
 
+
+	console.log('selected Camera------>', selectedCamera);
+	console.log('selected Microphone------>', selectedMicrophone);
+
+	
 	// console.log(
 	// 	'camera--->',
 	// 	isCameraOn,
@@ -109,32 +121,32 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 	// 	[selectedDevices.camera, selectedDevices.microphone, setStream]
 	// );
 
-	const getMediaDevices = useCallback(async () => {
-		try {
-			const devices = await navigator.mediaDevices.enumerateDevices();
-			const cameras = devices.filter((device) => device.kind === 'videoinput');
-			const microphones = devices.filter(
-				(device) => device.kind === 'audioinput'
-			);
+	// const getMediaDevices = useCallback(async () => {
+	// 	try {
+	// 		const devices = await navigator.mediaDevices.enumerateDevices();
+	// 		const cameras = devices.filter((device) => device.kind === 'videoinput');
+	// 		const microphones = devices.filter(
+	// 			(device) => device.kind === 'audioinput'
+	// 		);
 
-			setDevices({ cameras, microphones });
-		} catch (error) {
-			console.error('Error opening video camera.', error);
-		}
-	}, []);
+	// 		setDevices({ cameras, microphones });
+	// 	} catch (error) {
+	// 		console.error('Error opening video camera.', error);
+	// 	}
+	// }, []);
 
-	const handleCameraChange = (deviceId: string) => {
-		const camera = deviceId;
-		setSelectedDevices({ camera, microphone: selectedDevices.microphone });
-	};
+	// const handleCameraChange = (deviceId: string) => {
+	// 	const camera = deviceId;
+	// 	setSelectedDevices({ camera, microphone: selectedDevices.microphone });
+	// };
 
-	const handleMicrophoneChange = (deviceId: string) => {
-		const microphone = deviceId;
-		setSelectedDevices({
-			camera: selectedDevices.camera,
-			microphone,
-		});
-	};
+	// const handleMicrophoneChange = (deviceId: string) => {
+	// 	const microphone = deviceId;
+	// 	setSelectedDevices({
+	// 		camera: selectedDevices.camera,
+	// 		microphone,
+	// 	});
+	// };
 
 	const handleCallEnd = useCallback(() => {
 		socketEmit('event:callEnd', {
@@ -144,9 +156,9 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 		router.push('/');
 	}, [roomId, router, socketEmit, userId]);
 
-	useEffect(() => {
-		getMediaDevices();
-	}, [getMediaDevices]);
+	// useEffect(() => {
+	// 	getMediaDevices();
+	// }, [getMediaDevices]);
 
 	// useEffect(() => {
 	// 	getUserMedia();
@@ -186,10 +198,10 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 						<DropdownMenuContent>
 							<DropdownMenuLabel>Cameras</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							{devices.cameras.map((camera) => (
+							{mediaDevices.cameras.map((camera) => (
 								<DropdownMenuItem
 									key={camera.deviceId}
-									onClick={() => handleCameraChange(camera.deviceId)}
+									onClick={() => setSelectedCamera(camera.deviceId)}
 								>
 									{camera.label || `Camera ${camera.deviceId}`}
 								</DropdownMenuItem>
@@ -220,10 +232,10 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 						<DropdownMenuContent>
 							<DropdownMenuLabel>Microphone</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							{devices.microphones.map((microphone) => (
+							{mediaDevices.microphones.map((microphone) => (
 								<DropdownMenuItem
 									key={microphone.deviceId}
-									onClick={() => handleMicrophoneChange(microphone.deviceId)}
+									onClick={() => setSelectedMicrophone(microphone.deviceId)}
 								>
 									{microphone.label || `Microphone ${microphone.deviceId}`}
 								</DropdownMenuItem>

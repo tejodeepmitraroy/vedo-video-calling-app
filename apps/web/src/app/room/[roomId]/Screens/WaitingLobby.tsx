@@ -1,13 +1,9 @@
 'use client';
 
-import ScheduleCallForm from '@/components/ScheduleCallForm';
-
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Phone, Share } from 'lucide-react';
+import { Share } from 'lucide-react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
-import ControlPanel from '../components/ui/ControlPanel';
 import { useAuth } from '@clerk/nextjs';
 import {
 	Card,
@@ -35,25 +31,24 @@ import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
+import { useRouter } from 'next/navigation';
+
+interface MeetingDetails {
+	createdAt: Date;
+	createdById: string;
+	description: string | null;
+	endTime: Date | null;
+	id: string;
+	meetingId: string;
+	participantIds: string[];
+	startTime: Date | null;
+	title: string;
+	updatedAt: Date;
+	videoCallUrl: string;
+}
 
 interface WaitingLobbyProps {
-	MeetingDetails:
-		| {
-				createdAt: Date;
-				createdById: string;
-				description: string | null;
-				endTime: Date | null;
-				id: string;
-				meetingId: string;
-				participantIds: string[];
-				startTime: Date | null;
-				title: string;
-				updatedAt: Date;
-				videoCallUrl: string;
-		  }
-		| undefined;
 	roomId: string;
-	isFetchingRoomDetails: boolean;
 }
 
 export interface Device {
@@ -68,9 +63,9 @@ interface MediaDevices {
 }
 
 const WaitingLobby: FC<WaitingLobbyProps> = ({
-	MeetingDetails,
+	// MeetingDetails,
 	roomId,
-	isFetchingRoomDetails,
+	// isFetchingRoomDetails,
 }) => {
 	const stream = useRoomStore((state) => state.stream);
 	const setStream = useRoomStore((state) => state.setStream);
@@ -82,18 +77,54 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	const setSelectedMicrophone = useRoomStore(
 		(state) => state.setSelectedMicrophone
 	);
+	const router = useRouter();
 
 	const setMediaDevices = useRoomStore((state) => state.setMediaDevices);
 	const mediaDevices = useRoomStore((state) => state.mediaDevices);
 
-	// const [devices, setDevices] = useState<MediaDevices>({
-	// 	cameras: [],
-	// 	microphones: [],
-	// });
 	const [roomUrl, setRoomUrl] = useState('');
 	const { getToken, userId } = useAuth();
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
+	const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
+		useState<boolean>(false);
+	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
+
+	const getRoomDetails = useCallback(async () => {
+		const token = await getToken();
+
+		if (roomId) {
+			try {
+				setIsFetchingRoomDetails(true);
+
+				const { data } = await axios(
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				);
+				setIsFetchingRoomDetails(false);
+				const response = data.data;
+				console.log('Room Details---->', response);
+
+				if (response) {
+					setRoomDetails(response);
+				} else {
+					toast.error('Room Id Not Exsisted');
+					router.push('/');
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
+	}, [getToken, roomId, router]);
+
+	useEffect(() => {
+		getRoomDetails();
+	}, [getRoomDetails]);
 
 	const getMediaDevices = useCallback(async () => {
 		try {
@@ -109,35 +140,34 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 		}
 	}, [setMediaDevices]);
 
-	const getUserMedia = useCallback(
-		async (cameraId: string, microphoneId: string) => {
-			try {
-				const constraints = {
-					video: cameraId
-						? {
-								deviceId: { exact: cameraId },
-								width: { ideal: 1280 },
-								height: { ideal: 720 },
-							}
-						: {
-								width: { ideal: 1280 },
-								height: { ideal: 720 },
-							},
+	const getUserMedia = useCallback(async () => {
+		try {
+			const constraints = {
+				video: selectedCamera
+					? {
+							deviceId: { exact: selectedCamera },
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+						}
+					: {
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+						},
 
-					audio: microphoneId ? { deviceId: { exact: microphoneId } } : true,
-				};
+				audio: selectedMicrophone
+					? { deviceId: { exact: selectedMicrophone } }
+					: true,
+			};
 
-				// console.log(' constraints', constraints);
+			// console.log(' constraints', constraints);
 
-				const stream = await navigator.mediaDevices.getUserMedia(constraints);
-				// console.log(' Stream -->', stream);
-				setStream(stream);
-			} catch (error) {
-				console.error('Error accessing media devices:', error);
-			}
-		},
-		[setStream]
-	);
+			const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+			setStream(stream);
+		} catch (error) {
+			console.error('Error accessing media devices:', error);
+		}
+	}, [setStream]);
 
 	//Host join Room
 	const handleHostEnterRoom = async () => {
@@ -162,7 +192,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 		// 	console.log('Camera-->', selectedCamera);
 		// 	console.log('Microphone-->', selectedMicrophone);
 		// }
-		getUserMedia(selectedCamera, selectedMicrophone);
+		getUserMedia();
 	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
 	useEffect(() => {
@@ -186,7 +216,10 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 
 	///// All socket Events are Executed Here
 	useEffect(() => {
-		return () => {};
+		return () => {
+
+			
+		};
 	}, [socketOff, socketOn]);
 
 	//// All socket Notification are Executed Here
@@ -244,14 +277,14 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 									</RWebShare>
 								</div>
 								<CardTitle>
-									{isFetchingRoomDetails ? <Spinner /> : MeetingDetails?.title}
+									{isFetchingRoomDetails ? <Spinner /> : roomDetails?.title}
 								</CardTitle>
 								<div>Description</div>
 								<CardDescription>
 									{isFetchingRoomDetails ? (
 										<Spinner />
 									) : (
-										MeetingDetails?.description
+										roomDetails?.description
 									)}
 								</CardDescription>
 							</CardHeader>
@@ -276,7 +309,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 														<SelectLabel>Camera</SelectLabel>
 														{mediaDevices.cameras.length === 1 ? (
 															<SelectItem value={'NoCamera'}>
-																No gitCamera Detected
+																No Camera Detected
 															</SelectItem>
 														) : (
 															mediaDevices.cameras.map((camera) => (
@@ -327,7 +360,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 										</div>
 									</CardContent>
 									<CardFooter className="item-center flex flex-col">
-										{MeetingDetails?.createdById === userId ? (
+										{roomDetails?.createdById === userId ? (
 											<Button onClick={() => handleHostEnterRoom()}>
 												Join Room
 											</Button>
@@ -348,7 +381,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Video source</h1> */}
 						{/* <div>Video source</div> */}
 						<div className="aspect-video w-full">
-							<UserVideoPanel stream={stream} muted={true} />
+							<UserVideoPanel muted={true} />
 						</div>
 					</div>
 				</main>
