@@ -326,8 +326,12 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 									<UserVideoPanel muted={!isMicrophoneOn} />
 								</div>
 							</div>
-						) : remoteStream ? (
+						) : remoteStream ? (<>
 							<RemoteUserVideoPanel stream={remoteStream} />
+							<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+							<UserVideoPanel muted={true} />
+						</div>
+						</>
 						) : (
 							<UserVideoPanel muted={!isMicrophoneOn} />
 						)}
@@ -338,19 +342,17 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
 						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
-						{remoteSocketId && (
+						{/* {remoteSocketId && (
 							<Button >Call</Button>
 							// <Button onClick={() => handleCallUser()}>Call</Button>
-						)}
+						)} */}
 
 						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
 					</div>
 
-					{remoteStream && (
-						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-							<UserVideoPanel muted={true} />
-						</div>
-					)}
+					{/* {remoteStream && (
+						
+					)} */}
 				</main>
 			</div>
 		</div>
