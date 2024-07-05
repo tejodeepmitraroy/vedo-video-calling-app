@@ -34,6 +34,15 @@ import axios from 'axios';
 import ControlPanel from '../components/ui/ControlPanel';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useRoomStore } from '@/store/useStreamStore';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
+import RemoteUserVideoPanel from '../components/ui/RemoteUserVideoPanel';
+import ScreenSharePanel from '../components/ui/ScreenSharePanel';
 
 const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const stream = useRoomStore((state) => state.stream);
@@ -43,7 +52,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 
-	console.log('Remote socket ID', remoteSocketId);
+	console.log('Remote socket ID------>>>>>', remoteSocketId);
 
 	const router = useRouter();
 	const { getToken, userId } = useAuth();
@@ -62,7 +71,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const handleCallUser = useCallback(async () => {
 		const offer = await peer.getOffer();
 		console.log('creating a Offer--->', offer);
-		socket?.emit('event:callUser', { to: remoteSocketId, offer });
+		socketEmit('event:callUser', { to: remoteSocketId, offer });
 	}, [remoteSocketId, socket]);
 
 	const handleIncomingCall = useCallback(
@@ -104,6 +113,9 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 				// console.log('Track---->', track);
 				peer.peer?.addTrack(track, stream);
 			});
+
+			
+			
 		},
 		[stream]
 	);
@@ -171,18 +183,18 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	}, []);
 
 	useEffect(() => {
-		socket?.on('event:UserJoined', handleUserJoined);
-		socket?.on('incoming:call', handleIncomingCall);
-		socket?.on('call:accepted', handleAcceptedCall);
-		socket?.on('peer:nego:needed', handleNegoNeedIncoming);
-		socket?.on('peer:nego:final', handleNegoNeedFinal);
+		socketOn('event:UserJoined', handleUserJoined);
+		socketOn('incoming:call', handleIncomingCall);
+		socketOn('call:accepted', handleAcceptedCall);
+		socketOn('peer:nego:needed', handleNegoNeedIncoming);
+		socketOn('peer:nego:final', handleNegoNeedFinal);
 
 		return () => {
-			socket?.off('event:UserJoined', handleUserJoined);
-			socket?.off('incoming:call', handleIncomingCall);
-			socket?.off('call:accepted', handleAcceptedCall);
-			socket?.off('peer:nego:needed', handleNegoNeedIncoming);
-			socket?.off('peer:nego:final', handleNegoNeedFinal);
+			socketOff('event:UserJoined', handleUserJoined);
+			socketOff('incoming:call', handleIncomingCall);
+			socketOff('call:accepted', handleAcceptedCall);
+			socketOff('peer:nego:needed', handleNegoNeedIncoming);
+			socketOff('peer:nego:final', handleNegoNeedFinal);
 		};
 	}, [
 		handleAcceptedCall,
@@ -193,17 +205,27 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		socket,
 	]);
 
+
+
+
+	console.log('Meetroom--------->', stream);
+
+	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
-		 (userId: string, requestedUserId: string) => {
-			console.log(userId, requestedUserId);
+		(id: string, requestedUserId: string) => {
+			console.log(id, requestedUserId);
+			setRemoteSocketId(requestedUserId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				roomId,
-				userId,
+				userId: id,
+				hostUserId: userId,
 				id: requestedUserId,
 			});
+			
 		},
-		[roomId, socketEmit]
+		[roomId, setRemoteSocketId, socketEmit, userId]
 	);
+
 	const roomEnterPermissionDenied = useCallback(
 		(requestedUserId: string) => {
 			socketEmit('event:roomEnterPermissionDenied', { id: requestedUserId });
@@ -214,22 +236,28 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const userWantToEnter = useCallback(
 		async ({ userId, id }: { userId: string; id: string }) => {
 			toast(
-				<div className="">
-					<span>A User Want to Enter </span>
-					<span>{userId}</span>
-					<span>{id}</span>
-					<div className="">
-						<Button onClick={() => roomEnterPermissionAccepted(userId, id)}>
+				<Card>
+					<CardHeader>
+						<CardDescription>{userId} Want to Enter</CardDescription>
+					</CardHeader>
+
+					<CardContent className="flex items-center justify-evenly">
+						<Button
+							size={'sm'}
+							onClick={() => roomEnterPermissionAccepted(userId, id)}
+						>
 							Accept
 						</Button>
 						<Button
+							size={'sm'}
 							variant={'destructive'}
 							onClick={() => roomEnterPermissionDenied(id)}
 						>
 							Reject
 						</Button>
-					</div>
-				</div>,
+					</CardContent>
+				</Card>,
+
 				{
 					position: 'top-center',
 					autoClose: false,
@@ -245,6 +273,8 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
 
+	///// All socket Event Function are Executed Here
+
 	useEffect(() => {
 		socketOn('event:userWantToEnter', userWantToEnter);
 
@@ -252,32 +282,25 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			socketOff('event:userWantToEnter', userWantToEnter);
 		};
 	}, [socketOff, socketOn, userWantToEnter]);
-	console.log('Meetroom--------->', stream);
 
 	return (
-		<div className="flex h-screen w-full flex-col bg-muted/40">
-			<div className="relative flex h-screen w-full flex-col">
+		<div className="h-screen w-full">
+			<div className="flex flex-col">
 				<main className="relative h-full w-full overflow-hidden">
-					<div className="flex h-[91vh] w-full items-center justify-center bg-black md:p-7">
+					<div className="flex h-[91vh] w-full items-center justify-center bg-black">
 						<div className="absolute top-2 z-30 rounded-xl bg-white p-5 text-black">
 							{roomId}
 						</div>
-						<div className="h-full w-full max-w-[85rem] rounded-xl sm:aspect-video sm:border-2 sm:border-white">
-							{/* {remoteStream && (
-								<UserVideoPanel stream={remoteStream} muted={false} />
-							)} */}
-
+						{/* <div className="flex h-full w-full max-w-7xl items-center justify-center rounded-xl sm:aspect-video sm:border-2 sm:border-white"> */}
+						{/* <div className="flex h-full w-full max-w-[90rem] items-center justify-center rounded-xl">
 							{remoteStream ? (
-								<div className="aspect-video w-full">
-									<UserVideoPanel stream={remoteStream} muted={false} />
-								</div>
+								<RemoteUserVideoPanel stream={remoteStream} />
 							) : (
-								<div className="aspect-video w-full">
-									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-								</div>
+								// <UserVideoPanel stream={remoteStream} muted={false} />
+								<UserVideoPanel muted={!isMicrophoneOn} />
 							)}
-							{/* <ScreenSharePanel /> */}
-						</div>
+							<ScreenSharePanel /> 
+						</div> */}
 						{/* <div className="flex h-full w-full flex-col gap-3 overflow-y-auto md:flex-row">
 							<div className="relative flex h-full w-full items-center justify-center rounded-xl border-2 border-white bg-black sm:h-1/2 md:aspect-video md:h-auto md:w-1/2">
 								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
@@ -286,43 +309,39 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
 							</div>
 						</div> */}
-						{/* {screenStream ? (
+						{screenStream ? (
 							<div className="flex h-full w-full">
 								<div className="relative flex aspect-video w-[75%] items-center justify-center">
 									<ScreenSharePanel />
 								</div>
 								<div className="flex w-[25%] flex-col justify-center gap-5 p-5">
-									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-									<UserVideoPanel stream={stream} muted={false} />
+									
+									<RemoteUserVideoPanel stream={remoteStream} />
+									<UserVideoPanel muted={!isMicrophoneOn} />
 								</div>
 							</div>
+						) : remoteStream ? (
+							<RemoteUserVideoPanel stream={remoteStream} />
 						) : (
-							<ScrollArea className="w-full">
-								<div className="grid h-full w-full grid-cols-2 items-center justify-center gap-4 overflow-y-auto border border-white p-5">
-									<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-									{remoteStream && (
-										<UserVideoPanel stream={remoteStream} muted={false} />
-									)}
-								</div>
-							</ScrollArea>
-						)} */}
+							<UserVideoPanel muted={!isMicrophoneOn} />
+						)}
 					</div>
 					<div className="h-[10vh] w-full md:h-[9vh]">
-						<ControlPanel roomId={roomId} userId={userId!}/>
+						<ControlPanel roomId={roomId} userId={userId!} />
 					</div>
 
-					{/* <div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
+					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
 						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
 						{remoteSocketId && (
 							<Button onClick={() => handleCallUser()}>Call</Button>
 						)}
 
-						 {stream && <Button onClick={sendStreams}>Send Stream</Button>} 
-					</div> */}
+						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
+					</div>
 
 					{remoteStream && (
 						<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-							<UserVideoPanel stream={stream} muted={true} />
+							<UserVideoPanel muted={true} />
 						</div>
 					)}
 				</main>

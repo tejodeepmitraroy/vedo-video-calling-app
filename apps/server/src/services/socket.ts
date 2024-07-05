@@ -36,7 +36,7 @@ class SocketService {
           // socket.join(roomId);
           io.to(socket.id).emit('event:joinRoom', {
             roomId,
-            id: socket.id,
+            socketId: socket.id,
             userId,
             hostUser: true
           });
@@ -85,7 +85,7 @@ class SocketService {
         }
       );
       socket.on('event:roomEnterPermissionDenied', ({ id }: { id: string }) => {
-        io.to(id).emit('roomEnterPermissionDenied');
+        io.to(id).emit('notification:roomEnterPermissionDenied');
       });
 
       socket.on(
@@ -93,16 +93,22 @@ class SocketService {
         ({
           roomId,
           userId,
+          hostUserId,
           id
         }: {
           roomId: string;
           userId: string;
+          hostUserId: string;
           id: string;
         }) => {
+          console.log('Host accepted');
+
+          console.log('Socket id---->', socket.id);
           io.to(id).emit('event:joinRoom', {
             roomId,
-            id,
+            socketId: socket.id,
             userId,
+            hostUserId,
             hostUser: false
           });
 
@@ -145,7 +151,7 @@ class SocketService {
           io.to(socket.id).emit('event:enterRoom', {});
 
           io.to(roomId).emit('notification:informAllNewUserAdded', {
-            id: userId,
+            userId,
             socketId: socket.id
           });
 
@@ -221,7 +227,7 @@ class SocketService {
       socket.on(
         'event:callEnd',
         ({ roomId, userId }: { roomId: string; userId: string }) => {
-          io.to(roomId).emit('notification:userLeftTheRoom', { id:userId });
+          io.to(roomId).emit('notification:userLeftTheRoom', { userId });
           socket.leave(roomId);
           console.log(
             'Leaving before hostSocketIdToRoomId',
