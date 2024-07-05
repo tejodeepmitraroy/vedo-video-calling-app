@@ -68,11 +68,14 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		[]
 	);
 
-	const handleCallUser = useCallback(async () => {
-		const offer = await peer.getOffer();
-		console.log('creating a Offer--->', offer);
-		socketEmit('event:callUser', { to: remoteSocketId, offer });
-	}, [remoteSocketId, socket]);
+	const handleCallUser = useCallback(
+		async (remoteSocketId:string|null) => {
+			const offer = await peer.getOffer();
+			console.log('creating a Offer--->', offer);
+			socketEmit('event:callUser', { to: remoteSocketId, offer });
+		},
+		[remoteSocketId, socket]
+	);
 
 	const handleIncomingCall = useCallback(
 		async ({
@@ -138,6 +141,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			console.log('peer:nego:done----> ', answer);
 
 			socket?.emit('peer:nego:done', { to: from, answer });
+			handleCallUser(remoteSocketId);
 		},
 		[socket]
 	);
@@ -152,6 +156,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		}) => {
 			console.log('Final Answer---->', answer);
 			await peer.setLocalDescription(answer);
+			// handleCallUser(remoteSocketId);
 		},
 		[]
 	);
@@ -221,6 +226,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 				hostUserId: userId,
 				id: requestedUserId,
 			});
+			handleCallUser(requestedUserId);
 			
 		},
 		[roomId, setRemoteSocketId, socketEmit, userId]
@@ -333,7 +339,8 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
 						<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
 						{remoteSocketId && (
-							<Button onClick={() => handleCallUser()}>Call</Button>
+							<Button >Call</Button>
+							// <Button onClick={() => handleCallUser()}>Call</Button>
 						)}
 
 						{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
