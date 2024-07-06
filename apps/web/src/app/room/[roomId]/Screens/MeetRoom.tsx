@@ -43,6 +43,18 @@ import {
 } from '@/components/ui/card';
 import RemoteUserVideoPanel from '../components/ui/RemoteUserVideoPanel';
 import ScreenSharePanel from '../components/ui/ScreenSharePanel';
+import Image from 'next/image';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const stream = useRoomStore((state) => state.stream);
@@ -56,6 +68,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 	const router = useRouter();
 	const { getToken, userId } = useAuth();
+	const { user } = useUser();
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -69,7 +82,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	);
 
 	const handleCallUser = useCallback(
-		async (remoteSocketId:string|null) => {
+		async (remoteSocketId: string | null) => {
 			const offer = await peer.getOffer();
 			console.log('creating a Offer--->', offer);
 			socketEmit('event:callUser', { to: remoteSocketId, offer });
@@ -116,9 +129,6 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 				// console.log('Track---->', track);
 				peer.peer?.addTrack(track, stream);
 			});
-
-			
-			
 		},
 		[stream]
 	);
@@ -210,61 +220,75 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		socket,
 	]);
 
-
-
-
 	console.log('Meetroom--------->', stream);
 
 	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
-		(id: string, requestedUserId: string) => {
-			console.log(id, requestedUserId);
-			setRemoteSocketId(requestedUserId);
+		(socketId: string) => {
+			console.log(socketId);
+			setRemoteSocketId(socketId);
 			socketEmit('event:roomEnterPermissionAccepted', {
-				roomId,
-				userId: id,
-				hostUserId: userId,
-				id: requestedUserId,
+				socketId,
 			});
-			handleCallUser(requestedUserId);
-			
+			// handleCallUser(requestedUserId);
 		},
 		[roomId, setRemoteSocketId, socketEmit, userId]
 	);
 
 	const roomEnterPermissionDenied = useCallback(
-		(requestedUserId: string) => {
-			socketEmit('event:roomEnterPermissionDenied', { id: requestedUserId });
+		(socketId: string) => {
+			socketEmit('event:roomEnterPermissionDenied', { socketId });
 		},
 		[socketEmit]
 	);
 
 	const userWantToEnter = useCallback(
-		async ({ userId, id }: { userId: string; id: string }) => {
+		async ({
+			username,
+			profilePic,
+			socketId,
+		}: {
+			username: string;
+			profilePic: string;
+			socketId: string;
+		}) => {
 			toast(
-				<Card>
-					<CardHeader>
-						<CardDescription>{userId} Want to Enter</CardDescription>
-					</CardHeader>
-
-					<CardContent className="flex items-center justify-evenly">
-						<Button
-							size={'sm'}
-							onClick={() => roomEnterPermissionAccepted(userId, id)}
-						>
-							Accept
-						</Button>
-						<Button
-							size={'sm'}
-							variant={'destructive'}
-							onClick={() => roomEnterPermissionDenied(id)}
-						>
-							Reject
-						</Button>
-					</CardContent>
-				</Card>,
-
+				<>
+					<div className="w-full">
+						<div className="flex">
+							<div className="w-[20%]  flex items-center justify-center ">
+								<Image
+									src={profilePic}
+									width={30}
+									height={30}
+									className="rounded-full"
+									alt={'Profile Pic'}
+								/>
+							</div>
+							<div className="w-[80%] ">
+								{username} Want to Enter
+							</div>
+						</div>
+						<div className="flex justify-evenly">
+							<Button
+								size={'sm'}
+								variant={"ghost"}
+								onClick={() => roomEnterPermissionAccepted(socketId)}
+							>
+								Accept
+							</Button>
+							{/* <Button
+								size={'sm'}
+								variant={'destructive'}
+								onClick={() => roomEnterPermissionDenied(socketId)}
+							>
+								Reject
+							</Button> */}
+						</div>
+					</div>
+				</>,
 				{
+					onClose:()=>roomEnterPermissionDenied(socketId),
 					position: 'top-center',
 					autoClose: false,
 					hideProgressBar: false,
@@ -321,17 +345,17 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 									<ScreenSharePanel />
 								</div>
 								<div className="flex w-[25%] flex-col justify-center gap-5 p-5">
-									
 									<RemoteUserVideoPanel stream={remoteStream} />
 									<UserVideoPanel muted={!isMicrophoneOn} />
 								</div>
 							</div>
-						) : remoteStream ? (<>
-							<RemoteUserVideoPanel stream={remoteStream} />
-							<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-							<UserVideoPanel muted={true} />
-						</div>
-						</>
+						) : remoteStream ? (
+							<>
+								<RemoteUserVideoPanel stream={remoteStream} />
+								<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+									<UserVideoPanel muted={true} />
+								</div>
+							</>
 						) : (
 							<UserVideoPanel muted={!isMicrophoneOn} />
 						)}

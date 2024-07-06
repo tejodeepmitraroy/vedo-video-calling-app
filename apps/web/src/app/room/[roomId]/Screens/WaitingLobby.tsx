@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Share } from 'lucide-react';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import {
 	Card,
 	CardContent,
@@ -33,7 +33,7 @@ import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
 import { useRouter } from 'next/navigation';
 
-interface MeetingDetails {
+export interface MeetingDetails {
 	createdAt: Date;
 	createdById: string;
 	description: string | null;
@@ -48,6 +48,7 @@ interface MeetingDetails {
 }
 
 interface WaitingLobbyProps {
+	meetingDetails: MeetingDetails;
 	roomId: string;
 }
 
@@ -63,7 +64,7 @@ interface MediaDevices {
 }
 
 const WaitingLobby: FC<WaitingLobbyProps> = ({
-	// MeetingDetails,
+	meetingDetails,
 	roomId,
 	// isFetchingRoomDetails,
 }) => {
@@ -77,55 +78,27 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	const setSelectedMicrophone = useRoomStore(
 		(state) => state.setSelectedMicrophone
 	);
-	const router = useRouter();
+	
 
 	const setMediaDevices = useRoomStore((state) => state.setMediaDevices);
 	const mediaDevices = useRoomStore((state) => state.mediaDevices);
 
 	const [roomUrl, setRoomUrl] = useState('');
 	const { getToken, userId } = useAuth();
-	const { socketOn, socketEmit, socketOff } = useSocket();
+	const { user } = useUser();
+	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
 	const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
 		useState<boolean>(false);
-	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
+	// const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>(
+	// 	meetingDetails
+	// );
 
-	const getRoomDetails = useCallback(async () => {
-		const token = await getToken();
+	
 
-		if (roomId) {
-			try {
-				setIsFetchingRoomDetails(true);
+	console.log('socektID->', socket?.id);
 
-				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
-					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
-					}
-				);
-				setIsFetchingRoomDetails(false);
-				const response = data.data;
-				console.log('Room Details---->', response);
-
-				if (response) {
-					setRoomDetails(response);
-				} else {
-					toast.error('Room Id Not Exsisted');
-					router.push('/');
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	}, [getToken, roomId, router]);
-
-	useEffect(() => {
-		getRoomDetails();
-	}, [getRoomDetails]);
-
+	console.log("User details in waiting room",user?.fullName);
 	const getMediaDevices = useCallback(async () => {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
@@ -171,11 +144,12 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 
 	//Host join Room
 	const handleHostEnterRoom = async () => {
-		console.log('Room number--->', roomId);
-
-		console.log('User Id--->', userId);
-
-		socketEmit('event:hostEnterRoom', { roomId, userId });
+		socketEmit('event:joinRoom', {
+			roomId: roomId,
+			userId,
+			username: user?.fullName,
+			hostUser: true,
+		});
 	};
 
 	const handleAskedToEnter = async () => {
@@ -183,7 +157,8 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 
 		console.log('User Id--->', userId);
 
-		socketEmit('event:askToEnter', { roomId, userId });
+		socketEmit('event:askToEnter', { roomId, username:user?.fullName, profilePic:user?.imageUrl });
+		
 		setAskToEnter(true);
 	};
 
@@ -277,14 +252,14 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 									</RWebShare>
 								</div>
 								<CardTitle>
-									{isFetchingRoomDetails ? <Spinner /> : roomDetails?.title}
+									{isFetchingRoomDetails ? <Spinner /> : meetingDetails?.title}
 								</CardTitle>
 								<div>Description</div>
 								<CardDescription>
 									{isFetchingRoomDetails ? (
 										<Spinner />
 									) : (
-										roomDetails?.description
+										meetingDetails?.description
 									)}
 								</CardDescription>
 							</CardHeader>
@@ -360,7 +335,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 										</div>
 									</CardContent>
 									<CardFooter className="item-center flex flex-col">
-										{roomDetails?.createdById === userId ? (
+										{meetingDetails?.createdById === userId ? (
 											<Button onClick={() => handleHostEnterRoom()}>
 												Join Room
 											</Button>

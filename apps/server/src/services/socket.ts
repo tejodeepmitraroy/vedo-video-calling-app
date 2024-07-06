@@ -5,6 +5,7 @@ class SocketService {
   // private userIdToSocketIdMap: Map<string, string>;
   private socketIdToUserIdMap: Map<string, string>;
   private hostSocketIdToRoomId: Map<string, string>;
+  private rooms: any;
 
   constructor() {
     console.log('Init Socket Server');
@@ -17,6 +18,7 @@ class SocketService {
     // this.userIdToSocketIdMap = new Map();
     this.socketIdToUserIdMap = new Map();
     this.hostSocketIdToRoomId = new Map();
+    this.rooms = {};
   }
 
   public initListeners() {
@@ -25,29 +27,29 @@ class SocketService {
     io.on('connection', (socket) => {
       console.log('New socket connected', socket.id);
 
-      socket.on(
-        'event:hostEnterRoom',
-        ({ roomId, userId }: { roomId: string; userId: string }) => {
-          console.log('Host Enter the room-->', { roomId, userId });
-          // this.userIdToSocketIdMap.set(userId, socket.id);
-          // this.socketIdToUserIdMap.set(socket.id, userId);
-          // this.hostSocketIdToRoomId.set(socket.id, roomId);
+      // socket.on(
+      //   'event:hostEnterRoom',
+      //   ({ roomId, userId }: { roomId: string; userId: string }) => {
+      //     console.log('Host Enter the room-->', { roomId, userId });
+      //     // this.userIdToSocketIdMap.set(userId, socket.id);
+      //     // this.socketIdToUserIdMap.set(socket.id, userId);
+      //     // this.hostSocketIdToRoomId.set(socket.id, roomId);
 
-          // socket.join(roomId);
-          io.to(socket.id).emit('event:joinRoom', {
-            roomId,
-            socketId: socket.id,
-            userId,
-            hostUser: true
-          });
+      //     // socket.join(roomId);
+      //     io.to(socket.id).emit('event:joinRoom', {
+      //       roomId,
+      //       socketId: socket.id,
+      //       userId,
+      //       hostUser: true
+      //     });
 
-          console.log('Host User Joined in Room', {
-            userId,
-            roomId,
-            id: socket.id
-          });
-        }
-      );
+      //     console.log('Host User Joined in Room', {
+      //       userId,
+      //       roomId,
+      //       id: socket.id
+      //     });
+      //   }
+      // );
 
       function KeyByValue(map: Map<string, string>, KeyValue: string) {
         let result: string | undefined;
@@ -61,61 +63,53 @@ class SocketService {
 
       socket.on(
         'event:askToEnter',
-        ({ roomId, userId }: { roomId: string; userId: string }) => {
-          console.log('User want to ask-->', { roomId, userId });
-          // this.userIdToSocketIdMap.set(userId, socket.id);
-          // this.socketIdToUserIdMap.set(socket.id, userId);
+        ({
+          roomId,
+          username,
+          profilePic
+        }: {
+          roomId: string;
+          username: string | null | undefined;
+          profilePic: string | null | undefined;
+        }) => {
+          console.log('User want to ask-->', { roomId, username, profilePic });
 
-          console.log(
-            'Host User Id--->',
-            // this.roomIdToHostSocketId.get(roomId)
-            KeyByValue(this.hostSocketIdToRoomId, roomId)
-          );
+          // console.log(
+          //   'Host User Id--->',
+          //   KeyByValue(this.hostSocketIdToRoomId, roomId)
+          // );
 
           const hostSocketId = KeyByValue(this.hostSocketIdToRoomId, roomId);
 
           if (hostSocketId) {
             io.to(hostSocketId!).emit('event:userWantToEnter', {
-              userId,
-              id: socket.id
+              username,
+              profilePic,
+              socketId: socket.id
             });
           } else {
             io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
           }
         }
       );
-      socket.on('event:roomEnterPermissionDenied', ({ id }: { id: string }) => {
-        io.to(id).emit('notification:roomEnterPermissionDenied');
-      });
+      socket.on(
+        'event:roomEnterPermissionDenied',
+        ({ socketId }: { socketId: string }) => {
+          io.to(socketId).emit('notification:roomEnterPermissionDenied');
+        }
+      );
 
       socket.on(
         'event:roomEnterPermissionAccepted',
-        ({
-          roomId,
-          userId,
-          hostUserId,
-          id
-        }: {
-          roomId: string;
-          userId: string;
-          hostUserId: string;
-          id: string;
-        }) => {
+        ({ socketId }: { socketId: string }) => {
           console.log('Host accepted');
 
-          console.log('Socket id---->', socket.id);
-          io.to(id).emit('event:joinRoom', {
-            roomId,
-            socketId: socket.id,
-            userId,
-            hostUserId,
-            hostUser: false
+          io.to(socketId).emit('event:joinRoom', {
+            hostUserSocketId: socket.id
           });
 
           console.log('User Joined in Room', {
-            userId,
-            roomId,
-            id: socket.id
+            hostUserSocketId: socket.id
           });
         }
       );
@@ -125,20 +119,24 @@ class SocketService {
         ({
           roomId,
           userId,
-          hostUser,
-          id
+          username,
+          hostUser
         }: {
           roomId: string;
           userId: string;
+          username: string;
           hostUser: boolean;
-          id: string;
         }) => {
           console.log('Room Id', roomId);
           console.log('userId', userId);
           console.log('hostUser', hostUser);
-          console.log('Incommimng socket ID--->', id);
+          console.log('username', username);
+
           console.log('Current socket ID--->', socket.id);
 
+          if (!this.rooms[roomId]) {
+            this.rooms[roomId] = [];
+          }
           this.socketIdToUserIdMap.set(socket.id, userId);
 
           if (hostUser) {
@@ -147,18 +145,21 @@ class SocketService {
           }
 
           socket.join(roomId);
+          this.rooms[roomId].push(socket.id);
 
           io.to(socket.id).emit('event:enterRoom', {});
 
           io.to(roomId).emit('notification:informAllNewUserAdded', {
             userId,
+            username,
             socketId: socket.id
           });
 
           console.log('User Joined in Room', {
             userId,
+            username,
             roomId,
-            id: socket.id
+            socketId: socket.id
           });
 
           // if (!socketIdToEmailMap.get(userId)) {
