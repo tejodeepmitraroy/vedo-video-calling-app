@@ -73,17 +73,11 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 					audio: true,
 				});
 
-
 				const mergedStream = new MediaStream();
 				stream!.getTracks().forEach((track) => mergedStream.addTrack(track));
 				screenStream
 					.getTracks()
 					.forEach((track) => mergedStream.addTrack(track));
-
-
-
-
-				
 				console.log('Video Stream-------->>', screenStream);
 				setScreenStream(screenStream);
 			} catch (error) {
