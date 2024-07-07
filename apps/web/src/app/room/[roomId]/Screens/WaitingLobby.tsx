@@ -78,7 +78,6 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	const setSelectedMicrophone = useRoomStore(
 		(state) => state.setSelectedMicrophone
 	);
-	
 
 	const setMediaDevices = useRoomStore((state) => state.setMediaDevices);
 	const mediaDevices = useRoomStore((state) => state.mediaDevices);
@@ -94,11 +93,9 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	// 	meetingDetails
 	// );
 
-	
-
 	console.log('socektID->', socket?.id);
 
-	console.log("User details in waiting room",user?.fullName);
+	console.log('User details in waiting room', user?.fullName);
 	const getMediaDevices = useCallback(async () => {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
@@ -157,8 +154,12 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 
 		console.log('User Id--->', userId);
 
-		socketEmit('event:askToEnter', { roomId, username:user?.fullName, profilePic:user?.imageUrl });
-		
+		socketEmit('event:askToEnter', {
+			roomId,
+			username: user?.fullName,
+			profilePic: user?.imageUrl,
+		});
+
 		setAskToEnter(true);
 	};
 
@@ -191,10 +192,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 
 	///// All socket Events are Executed Here
 	useEffect(() => {
-		return () => {
-
-			
-		};
+		return () => {};
 	}, [socketOff, socketOn]);
 
 	//// All socket Notification are Executed Here

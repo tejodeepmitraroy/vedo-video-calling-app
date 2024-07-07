@@ -113,6 +113,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 			if (id === userId) {
 				toast.success(`You Left the Room`);
 			} else {
+				setRemoteSocketId(null);
 				toast.info(`${id} Left the Room`);
 			}
 		},

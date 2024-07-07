@@ -1,60 +1,18 @@
 'use client';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import {
-	Home,
-	LineChart,
-	Package,
-	Package2,
-	PanelLeft,
-	Settings,
-	ShoppingCart,
-	Users2,
-	Video,
-	MessagesSquare,
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
-
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth, useUser } from '@clerk/nextjs';
-import UserProfile from '@/components/UserProfile';
 import peer from '@/services/peer';
 import { toast } from 'react-toastify';
-import { RWebShare } from 'react-web-share';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import ControlPanel from '../components/ui/ControlPanel';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useRoomStore } from '@/store/useStreamStore';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
 import RemoteUserVideoPanel from '../components/ui/RemoteUserVideoPanel';
 import ScreenSharePanel from '../components/ui/ScreenSharePanel';
 import Image from 'next/image';
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
 
 const MeetRoom = ({ roomId }: { roomId: string }) => {
 	const stream = useRoomStore((state) => state.stream);
@@ -230,7 +188,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			socketEmit('event:roomEnterPermissionAccepted', {
 				socketId,
 			});
-			// handleCallUser(requestedUserId);
+			handleCallUser(socketId);
 		},
 		[roomId, setRemoteSocketId, socketEmit, userId]
 	);
@@ -253,42 +211,31 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			socketId: string;
 		}) => {
 			toast(
-				<>
-					<div className="w-full">
-						<div className="flex">
-							<div className="w-[20%]  flex items-center justify-center ">
-								<Image
-									src={profilePic}
-									width={30}
-									height={30}
-									className="rounded-full"
-									alt={'Profile Pic'}
-								/>
-							</div>
-							<div className="w-[80%] ">
-								{username} Want to Enter
-							</div>
+				<div className="w-full">
+					<div className="flex">
+						<div className="flex w-[20%] items-center justify-center">
+							<Image
+								src={profilePic}
+								width={30}
+								height={30}
+								className="rounded-full"
+								alt={'Profile Pic'}
+							/>
 						</div>
-						<div className="flex justify-evenly">
-							<Button
-								size={'sm'}
-								variant={"ghost"}
-								onClick={() => roomEnterPermissionAccepted(socketId)}
-							>
-								Accept
-							</Button>
-							{/* <Button
-								size={'sm'}
-								variant={'destructive'}
-								onClick={() => roomEnterPermissionDenied(socketId)}
-							>
-								Reject
-							</Button> */}
-						</div>
+						<div className="w-[80%]">{username} Want to Enter</div>
 					</div>
-				</>,
+					<div className="flex justify-evenly">
+						<Button
+							size={'sm'}
+							variant={'default'}
+							onClick={() => roomEnterPermissionAccepted(socketId)}
+						>
+							Accept
+						</Button>
+					</div>
+				</div>,
 				{
-					onClose:()=>roomEnterPermissionDenied(socketId),
+					onClose: () => roomEnterPermissionDenied(socketId),
 					position: 'top-center',
 					autoClose: false,
 					hideProgressBar: false,
