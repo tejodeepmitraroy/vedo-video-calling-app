@@ -242,8 +242,30 @@ class SocketService {
         }
       );
 
+      socket.on("disconnecting", () => {
+
+        const roomId = Array.from(socket.rooms)[1];
+
+        const userId = this.socketIdToUserIdMap.get(socket.id);
+        console.log('userId--->', userId);
+
+
+
+         io.to(roomId).emit('notification:userLeftTheRoom', { userId });
+
+        // socket.rooms.forEach((item) => {
+        //   console.log('Socket Rooms---->', item);
+        // });
+
+        console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);
+     // the Set contains at least the socket ID
+  });
+
       // Disconnection Socket
       socket.on('disconnect', (reason) => {
+
+
+        
         console.log(`User ${socket.id} disconnected. Reason: ${reason}`);
 
         // this.userIdToSocketIdMap.delete(userId);

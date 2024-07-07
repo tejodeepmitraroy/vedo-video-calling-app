@@ -39,12 +39,17 @@ class PeerService {
 	}
 
 	async setLocalDescription(answer: RTCSessionDescriptionInit) {
-		if(this.peer){
+		if (this.peer) {
 			const remoteDesc = new RTCSessionDescription(answer);
 			await this.peer.setRemoteDescription(remoteDesc);
 		}
+	}
 
-
+	async disconnectPeer() {
+		if (this.peer) {
+			this.peer.close();
+			this.peer = null;
+		}
 	}
 }
 

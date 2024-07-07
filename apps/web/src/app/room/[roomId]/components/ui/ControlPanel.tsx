@@ -9,6 +9,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSocket } from '@/context/SocketContext';
+import peer from '@/services/peer';
 import { useRoomStore } from '@/store/useStreamStore';
 import {
 	Mic,
@@ -51,7 +52,7 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 	const setSelectedMicrophone = useRoomStore(
 		(state) => state.setSelectedMicrophone
 	);
-
+	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 	// const [devices, setDevices] = useState<MediaDevices>({
 	// 	cameras: [],
 	// 	microphones: [],
@@ -153,6 +154,9 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 			roomId,
 			userId,
 		});
+		peer.disconnectPeer()
+		
+		
 		router.push('/');
 	}, [roomId, router, socketEmit, userId]);
 

@@ -16,7 +16,7 @@ interface WebRTCStore {
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
-	setRemoteSocketId: (remoteSocketId: string) => void;
+	setRemoteSocketId: (remoteSocketId: string|null) => void;
 	setStream: (stream: MediaStream | null) => void;
 	setScreenStream: (stream: MediaStream | null) => void;
 	setMediaDevices: (mediaDevices: MediaDevices) => void;
