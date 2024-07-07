@@ -1,6 +1,5 @@
 import express, { Application } from "express";
 import cors from "cors";
-import authMiddleware from "./middleware/clerk.middleware";
 import * as dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/users.routes";

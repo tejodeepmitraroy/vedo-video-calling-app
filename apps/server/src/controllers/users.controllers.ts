@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler";
 import prisma from "../lib/prismaClient";
-import ApiError from "../utils/ApiError";
-import { Webhook } from "svix";
 
 export const clerkWebhook = asyncHandler(
   async (request: Request, response: Response) => {
     // Get the headers and body
-    const headers = request.headers;
+    // const headers = request.headers;
     const payload = request.body;
 
     const { data, type } = payload;
@@ -82,7 +80,7 @@ export const clerkWebhook = asyncHandler(
     try {
       switch (type) {
         case "user.created":
-          const email = email_addresses[0]
+          { const email = email_addresses[0]
             ? email_addresses[0].email_address
             : "";
 
@@ -100,10 +98,15 @@ export const clerkWebhook = asyncHandler(
           return response.status(200).json({
             success: true,
             message: "Webhook received",
-          });
+          }); }
 
         case "user.updated":
-          const updatedUser = await prisma.user.update({
+          {
+            const email = email_addresses[0]
+              ? email_addresses[0].email_address
+              : '';
+
+            const updatedUser = await prisma.user.update({
             where: {
               id,
             },
@@ -121,10 +124,10 @@ export const clerkWebhook = asyncHandler(
           return response.status(200).json({
             success: true,
             message: "Webhook received",
-          });
+          }); }
 
         case "user.deleted":
-          console.log("Initated Delete", type);
+          { console.log("Initated Delete", type);
 
           const deletedUser = await prisma.user.delete({
             where: {
@@ -136,7 +139,7 @@ export const clerkWebhook = asyncHandler(
           return response.status(200).json({
             success: true,
             message: "Webhook received",
-          });
+          }); }
 
         default:
           console.log("no parameter hitted");
