@@ -1,7 +1,7 @@
 'use client';
 import { useRoomStore } from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC} from 'react';
 // import ReactPlayer from 'react-player';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 interface UserVideoPanelProps {
@@ -11,67 +11,9 @@ interface UserVideoPanelProps {
 
 const UserVideoPanel: FC<UserVideoPanelProps> = ({ muted }) => {
 	const stream = useRoomStore((state) => state.stream);
-	const [updateStream, setUpdateStream] = useState<MediaStream | null>(null);
-	const setStream = useRoomStore((state) => state.setStream);
-	const selectedCamera = useRoomStore((state) => state.selectedCamera);
-	const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
-
-	// const getUserMedia = useCallback(
-	// 	async (cameraId: string, microphoneId: string) => {
-	// 		try {
-	// 			const constraints = {
-	// 				video: cameraId
-	// 					? {
-	// 							deviceId: { exact: cameraId },
-	// 							width: { ideal: 1280 },
-	// 							height: { ideal: 720 },
-	// 						}
-	// 					: {
-	// 							width: { ideal: 1280 },
-	// 							height: { ideal: 720 },
-	// 						},
-
-	// 				audio: microphoneId ? { deviceId: { exact: microphoneId } } : true,
-	// 			};
-
-	// 			// console.log(' constraints', constraints);
-
-	// 			const stream = await navigator.mediaDevices.getUserMedia(constraints);
-	// 			// console.log(' Stream -->', stream);
-	// 			setStream(stream);
-	// 		} catch (error) {
-	// 			console.error('Error accessing media devices:', error);
-	// 		}
-	// 	},
-	// 	[setStream]
-	// );
-
-	// const handleDeviceChange = async (deviceId) => {
-	// 	const newStream = await getUserMedia(selectedCamera, selectedMicrophone);
-	// 	setStream(newStream);
-	// };
-
-	//   useEffect(() => {
-	// 		if ( stream) {
-	// 			setUpdateStream;
-	// 			videoRef.current.srcObject = stream;
-	// 		}
-	// 	}, [stream]);
-
-	// useEffect(() => {
-	// 	if (selectedCamera || selectedMicrophone) {
-	// 		// setUpdateStream(stream);
-	// 		console.log('Current Camera-->', selectedCamera);
-	// 		console.log('Current Microphone-->', selectedMicrophone);
-	// 		getUserMedia(selectedCamera, selectedMicrophone);
-	// 	}
-
-	// 	// return()=>{
-	// 	// 	if (stream && stream.getTracks) {
-	// 	// 		stream.getTracks().forEach((track) => track.stop());
-	// 	// 	}
-	// 	// }
-	// }, [getUserMedia, selectedCamera, selectedMicrophone]);
+	
+	
+	
 
 	
 	console.log('steam in Video component---->', stream);

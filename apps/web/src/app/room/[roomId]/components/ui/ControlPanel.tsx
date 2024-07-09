@@ -22,7 +22,7 @@ import {
 	ScreenShareOff,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, {  useCallback,  } from 'react';
 
 export interface Device {
 	deviceId: string;
@@ -30,15 +30,7 @@ export interface Device {
 	groupId: string;
 }
 
-interface MediaDevices {
-	cameras: Device[];
-	microphones: Device[];
-}
-
 const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => {
-	const setStream = useRoomStore((state) => state.setStream);
-	// const selectedDevices = useRoomStore((state) => state.selectedDevices);
-	// const setSelectedDevices = useRoomStore((state) => state.setSelectedDevices);
 	const toggleCamera = useRoomStore((state) => state.toggleCamera);
 	const toggleMicrophone = useRoomStore((state) => state.toggleMicrophone);
 	const isCameraOn = useRoomStore((state) => state.isCameraOn);
@@ -52,13 +44,16 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 	const setSelectedMicrophone = useRoomStore(
 		(state) => state.setSelectedMicrophone
 	);
-	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
+	// const setStream = useRoomStore((state) => state.setStream);
+	const toggleStopStream = useRoomStore((state) => state.toggleStopStream);
+	
+	// const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
 	// const [devices, setDevices] = useState<MediaDevices>({
 	// 	cameras: [],
 	// 	microphones: [],
 	// });
 
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { socketEmit} = useSocket();
 	const router = useRouter();
 
 
@@ -149,16 +144,55 @@ const ControlPanel = ({ roomId, userId }: { roomId: string; userId:string }) => 
 	// 	});
 	// };
 
+	const stopMediaDevices = () => {
+		const constraints = {
+				video: selectedCamera
+					? {
+							deviceId: { exact: selectedCamera },
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+						}
+					: {
+							width: { ideal: 1280 },
+							height: { ideal: 720 },
+						},
+
+				audio: selectedMicrophone
+					? { deviceId: { exact: selectedMicrophone } }
+					: true,
+			};
+		navigator.mediaDevices.enumerateDevices().then((devices) => {
+			devices.forEach((device) => {
+				if (device.kind === 'videoinput' || device.kind === 'audioinput') {
+					navigator.mediaDevices
+						.getUserMedia(constraints)
+						.then((stream) => {
+							stream.getTracks().forEach((track) => track.stop());
+						})
+						.catch((error) =>
+							console.error('Error stopping media device:', error)
+						);
+				}
+			});
+		});
+	};
+
+
+
 	const handleCallEnd = useCallback(() => {
 		socketEmit('event:callEnd', {
 			roomId,
 			userId,
 		});
-		peer.disconnectPeer()
+		peer.disconnectPeer();
+		toggleStopStream()
+		stopMediaDevices()
 		
 		
 		router.push('/');
 	}, [roomId, router, socketEmit, userId]);
+
+
 
 	// useEffect(() => {
 	// 	getMediaDevices();

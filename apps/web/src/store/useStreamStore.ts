@@ -16,7 +16,7 @@ interface WebRTCStore {
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
-	setRemoteSocketId: (remoteSocketId: string|null) => void;
+	setRemoteSocketId: (remoteSocketId: string | null) => void;
 	setStream: (stream: MediaStream | null) => void;
 	setScreenStream: (stream: MediaStream | null) => void;
 	setMediaDevices: (mediaDevices: MediaDevices) => void;
@@ -25,6 +25,7 @@ interface WebRTCStore {
 	toggleCamera: () => void;
 	toggleMicrophone: () => void;
 	toggleScreenShare: () => void;
+	toggleStopStream:()=>void
 }
 
 export const useRoomStore = create<WebRTCStore>((set, get) => ({
@@ -85,5 +86,13 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 			}
 		}
 		set({ isScreenSharing: !isScreenSharing });
+	},
+	toggleStopStream: () => {
+		const { stream, } = get();
+		if (stream) {
+			stream.getTracks().forEach((track) => track.stop());
+
+			console.log('Get Track Off', stream);
+		}
 	},
 }));

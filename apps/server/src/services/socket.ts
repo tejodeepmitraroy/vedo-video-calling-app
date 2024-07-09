@@ -83,6 +83,10 @@ class SocketService {
 
           const hostSocketId = KeyByValue(this.hostSocketIdToRoomId, roomId);
 
+          if (this.rooms[roomId].length === 2){
+            io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+          }
+					
           if (hostSocketId) {
             io.to(hostSocketId!).emit('event:userWantToEnter', {
               username,
@@ -161,7 +165,9 @@ class SocketService {
             userId,
             username,
             roomId,
-            socketId: socket.id
+            socketId: socket.id,
+
+            roomStatus:this.rooms[roomId]
           });
 
           // if (!socketIdToEmailMap.get(userId)) {
