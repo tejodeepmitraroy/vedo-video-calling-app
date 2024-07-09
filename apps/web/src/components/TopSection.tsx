@@ -1,7 +1,6 @@
 "use client"
 import React from 'react'
 import {
-	Bell,
 	LineChart,
 	Home,
 	Menu,
@@ -9,12 +8,6 @@ import {
 	Package2,
 	ShoppingCart,
 	Users,
-	Video,
-	MessagesSquare,
-	Phone,
-	Settings,
-	CalendarDays,
-	Plus,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from './ui/button';

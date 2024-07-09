@@ -1,13 +1,10 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { TooltipProvider } from '@/components/ui/tooltip';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -24,6 +21,7 @@ export default function RootLayout({
 			<ClerkProvider>
 				<SocketProvider>
 					<body>
+						<TooltipProvider>
 						<ToastContainer
 							position="top-center"
 							limit={2}
@@ -37,7 +35,7 @@ export default function RootLayout({
 							pauseOnHover={false}
 							theme="light"
 						/>
-						<TooltipProvider>{children}</TooltipProvider>
+							{children}</TooltipProvider>
 					</body>
 				</SocketProvider>
 			</ClerkProvider>

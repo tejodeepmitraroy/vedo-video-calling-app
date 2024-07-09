@@ -1,8 +1,5 @@
 import {
   ClerkExpressRequireAuth,
-  ClerkMiddleware,
-  RequireAuthProp,
-  StrictAuthProp,
 } from "@clerk/clerk-sdk-node";
 
 const authMiddleware =

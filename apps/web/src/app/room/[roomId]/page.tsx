@@ -1,6 +1,5 @@
 'use client';
-import React, { FC, useCallback, useEffect, useState } from 'react';
-
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import axios from 'axios';
 import { useSocket } from '@/context/SocketContext';
@@ -13,10 +12,9 @@ import WaitingLobby, { MeetingDetails } from './Screens/WaitingLobby';
 export default function CallPanel({ params }: { params: { roomId: string } }) {
 	const [enterRoom, setEnterRoom] = useState<boolean>(false);
 	const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>();
-
 	const setRemoteSocketId = useRoomStore((state) => state.setRemoteSocketId);
-	const remoteSocketId = useRoomStore((state) => state.remoteSocketId);
-	// const { userId: id } = useAuth();
+	
+	
 	const router = useRouter();
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const { getToken, userId } = useAuth();
@@ -87,7 +85,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	);
 
 	const handleEnterRoom = useCallback(
-		({ userId, id }: { userId: string; id: string }) => {
+		() => {
 			setEnterRoom(true);
 		},
 		[]
@@ -120,6 +118,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 		[]
 	);
 
+	
 	//All Event state here
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
@@ -135,6 +134,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 	useEffect(() => {
 		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
 		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
+		
 		return () => {
 			socketOff(
 				'notification:informAllNewUserAdded',

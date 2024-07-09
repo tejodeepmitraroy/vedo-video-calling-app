@@ -34,7 +34,7 @@ interface ClerkUser {
   // Add other Clerk user properties if needed
 }
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   auth?: WithAuthProp<ClerkUser>;
 }
 

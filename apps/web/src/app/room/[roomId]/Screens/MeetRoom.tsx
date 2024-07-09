@@ -1,11 +1,11 @@
 'use client';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import peer from '@/services/peer';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
+
 import ControlPanel from '../components/ui/ControlPanel';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useRoomStore } from '@/store/useStreamStore';
@@ -24,9 +24,9 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 	console.log('Remote socket ID------>>>>>', remoteSocketId);
 
-	const router = useRouter();
-	const { getToken, userId } = useAuth();
-	const { user } = useUser();
+
+	const { userId } = useAuth();
+	
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
@@ -69,10 +69,10 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 	const handleAcceptedCall = useCallback(
 		async ({
-			from,
+			
 			answer,
 		}: {
-			from: string;
+			
 			answer: RTCSessionDescriptionInit;
 		}) => {
 			await peer.setLocalDescription(answer);
@@ -116,7 +116,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 	const handleNegoNeedFinal = useCallback(
 		async ({
-			from,
+			
 			answer,
 		}: {
 			from: string;
@@ -129,13 +129,13 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		[]
 	);
 
-	const sendStreams = useCallback(() => {
-		console.log('send stream-->', stream);
-		stream?.getTracks().forEach((track) => {
-			console.log('Send track-->', track);
-			peer.peer?.addTrack(track, stream);
-		});
-	}, [stream]);
+	// const sendStreams = useCallback(() => {
+	// 	console.log('send stream-->', stream);
+	// 	stream?.getTracks().forEach((track) => {
+	// 		console.log('Send track-->', track);
+	// 		peer.peer?.addTrack(track, stream);
+	// 	});
+	// }, [stream]);
 
 	useEffect(() => {
 		peer.peer?.addEventListener('negotiationneeded', handleNegoNeeded);

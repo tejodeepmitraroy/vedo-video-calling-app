@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import React from 'react';
 import { Button } from './ui/button';
-import { Home, LifeBuoy, Phone, Triangle, Video } from 'lucide-react';
+import { Home, LifeBuoy, Phone, Video } from 'lucide-react';
 import {
 	Tooltip,
 	TooltipContent,

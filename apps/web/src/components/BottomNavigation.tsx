@@ -1,21 +1,16 @@
 import {
-	Book,
-	Bot,
-	Code2,
+
 	Home,
-	LifeBuoy,
+
 	Phone,
 	Presentation,
-	Settings2,
-	SquareTerminal,
-	SquareUser,
-	Triangle,
+
 } from 'lucide-react';
 import React from 'react';
 import {
 	Tooltip,
 	TooltipContent,
-	TooltipProvider,
+
 	TooltipTrigger,
 } from './ui/tooltip';
 import { Button } from './ui/button';

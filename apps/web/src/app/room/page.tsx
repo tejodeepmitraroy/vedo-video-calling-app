@@ -1,41 +1,19 @@
 'use client';
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import UserProfile from '@/components/UserProfile';
 import {
-	Bell,
-	LineChart,
-	Home,
-	Menu,
-	Package,
-	Package2,
-	Search,
-	ShoppingCart,
-	Users,
+
 	Video,
-	MessagesSquare,
-	Phone,
-	Settings,
-	CalendarDays,
+
 	Plus,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
-import Link from 'next/link';
+
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
 import {
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import NavBar from '@/components/Navbar';
@@ -56,7 +34,7 @@ const page = () => {
 					</div> */}
 					<div
 						className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-						x-chunk="dashboard-02-chunk-1"
+						// x-chunk="dashboard-02-chunk-1"
 					>
 						<div className="flex flex-col gap-10 p-4 md:flex-row">
 							<div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-10 text-center shadow-sm">

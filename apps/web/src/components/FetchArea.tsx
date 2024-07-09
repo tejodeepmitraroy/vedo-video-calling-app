@@ -1,12 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { useAuth, useSession, useUser } from "@clerk/nextjs";
-import { auth, currentUser, getAuth } from "@clerk/nextjs/server";
-import axios from "axios";
+import { useAuth, } from "@clerk/nextjs";
+
+
 import { useState } from "react";
 
 export default function FetchArea() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
   
   const [data, setData] = useState(null);
   

@@ -1,6 +1,10 @@
 'use client';
+
+import { useRoomStore } from "@/store/useStreamStore";
+
 class PeerService {
 	peer: RTCPeerConnection | null = null;
+	private store: ReturnType<typeof useRoomStore>;
 
 	constructor() {
 		if (!this.peer) {
@@ -16,6 +20,7 @@ class PeerService {
 			};
 			this.peer = new RTCPeerConnection(configuration);
 		}
+		this.store = useRoomStore.getState();
 	}
 
 	async getOffer(): Promise<RTCSessionDescriptionInit | undefined> {
@@ -51,6 +56,21 @@ class PeerService {
 			this.peer = null;
 		}
 	}
+
+	// async getMediaDevices() {
+	// 	try {
+	// 		const devices = await navigator.mediaDevices.enumerateDevices();
+	// 		const cameras = devices.filter((device) => device.kind === 'videoinput');
+	// 		const microphones = devices.filter(
+	// 			(device) => device.kind === 'audioinput'
+	// 		);
+
+			
+	// 		this.store.setMediaDevices({ cameras, microphones });
+	// 	} catch (error) {
+	// 		console.error('Error opening video camera.', error);
+	// 	}
+	// }
 }
 
 const peerService = new PeerService();

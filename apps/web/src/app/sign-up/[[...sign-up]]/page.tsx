@@ -1,11 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { SignUp } from '@clerk/nextjs';
 import Image from 'next/image';
-import Link from 'next/link';
 
-export default function Page() {
+const SignUpPage = () => {
 	return (
 		<>
 			<div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:h-screen">
@@ -27,3 +23,5 @@ export default function Page() {
 		</>
 	);
 }
+
+export default SignUpPage;

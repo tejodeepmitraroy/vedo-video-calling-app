@@ -4,7 +4,7 @@ import axiosInstance from '../utils/axiosInstance';
 
 // Define the state interface
 interface State {
-	data: any[];
+	data: unknown[];
 	loading: boolean;
 	error: string | null;
 	fetchData: (path: string) => Promise<void>;

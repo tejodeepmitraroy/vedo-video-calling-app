@@ -1,4 +1,3 @@
-import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 
 const axiosInstance = axios.create({

@@ -5,7 +5,9 @@ class SocketService {
   // private userIdToSocketIdMap: Map<string, string>;
   private socketIdToUserIdMap: Map<string, string>;
   private hostSocketIdToRoomId: Map<string, string>;
-  private rooms: any;
+  private rooms: {
+    [key: string]: string[];
+  };
 
   constructor() {
     console.log('Init Socket Server');
@@ -81,6 +83,10 @@ class SocketService {
 
           const hostSocketId = KeyByValue(this.hostSocketIdToRoomId, roomId);
 
+          if (this.rooms[roomId].length === 2){
+            io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+          }
+					
           if (hostSocketId) {
             io.to(hostSocketId!).emit('event:userWantToEnter', {
               username,
@@ -159,7 +165,9 @@ class SocketService {
             userId,
             username,
             roomId,
-            socketId: socket.id
+            socketId: socket.id,
+
+            roomStatus:this.rooms[roomId]
           });
 
           // if (!socketIdToEmailMap.get(userId)) {
@@ -242,30 +250,24 @@ class SocketService {
         }
       );
 
-      socket.on("disconnecting", () => {
-
+      socket.on('disconnecting', () => {
         const roomId = Array.from(socket.rooms)[1];
 
         const userId = this.socketIdToUserIdMap.get(socket.id);
         console.log('userId--->', userId);
 
-
-
-         io.to(roomId).emit('notification:userLeftTheRoom', { userId });
+        io.to(roomId).emit('notification:userLeftTheRoom', { userId });
 
         // socket.rooms.forEach((item) => {
         //   console.log('Socket Rooms---->', item);
         // });
 
         console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);
-     // the Set contains at least the socket ID
-  });
+        // the Set contains at least the socket ID
+      });
 
       // Disconnection Socket
       socket.on('disconnect', (reason) => {
-
-
-        
         console.log(`User ${socket.id} disconnected. Reason: ${reason}`);
 
         // this.userIdToSocketIdMap.delete(userId);

@@ -24,14 +24,13 @@ import {
 } from '@/components/ui/select';
 import { useRoomStore } from '@/store/useStreamStore';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+
 import { useSocket } from '@/context/SocketContext';
 import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
-import { useRouter } from 'next/navigation';
 
 export interface MeetingDetails {
 	createdAt: Date;
@@ -58,20 +57,20 @@ export interface Device {
 	groupId: string;
 }
 
-interface MediaDevices {
-	cameras: Device[];
-	microphones: Device[];
-}
+// interface MediaDevices {
+// 	cameras: Device[];
+// 	microphones: Device[];
+// }
 
 const WaitingLobby: FC<WaitingLobbyProps> = ({
 	meetingDetails,
 	roomId,
 	// isFetchingRoomDetails,
 }) => {
-	const stream = useRoomStore((state) => state.stream);
+	// const stream = useRoomStore((state) => state.stream);
 	const setStream = useRoomStore((state) => state.setStream);
-	const isCameraOn = useRoomStore((state) => state.isCameraOn);
-	const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
+	// const isCameraOn = useRoomStore((state) => state.isCameraOn);
+	// const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
 	const selectedCamera = useRoomStore((state) => state.selectedCamera);
 	const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
 	const setSelectedCamera = useRoomStore((state) => state.setSelectedCamera);
@@ -83,12 +82,12 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	const mediaDevices = useRoomStore((state) => state.mediaDevices);
 
 	const [roomUrl, setRoomUrl] = useState('');
-	const { getToken, userId } = useAuth();
+	const { userId } = useAuth();
 	const { user } = useUser();
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
-	const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
-		useState<boolean>(false);
+	// const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
+	// 	useState<boolean>(false);
 	// const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>(
 	// 	meetingDetails
 	// );
@@ -96,6 +95,9 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 	console.log('socektID->', socket?.id);
 
 	console.log('User details in waiting room', user?.fullName);
+
+
+	
 	const getMediaDevices = useCallback(async () => {
 		try {
 			const devices = await navigator.mediaDevices.enumerateDevices();
@@ -190,6 +192,11 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 		toast.warn(`Host is Not Existed in Room. Please wait`);
 	}, []);
 
+	const handleRoomLimitFull = useCallback(() => {
+		setAskToEnter(false);
+		toast.warn(`Room Limit Full`);
+	}, []);
+
 	///// All socket Events are Executed Here
 	useEffect(() => {
 		return () => {};
@@ -203,12 +210,14 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 			'notification:roomEnterPermissionDenied',
 			roomEnterPermissionDenied
 		);
+		socketOn('notification:roomLimitFull', handleRoomLimitFull);
 		return () => {
 			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 			socketOff(
 				'notification:roomEnterPermissionDenied',
 				roomEnterPermissionDenied
 			);
+			socketOff('notification:roomLimitFull', handleRoomLimitFull);
 		};
 	}, [
 		handleHostIsNoExistInRoom,
@@ -227,7 +236,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
 
 						<Card className="w-full border border-dashed">
-							{isFetchingRoomDetails ? <Spinner /> : <></>}
+							{meetingDetails ? <Spinner /> : <></>}
 							<CardHeader>
 								<div className="flex items-center justify-between">
 									Title{' '}
@@ -250,20 +259,14 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 									</RWebShare>
 								</div>
 								<CardTitle>
-									{isFetchingRoomDetails ? <Spinner /> : meetingDetails?.title}
+									{meetingDetails ? meetingDetails.title : <Spinner />}
 								</CardTitle>
 								<div>Description</div>
 								<CardDescription>
-									{isFetchingRoomDetails ? (
-										<Spinner />
-									) : (
-										meetingDetails?.description
-									)}
+									{meetingDetails ? meetingDetails?.description : <Spinner />}
 								</CardDescription>
 							</CardHeader>
-							{isFetchingRoomDetails ? (
-								<Spinner />
-							) : (
+							{meetingDetails ? (
 								<>
 									<CardContent className="mt-5 flex flex-col gap-3">
 										<div className="flex w-full items-center justify-between">
@@ -347,6 +350,8 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 										)}
 									</CardFooter>
 								</>
+							) : (
+								<Spinner />
 							)}
 						</Card>
 					</div>

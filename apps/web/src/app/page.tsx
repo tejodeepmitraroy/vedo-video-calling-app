@@ -7,19 +7,19 @@ import Sidebar from '@/components/Sidebar';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useSocket } from '@/context/SocketContext';
-import { useAuth, useUser } from '@clerk/nextjs';
+// import { useSocket } from '@/context/SocketContext';
+import { useAuth, } from '@clerk/nextjs';
 import axios from 'axios';
-import { Video, Phone, Plus } from 'lucide-react';
+import {  Phone,  } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent,   useState } from 'react';
 import { toast } from 'react-toastify';
 
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
-	const { getToken, userId } = useAuth();
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { getToken, } = useAuth();
+	// const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
@@ -47,7 +47,7 @@ export default function Dashboard() {
 
 			console.log(data.data);
 			const roomId = data.data.meetingId;
-			const userId = data.data.createdById;
+			// const userId = data.data.createdById;
 
 			router.push(`/room/${roomId}`);
 		} catch (error) {

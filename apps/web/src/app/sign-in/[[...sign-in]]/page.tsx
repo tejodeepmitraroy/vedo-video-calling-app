@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { SignIn } from '@clerk/nextjs';
 
-export default function Page() {
+const SignInPage = () => {
 	return (
 		<div className="relative min-h-screen w-full lg:grid lg:grid-cols-2">
 			<div className="flex items-center justify-center py-12">
@@ -20,4 +20,6 @@ export default function Page() {
 			</div>
 		</div>
 	);
-}
+};
+
+export default SignInPage

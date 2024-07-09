@@ -1,6 +1,6 @@
 class ApiError extends Error {
   statusCode: number;
-  data: any;
+  data: unknown;
   message: string;
   success: boolean;
   errors: never[];
@@ -8,7 +8,7 @@ class ApiError extends Error {
   constructor(
     statusCode: number,
     message: string = "Something went wrong",
-    data: any = null,
+    data: unknown = null,
     errors = [],
     stack = ""
   ) {
