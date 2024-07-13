@@ -1,8 +1,5 @@
 'use client';
 import { create } from 'zustand';
-import { Socket } from 'socket.io-client';
-import WebRTCService from '@/services/webRTCService';
-import webRTCService from '@/services/webRTCService';
 
 interface MediaDevices {
 	cameras: MediaDeviceInfo[];

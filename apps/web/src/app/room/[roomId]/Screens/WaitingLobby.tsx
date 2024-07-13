@@ -37,21 +37,16 @@ import useRoomStore from '@/store/useRoomStore';
 import WebRTCService from '@/services/webRTCService';
 
 interface WaitingLobbyProps {
-	// meetingDetails: MeetingDetails;
 	roomId: string;
 }
 
-export interface Device {
-	deviceId: string;
-	label: string;
-	groupId: string;
-}
+// export interface Device {
+// 	deviceId: string;
+// 	label: string;
+// 	groupId: string;
+// }
 
-const WaitingLobby: FC<WaitingLobbyProps> = ({
-	// meetingDetails,
-	roomId,
-	// isFetchingRoomDetails,
-}) => {
+const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const selectedCamera = useStreamStore((state) => state.selectedCamera);
