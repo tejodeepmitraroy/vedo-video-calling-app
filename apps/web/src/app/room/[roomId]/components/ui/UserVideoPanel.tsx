@@ -1,27 +1,21 @@
 'use client';
-import { useRoomStore } from '@/store/useStreamStore';
+import useStreamStore from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
-import React, { FC} from 'react';
-// import ReactPlayer from 'react-player';
+import React, { FC } from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 interface UserVideoPanelProps {
-	// stream: MediaStream | null;
 	muted: boolean;
 }
 
 const UserVideoPanel: FC<UserVideoPanelProps> = ({ muted }) => {
-	const stream = useRoomStore((state) => state.stream);
-	
-	
-	
+	const localStream = useStreamStore((state) => state.localStream);
 
-	
-	console.log('steam in Video component---->', stream);
+	// console.log("STREAM URL------>",URL.createObjectURL(localStream!))
 	return (
 		<div className="relative z-20 flex aspect-[16/9] h-full w-full">
 			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-black">
 				<ReactPlayer
-					url={stream!}
+					url={localStream!}
 					playing
 					style={{
 						position: 'relative',

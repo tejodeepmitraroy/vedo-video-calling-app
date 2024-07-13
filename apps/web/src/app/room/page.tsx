@@ -1,12 +1,7 @@
 'use client';
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import {
-
-	Video,
-
-	Plus,
-} from 'lucide-react';
+import { Video, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 

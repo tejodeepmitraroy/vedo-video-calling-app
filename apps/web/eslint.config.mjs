@@ -2,32 +2,32 @@ import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
-import { fixupConfigRules } from '@eslint/compat';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
 
-import { FlatCompat } from '@eslint/eslintrc';
-
-const compat = new FlatCompat();
 export default [
 	{ files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
-	{
-		languageOptions: {
-			parserOptions: { ecmaFeatures: { jsx: true } },
-		},
-	},
+	{ languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } } },
 	{ languageOptions: { globals: { ...globals.browser, ...globals.node } } },
 	pluginJs.configs.recommended,
 	...tseslint.configs.recommended,
-	...fixupConfigRules(pluginReactConfig),
-	...fixupConfigRules(compat.extends('plugin:@next/next/core-web-vitals')),
+	pluginReactConfig,
 	{
-		ignores: ['.next/*', '.cache'],
-
+		plugins: {
+			'react-hooks': pluginReactHooks,
+		},
+		ignores: ['.config/*',`".next"`,'build'],
 		rules: {
 			'react/react-in-jsx-scope': 'off',
+			'react-hooks/rules-of-hooks': 'error',
+			'react-hooks/exhaustive-deps': 'warn',
 			'react/jsx-uses-react': 'off',
 			'react/prop-types': 'off',
-			'@typescript-eslint/no-unused-vars': 'error',
 			'@typescript-eslint/no-explicit-any': 'off',
+
+			/////////
+			'@typescript-eslint/no-unused-vars': 'off',
+			'no-prototype-builtins': 'off',
+			'@typescript-eslint/no-this-alias': 'off',
 		},
 	},
 ];

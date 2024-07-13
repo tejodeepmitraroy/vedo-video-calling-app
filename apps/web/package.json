@@ -50,21 +50,21 @@
 		"zustand": "^4.5.2"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^1.1.0",
 		"@eslint/eslintrc": "^3.1.0",
 		"@eslint/js": "^9.6.0",
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
-		"eslint": "9.x",
+		"eslint": "8.x",
 		"eslint-config-next": "^14.2.4",
 		"eslint-plugin-react": "^7.34.3",
+		"eslint-plugin-react-hooks": "^5.1.0-rc-85acf2d195-20240711",
 		"globals": "^15.8.0",
 		"postcss": "^8",
 		"prettier": "^3.3.2",
 		"prettier-plugin-tailwindcss": "^0.6.4",
 		"tailwindcss": "^3.4.1",
 		"typescript": "^5",
-		"typescript-eslint": "^7.15.0"
+		"typescript-eslint": "^7.16.0"
 	}
 }

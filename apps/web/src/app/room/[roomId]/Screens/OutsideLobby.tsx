@@ -1,12 +1,11 @@
-
 import NavBar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
-import React from 'react'
+import React from 'react';
 
-const OutsideLobby = () => {
-  return (
-    <div className="grid h-screen w-full pl-[60px]">
+const OutsideLobby = ({ roomId }: { roomId :string}) => {
+	return (
+		<div className="grid h-screen w-full pl-[60px]">
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar />
@@ -16,7 +15,8 @@ const OutsideLobby = () => {
 						<div className="flex w-full flex-col gap-5 rounded-lg border border-dashed p-5 shadow-sm md:w-auto">
 							<div className="flex items-center">
 								<h2 className="text-xl font-semibold tracking-tight">
-									Quick Settings
+									This is OutSide
+									Lobbyapps/web/src/app/room/[roomId]/Screens/MeetRoom.tsx
 								</h2>
 							</div>
 							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -39,7 +39,6 @@ const OutsideLobby = () => {
 									// onClick={() => handleInstantCreateCall()}
 									className="flex items-center justify-center gap-3 border border-dashed p-10 text-center shadow-sm"
 								>
-							
 									Create a 1:1 Instant Room
 								</Button>
 
@@ -51,7 +50,6 @@ const OutsideLobby = () => {
 			</div>
 		</div>
 	);
-  
-}
+};
 
-export default OutsideLobby
+export default OutsideLobby;
