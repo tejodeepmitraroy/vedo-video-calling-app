@@ -3,7 +3,7 @@ import Sidebar from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
 import React from 'react';
 
-const OutsideLobby = ({ roomId }: { roomId :string}) => {
+const OutsideLobby = () => {
 	return (
 		<div className="grid h-screen w-full pl-[60px]">
 			<Sidebar />

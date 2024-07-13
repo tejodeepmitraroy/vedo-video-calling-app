@@ -10,7 +10,7 @@ interface useRoomStore {
 	setRoomDetails: (roomDetails: MeetingDetails | null) => void;
 }
 
-const useRoomStore = create<useRoomStore>((set, get) => ({
+const useRoomStore = create<useRoomStore>((set) => ({
 	roomState: 'waitingLobby',
 	roomDetails: null,
 	setRoomState: (roomState) => set({ roomState }),

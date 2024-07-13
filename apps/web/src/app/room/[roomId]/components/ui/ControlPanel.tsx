@@ -23,7 +23,6 @@ import {
 	ScreenShare,
 	ScreenShareOff,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import React, { useCallback } from 'react';
 
 export interface Device {
@@ -55,7 +54,7 @@ const ControlPanel = ({
 	const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	const { socketEmit } = useSocket();
-	const router = useRouter();
+	// const router = useRouter();
 
 	// console.log('selected Camera------>', selectedCamera);
 	// console.log('selected Microphone------>', selectedMicrophone);

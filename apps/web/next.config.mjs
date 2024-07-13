@@ -8,8 +8,6 @@ const nextConfig = {
 			},
 		],
 	},
-	// ignoreDuringBuilds: true,
-	distDir: 'build',
 	reactStrictMode: false,
 };
 
