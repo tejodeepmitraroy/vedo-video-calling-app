@@ -12,7 +12,7 @@ export default function CallPanel({ params }: { params: { roomId: string } }) {
 		<>
 			{roomState === 'waitingLobby' && <WaitingLobby roomId={params.roomId} />}
 			{roomState === 'meetingRoom' && <MeetRoom roomId={params.roomId} />}
-			{roomState === 'outSideLobby' && <OutsideLobby roomId={params.roomId} />}
+			{roomState === 'outSideLobby' && <OutsideLobby />}
 		</>
 	);
 }

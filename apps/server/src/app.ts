@@ -3,7 +3,7 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/users.routes";
-import callRouter from "./routes/calls.routes";
+import roomRouter from "./routes/room.routes";
 
 dotenv.config();
 
@@ -20,8 +20,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/v1/users", userRouter);
-app.use("/api/v1/call", callRouter);
+app.use("/api/v1/user", userRouter);
+app.use('/api/v1/room', roomRouter);
 
 app.get("/", async (req, res) => {
   res.json({ message: "Server is 100% up running" });

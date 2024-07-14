@@ -29,7 +29,7 @@ const page = () => {
 					</div> */}
 					<div
 						className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-						// x-chunk="dashboard-02-chunk-1"
+					
 					>
 						<div className="flex flex-col gap-10 p-4 md:flex-row">
 							<div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-10 text-center shadow-sm">

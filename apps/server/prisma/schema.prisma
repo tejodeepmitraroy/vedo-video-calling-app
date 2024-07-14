@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -20,22 +21,28 @@ model User {
   last_name  String
   email      String    @unique
   image_url  String
-  meetings   Meeting[]
-  createdAt  DateTime?  @default(now())
-  updatedAt  DateTime?  @updatedAt
+  Rooms      Room[]
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
 }
 
-model Meeting {
-  id             String    @id @default(uuid())
-  meetingId      String    @unique
-  videoCallUrl   String    @unique
+model Room {
+  id             String    @id @unique @default(uuid())
+  type           RoomType  @default(INSTANT)
+  roomId         String    @unique
+  url            String    @unique
   title          String
   description    String?
   startTime      DateTime?
   endTime        DateTime?
   createdById    String
   participantIds String[]
-  createdBy      User      @relation(fields: [createdById], references: [id],onDelete: Cascade)
-  createdAt      DateTime?  @default(now())
-  updatedAt      DateTime?  @updatedAt
+  createdBy      User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
+}
+
+enum RoomType {
+  INSTANT
+  SCHEDULE
 }

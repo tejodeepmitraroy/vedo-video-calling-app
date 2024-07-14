@@ -3,11 +3,9 @@ import { SignIn } from '@clerk/nextjs';
 
 const SignInPage = () => {
 	return (
-		<div className="relative min-h-screen w-full lg:grid lg:grid-cols-2">
-			<div className="flex items-center justify-center py-12">
-				<div className="relative mx-auto grid w-[350px] gap-6">
-					<SignIn path="/sign-in" signUpUrl="/sign-up" />
-				</div>
+		<div className="relative h-screen w-full lg:grid lg:grid-cols-2">
+			<div className="w-full h-full flex items-center justify-center p-4">
+				<SignIn path="/sign-in" signUpUrl="/sign-up" />
 			</div>
 			<div className="hidden bg-muted lg:block">
 				<Image
@@ -22,4 +20,4 @@ const SignInPage = () => {
 	);
 };
 
-export default SignInPage
+export default SignInPage;

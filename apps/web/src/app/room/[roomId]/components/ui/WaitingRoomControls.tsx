@@ -8,23 +8,9 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSocket } from '@/context/SocketContext';
-import webRTCService from '@/services/webRTCService';
-import useRoomStore from '@/store/useRoomStore';
 import useStreamStore from '@/store/useStreamStore';
-import { useAuth } from '@clerk/nextjs';
-
-import {
-	Mic,
-	Phone,
-	Video,
-	ChevronDown,
-	MicOff,
-	VideoOff,
-	ScreenShare,
-	ScreenShareOff,
-} from 'lucide-react';
-import React, { useCallback } from 'react';
+import { Mic, Video, ChevronDown, MicOff, VideoOff } from 'lucide-react';
+import React from 'react';
 
 export interface Device {
 	deviceId: string;
@@ -32,25 +18,16 @@ export interface Device {
 	groupId: string;
 }
 
-const ControlPanel = ({ roomId }: { roomId: string }) => {
+const WaitingRoomControls = () => {
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
-	const toggleScreenShare = useStreamStore((state) => state.toggleScreenShare);
-	const isScreenSharing = useStreamStore((state) => state.isScreenSharing);
 	const mediaDevices = useStreamStore((state) => state.mediaDevices);
-	// const selectedCamera = useRoomStore((state) => state.selectedCamera);
-	// const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
 	const setSelectedCamera = useStreamStore((state) => state.setSelectedCamera);
 	const setSelectedMicrophone = useStreamStore(
 		(state) => state.setSelectedMicrophone
 	);
-	const setRoomState = useRoomStore((state) => state.setRoomState);
-
-	const { socketEmit } = useSocket();
-	const { userId } = useAuth();
-	// const router = useRouter();
 
 	// console.log('selected Camera------>', selectedCamera);
 	// console.log('selected Microphone------>', selectedMicrophone);
@@ -64,17 +41,8 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	// 	isScreenSharing
 	// );
 
-	const handleCallEnd = useCallback(() => {
-		socketEmit('event:callEnd', {
-			roomId,
-			userId,
-		});
-		webRTCService.disconnectPeer();
-		setRoomState('outSideLobby');
-	}, [roomId, setRoomState, socketEmit, userId]);
-
 	return (
-		<div className="flex h-[9vh] w-full items-center justify-center border border-white bg-background">
+		<div className="absolute bottom-0 left-0 right-0 z-20 h-20 flex w-full items-center justify-center bg-transparent">
 			<div className="flex gap-4">
 				{/* Camera */}
 				<div className="flex">
@@ -143,28 +111,9 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
-
-				<Button
-					onClick={() => toggleScreenShare()}
-					variant={isScreenSharing ? 'destructive' : 'default'}
-				>
-					{isScreenSharing ? (
-						<ScreenShareOff className="h-6 w-7" />
-					) : (
-						<ScreenShare className="h-6 w-7" />
-					)}
-				</Button>
-
-				<Button
-					variant={'destructive'}
-					onClick={() => handleCallEnd()}
-					className=""
-				>
-					<Phone className="h-6 w-7" />
-				</Button>
 			</div>
 		</div>
 	);
 };
 
-export default ControlPanel;
+export default WaitingRoomControls;

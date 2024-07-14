@@ -31,6 +31,10 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 	const { socket, socketOn, socketEmit, socketOff } = useSocket();
 
+
+	console.log('Meeting Component mounted++++++++++');
+
+
 	// const handleUserJoined = useCallback(
 	// 	({ userId, id }: { userId: string; id: string }) => {
 	// 		console.log('User Joined', userId);
@@ -371,7 +375,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 						)} */}
 					</div>
 					<div className="h-[10vh] w-full md:h-[9vh]">
-						<ControlPanel roomId={roomId} userId={userId!} />
+						<ControlPanel roomId={roomId}/>
 					</div>
 
 					<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">

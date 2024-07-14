@@ -1,27 +1,16 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Share } from 'lucide-react';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useAuth, useUser } from '@clerk/nextjs';
 import {
 	Card,
-	CardContent,
 	CardDescription,
 	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
-
 import { toast } from 'react-toastify';
 import { useSocket } from '@/context/SocketContext';
 import Sidebar from '@/components/Sidebar';
@@ -34,33 +23,16 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useStreamStore from '@/store/useStreamStore';
 import useRoomStore from '@/store/useRoomStore';
-import WebRTCService from '@/services/webRTCService';
+import WaitingRoomControls from '../components/ui/WaitingRoomControls';
 
-interface WaitingLobbyProps {
-	roomId: string;
-}
-
-// export interface Device {
-// 	deviceId: string;
-// 	label: string;
-// 	groupId: string;
-// }
-
-const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
+const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const selectedCamera = useStreamStore((state) => state.selectedCamera);
 	const selectedMicrophone = useStreamStore(
 		(state) => state.selectedMicrophone
 	);
-	const setSelectedCamera = useStreamStore((state) => state.setSelectedCamera);
-	const setSelectedMicrophone = useStreamStore(
-		(state) => state.setSelectedMicrophone
-	);
 	const setMediaDevices = useStreamStore((state) => state.setMediaDevices);
-	const mediaDevices = useStreamStore((state) => state.mediaDevices);
-	const [roomUrl, setRoomUrl] = useState('');
-
 	const { user } = useUser();
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
@@ -70,7 +42,6 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 	const roomDetails = useRoomStore((state) => state.roomDetails);
 	const setPeerOffer = useStreamStore((state) => state.setPeerOffer);
 	const setRoomDetails = useRoomStore((state) => state.setRoomDetails);
-
 	const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -83,10 +54,8 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 
 		if (roomId) {
 			try {
-				// setIsFetchingRoomDetails(true);
-
 				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/call/${roomId}`,
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room/${roomId}`,
 					{
 						headers: {
 							'Content-Type': 'application/json',
@@ -94,10 +63,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 						},
 					}
 				);
-				// setIsFetchingRoomDetails(false);
 				const response = data.data;
-				// console.log('Room Details---->', response);
-
 				if (response) {
 					setRoomDetails(response);
 				} else {
@@ -116,21 +82,17 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Host join Room
-	const handleHostEnterRoom = async () => {
+	const handleHostEnterRoom = useCallback(async () => {
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
 			userId,
 			username: user?.fullName,
 			hostUser: true,
 		});
-	};
+	}, [roomId, socketEmit, user?.fullName, userId]);
 
 	//Client join Room
-	const handleAskedToEnter = async () => {
-		console.log('Room number--->', roomId);
-
-		console.log('User Id--->', userId);
-
+	const handleAskedToEnter = useCallback(async () => {
 		socketEmit('event:askToEnter', {
 			roomId,
 			username: user?.fullName,
@@ -139,21 +101,16 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 		});
 
 		setAskToEnter(true);
-	};
+	}, [peerOffer, roomId, socketEmit, user?.fullName, user?.imageUrl]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const getMediaDevices = useCallback(async () => {
 		const mediaDevice = await webRTCService.getAllMediaDevices();
-
 		setMediaDevices(mediaDevice!);
 	}, [setMediaDevices]);
 
 	const getUserMedia = useCallback(async () => {
-		// const mediaStream = await webRTCService.getUserMedia({
-		// 	selectedCamera,
-		// 	selectedMicrophone,
-		// });
 		const mediaStream = await webRTCService.getUserMedia();
 		console.log('Media Stream in Waiting room ------------->>>', mediaStream);
 		setLocalStream(mediaStream!);
@@ -170,24 +127,10 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 	}, [getMediaDevices, getUserMedia, selectedCamera, selectedMicrophone]);
 
 	const creationOffer = useCallback(async () => {
-		const offer = await WebRTCService.getOffer();
+		const offer = await webRTCService.getOffer();
 		setPeerOffer(offer);
 		console.log('Current--->', offer);
 	}, [setPeerOffer]);
-
-	// useEffect(() => {
-	// 	creationOffer();
-	// }, [creationOffer]);
-
-	// useEffect(() => {
-	// 	creationOffer();
-	// }, [creationOffer]);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	useEffect(() => {
-		setRoomUrl(window.location.href);
-	}, []);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -260,28 +203,20 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 	}, []);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	///// All socket Events are Executed Here
+
 
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
-
-		return () => {
-			socketOff('event:joinRoom', handleJoinRoom);
-			socketOff('event:enterRoom', handleEnterRoom);
-		};
-	}, [handleEnterRoom, handleJoinRoom, socketOff, socketOn]);
-
-	//// All socket Notification are Executed Here
-
-	useEffect(() => {
 		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 		socketOn(
 			'notification:roomEnterPermissionDenied',
 			roomEnterPermissionDenied
 		);
-		socketOn('notification:roomLimitFull', handleRoomLimitFull);
+
 		return () => {
+			socketOff('event:joinRoom', handleJoinRoom);
+			socketOff('event:enterRoom', handleEnterRoom);
 			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 			socketOff(
 				'notification:roomEnterPermissionDenied',
@@ -289,23 +224,62 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 			);
 			socketOff('notification:roomLimitFull', handleRoomLimitFull);
 		};
-	}, [
-		handleHostIsNoExistInRoom,
-		handleRoomLimitFull,
-		roomEnterPermissionDenied,
-		socketOff,
-		socketOn,
-	]);
+	}, [handleEnterRoom, handleHostIsNoExistInRoom, handleJoinRoom, handleRoomLimitFull, roomEnterPermissionDenied, socketOff, socketOn]);
+
+
+
+	///// All socket Events are Executed Here
+
+	// useEffect(() => {
+	// 	socketOn('event:joinRoom', handleJoinRoom);
+	// 	socketOn('event:enterRoom', handleEnterRoom);
+
+	// 	return () => {
+	// 		socketOff('event:joinRoom', handleJoinRoom);
+	// 		socketOff('event:enterRoom', handleEnterRoom);
+	// 	};
+	// }, [handleEnterRoom, handleJoinRoom, socketOff, socketOn]);
+
+	//// All socket Notification are Executed Here
+
+	// useEffect(() => {
+	// 	socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+	// 	socketOn(
+	// 		'notification:roomEnterPermissionDenied',
+	// 		roomEnterPermissionDenied
+	// 	);
+	// 	socketOn('notification:roomLimitFull', handleRoomLimitFull);
+	// 	return () => {
+	// 		socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+	// 		socketOff(
+	// 			'notification:roomEnterPermissionDenied',
+	// 			roomEnterPermissionDenied
+	// 		);
+	// 		socketOff('notification:roomLimitFull', handleRoomLimitFull);
+	// 	};
+	// }, [
+	// 	handleHostIsNoExistInRoom,
+	// 	handleRoomLimitFull,
+	// 	roomEnterPermissionDenied,
+	// 	socketOff,
+	// 	socketOn,
+	// ]);
+
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
 		<div className="grid h-screen w-full md:pl-[60px]">
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Waiting Lobby" />
-				<main className="mb-14 flex flex-1 flex-col-reverse gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
-					<div className="flex h-full w-full flex-col items-center md:w-[40%]">
-						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
-
+				<main className="mb-14 flex flex-1 flex-col gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
+					<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
+						<div className="relative aspect-video w-full">
+							<UserVideoPanel muted={true} />
+							<WaitingRoomControls />
+						</div>
+					</div>
+					<div className="flex h-full w-full flex-col items-center justify-center p-5 md:w-[50%]">
 						<Card className="w-full border border-dashed">
 							{roomDetails ? (
 								<>
@@ -315,7 +289,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 											<RWebShare
 												data={{
 													text: 'Share',
-													url: roomUrl,
+													url: window.location.href,
 													title: 'roomUrl',
 												}}
 												onClick={() =>
@@ -341,74 +315,7 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 										</CardDescription>
 									</CardHeader>
 
-									<CardContent className="mt-5 flex flex-col gap-3">
-										<div className="flex w-full items-center justify-between">
-											<span>Select your Camera</span>
-											<Select
-												onValueChange={(value) => {
-													setSelectedCamera(value);
-												}}
-												defaultValue={selectedCamera}
-											>
-												<SelectTrigger className="w-1/2">
-													<SelectValue placeholder="Select a Camera" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														<SelectLabel>Camera</SelectLabel>
-														{mediaDevices.cameras.length === 1 ? (
-															<SelectItem value={'NoCamera'}>
-																No Camera Detected
-															</SelectItem>
-														) : (
-															mediaDevices.cameras.map((camera) => (
-																<SelectItem
-																	value={camera.deviceId}
-																	key={camera.deviceId}
-																>
-																	{camera.label || `Camera ${camera.deviceId}`}
-																</SelectItem>
-															))
-														)}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</div>
-										<div className="flex w-full items-center justify-between">
-											<span>Select your Mic</span>
-											<Select
-												onValueChange={(value) => {
-													setSelectedMicrophone(value);
-												}}
-												defaultValue={selectedMicrophone}
-											>
-												<SelectTrigger className="w-1/2">
-													<SelectValue placeholder="Select a Microphone" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														<SelectLabel>Microphone</SelectLabel>
-														{mediaDevices.microphones.length === 1 ? (
-															<SelectItem value={'NoMicrophone'}>
-																No Microphone Detected
-															</SelectItem>
-														) : (
-															mediaDevices.microphones.map((microphone) => (
-																<SelectItem
-																	key={microphone.deviceId}
-																	value={microphone.deviceId}
-																>
-																	{microphone.label ||
-																		`Microphone ${microphone.deviceId}`}
-																</SelectItem>
-															))
-														)}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</div>
-									</CardContent>
-									<CardFooter className="item-center flex flex-col">
+									<CardFooter className="item-center flex justify-evenly">
 										{roomDetails?.createdById === userId ? (
 											<Button onClick={() => handleHostEnterRoom()}>
 												Join Room
@@ -427,16 +334,11 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({ roomId }) => {
 									</CardFooter>
 								</>
 							) : (
-								<Spinner />
+								<div className="flex w-full items-center justify-center">
+									<Spinner />
+								</div>
 							)}
 						</Card>
-					</div>
-					<div className="flex h-full w-full flex-col items-center p-5 px-20 md:w-[60%]">
-						{/* <h1 className="text-lg font-semibold md:text-2xl">Video source</h1> */}
-						{/* <div>Video source</div> */}
-						<div className="aspect-video w-full">
-							<UserVideoPanel muted={true} />
-						</div>
 					</div>
 				</main>
 			</div>
