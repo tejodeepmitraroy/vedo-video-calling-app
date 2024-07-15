@@ -204,7 +204,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	useEffect(() => {
 		socketOn('event:joinRoom', handleJoinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
@@ -224,9 +223,15 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			);
 			socketOff('notification:roomLimitFull', handleRoomLimitFull);
 		};
-	}, [handleEnterRoom, handleHostIsNoExistInRoom, handleJoinRoom, handleRoomLimitFull, roomEnterPermissionDenied, socketOff, socketOn]);
-
-
+	}, [
+		handleEnterRoom,
+		handleHostIsNoExistInRoom,
+		handleJoinRoom,
+		handleRoomLimitFull,
+		roomEnterPermissionDenied,
+		socketOff,
+		socketOn,
+	]);
 
 	///// All socket Events are Executed Here
 
@@ -265,7 +270,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	// 	socketOn,
 	// ]);
 
-	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
 		<div className="grid h-screen w-full md:pl-[60px]">

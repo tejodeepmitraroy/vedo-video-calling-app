@@ -2,16 +2,12 @@ import Link from 'next/link';
 import React from 'react';
 import { Button } from './ui/button';
 import { Home, LifeBuoy, Phone, Video } from 'lucide-react';
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import UserProfile from './UserProfile';
 
 const Sidebar = () => {
 	return (
-		<aside className=" hidden inset-y fixed left-0 z-20 md:flex h-full w-[60px] flex-col border-r">
+		<aside className="inset-y fixed left-0 z-20 hidden h-full w-[60px] flex-col border-r md:flex">
 			<div className="flex h-[60px] items-center justify-center border-b p-2">
 				<Button
 					variant="outline"
@@ -19,7 +15,7 @@ const Sidebar = () => {
 					aria-label="Home"
 					className="group hover:bg-primary hover:text-white"
 				>
-					<Video className="group-hover:fill-white size-5 fill-foreground" />
+					<Video className="size-5 fill-foreground group-hover:fill-white" />
 				</Button>
 			</div>
 			<nav className="grid gap-3 p-2">

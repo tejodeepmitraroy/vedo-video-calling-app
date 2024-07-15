@@ -1,8 +1,7 @@
-"use client"
+'use client';
 import axios from 'axios';
 
 export const handleInstantCreateCall = async (token: string) => {
-	
 	console.log('Token---->', token);
 
 	try {
@@ -24,4 +23,3 @@ export const handleInstantCreateCall = async (token: string) => {
 		console.log(error);
 	}
 };
-

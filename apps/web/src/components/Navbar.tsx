@@ -30,7 +30,7 @@ import React from 'react';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 // import { Textarea } from './ui/textarea';
 
-const NavBar = ({ heading }: { heading?:string }) => {
+const NavBar = ({ heading }: { heading?: string }) => {
 	return (
 		<header className="sticky top-0 z-10 flex h-[60px] items-center gap-1 border-b bg-background px-4">
 			<h1 className="text-lg font-semibold md:text-2xl">{heading}</h1>

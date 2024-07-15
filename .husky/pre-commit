@@ -1,2 +1,6 @@
+yarn prettier
+yarn prettier:fix
 yarn lint
+yarn lint:fix
+
 yarn build

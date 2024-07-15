@@ -1,8 +1,6 @@
 'use client';
 import { create } from 'zustand';
 
-
-
 interface useRoomStore {
 	roomState: string;
 	roomDetails: MeetingDetails | null;

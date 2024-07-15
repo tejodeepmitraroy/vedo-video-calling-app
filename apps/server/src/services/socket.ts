@@ -77,7 +77,7 @@ class SocketService {
 					}
 				}
 			);
-			
+
 			socket.on(
 				'event:roomEnterPermissionDenied',
 				({ socketId }: { socketId: string }) => {

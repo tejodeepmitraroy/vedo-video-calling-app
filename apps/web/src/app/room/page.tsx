@@ -27,10 +27,7 @@ const page = () => {
 							Create a new Room
 						</h1>
 					</div> */}
-					<div
-						className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-					
-					>
+					<div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
 						<div className="flex flex-col gap-10 p-4 md:flex-row">
 							<div className="flex flex-col items-center gap-1 rounded-lg border border-dashed p-10 text-center shadow-sm">
 								<h3 className="text-2xl font-bold tracking-tight">

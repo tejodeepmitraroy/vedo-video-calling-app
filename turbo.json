@@ -4,16 +4,15 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
-      "outputs": [".next/**","dist/**", "!.next/cache/**"]
+      "outputs": [".next/**", "dist/**", "!.next/cache/**"]
     },
-     
     "lint": {},
-  
-   
+    "lint:fix":{},
+    "prettier":{},
+    "prettier:fix":{},
     "dev": {
       "cache": false,
       "persistent": true
     }
   }
-  
 }

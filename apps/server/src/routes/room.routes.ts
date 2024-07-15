@@ -5,7 +5,7 @@ import {
 	createScheduleCall,
 	deleteScheduledRoom,
 	getAllRooms,
-	getAllScheduledRooms,
+	// getAllScheduledRooms,
 	getRoomDetails,
 	getScheduledRoom,
 	updateScheduledRoom,
@@ -22,13 +22,13 @@ router.route('/:roomId').get(getRoomDetails);
 router
 	.route('/schedule')
 	.post(authMiddleware, createScheduleCall)
-	.get(authMiddleware, getAllScheduledRooms)
-	.put(authMiddleware, updateScheduledRoom)
-	;
-
-router
-	.route('/schedule/:roomId')
 	.get(authMiddleware, getScheduledRoom)
+	.put(authMiddleware, updateScheduledRoom)
 	.delete(authMiddleware, deleteScheduledRoom);
+
+// router
+// 	.route('/schedule/:roomId')
+//  .get(authMiddleware, getScheduledRoom)
+// 	.delete(authMiddleware, deleteScheduledRoom);
 
 export default router;

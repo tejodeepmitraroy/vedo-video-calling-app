@@ -4,7 +4,7 @@ import { SignIn } from '@clerk/nextjs';
 const SignInPage = () => {
 	return (
 		<div className="relative h-screen w-full lg:grid lg:grid-cols-2">
-			<div className="w-full h-full flex items-center justify-center p-4">
+			<div className="flex h-full w-full items-center justify-center p-4">
 				<SignIn path="/sign-in" signUpUrl="/sign-up" />
 			</div>
 			<div className="hidden bg-muted lg:block">

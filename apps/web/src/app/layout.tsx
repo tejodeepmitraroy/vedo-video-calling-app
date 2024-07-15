@@ -22,20 +22,21 @@ export default function RootLayout({
 				<SocketProvider>
 					<body>
 						<TooltipProvider>
-						<ToastContainer
-							position="top-center"
-							limit={2}
-							autoClose={2000}
-							hideProgressBar={false}
-							newestOnTop={false}
-							closeOnClick
-							rtl={false}
-							pauseOnFocusLoss={false}
-							draggable
-							pauseOnHover={false}
-							theme="light"
-						/>
-							{children}</TooltipProvider>
+							<ToastContainer
+								position="top-center"
+								limit={2}
+								autoClose={2000}
+								hideProgressBar={false}
+								newestOnTop={false}
+								closeOnClick
+								rtl={false}
+								pauseOnFocusLoss={false}
+								draggable
+								pauseOnHover={false}
+								theme="light"
+							/>
+							{children}
+						</TooltipProvider>
 					</body>
 				</SocketProvider>
 			</ClerkProvider>

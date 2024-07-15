@@ -1,25 +1,13 @@
-import {
-
-	Home,
-
-	Phone,
-	Presentation,
-
-} from 'lucide-react';
+import { Home, Phone, Presentation } from 'lucide-react';
 import React from 'react';
-import {
-	Tooltip,
-	TooltipContent,
-
-	TooltipTrigger,
-} from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import UserProfile from './UserProfile';
 
 const BottomNavigation = () => {
 	return (
-		<div className="fixed bottom-0 left-0 md:hidden flex h-14 w-full items-center border border-t bg-background">
+		<div className="fixed bottom-0 left-0 flex h-14 w-full items-center border border-t bg-background md:hidden">
 			<nav className="flex w-full justify-evenly gap-1">
 				<Tooltip>
 					<TooltipTrigger asChild>

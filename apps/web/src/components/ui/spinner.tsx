@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Spinner = ({ text }:{text?:string}) => {
+const Spinner = ({ text }: { text?: string }) => {
 	return (
 		<div>
 			<svg

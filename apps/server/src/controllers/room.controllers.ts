@@ -143,22 +143,39 @@ export const createScheduleCall = asyncHandler(
 	}
 );
 
-export const getAllScheduledRooms = asyncHandler(
+export const getScheduledRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
 		const userId = request.auth?.id;
+		const roomId = request.query.roomId;
 
-		try {
-			const rooms = await prisma.room.findMany({
-				where: {
-					type: 'SCHEDULE',
-					createdById: userId!,
-				},
-			});
-			return response.status(200).json(new ApiResponse(200, rooms));
-		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+		if (typeof roomId === 'string') {
+			try {
+				const rooms = await prisma.room.findUnique({
+					where: {
+						type: 'SCHEDULE',
+						roomId: roomId,
+					},
+				});
+				return response.status(200).json(new ApiResponse(200, rooms));
+			} catch (error) {
+				return response
+					.status(400)
+					.json(new ApiError(400, 'Error Happened', error));
+			}
+		} else {
+			try {
+				const rooms = await prisma.room.findMany({
+					where: {
+						type: 'SCHEDULE',
+						createdById: userId!,
+					},
+				});
+				return response.status(200).json(new ApiResponse(200, rooms));
+			} catch (error) {
+				return response
+					.status(400)
+					.json(new ApiError(400, 'Error Happened', error));
+			}
 		}
 	}
 );
@@ -172,7 +189,7 @@ export const updateScheduledRoom = asyncHandler(
 		try {
 			const updatedRoom = await prisma.room.update({
 				where: {
-					type:'SCHEDULE',
+					type: 'SCHEDULE',
 					roomId: roomId,
 					createdById: userId,
 				},
@@ -196,44 +213,51 @@ export const updateScheduledRoom = asyncHandler(
 
 export const deleteScheduledRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const roomId = request.params.roomId;
+		// const roomId = request.params.roomId;
+		const roomId = request.query.roomId;
 		console.log(roomId);
 
-		try {
-			const deleteRoom = await prisma.room.delete({
-				where: {
-					type: 'SCHEDULE',
-					roomId,
-				},
-			});
+		if (typeof roomId === 'string') {
+			try {
+				const deleteRoom = await prisma.room.delete({
+					where: {
+						type: 'SCHEDULE',
+						roomId,
+					},
+				});
 
-			return response.status(200).json(new ApiResponse(200, deleteRoom));
-		} catch (error) {
+				return response.status(200).json(new ApiResponse(200, deleteRoom));
+			} catch (error) {
+				return response
+					.status(400)
+					.json(new ApiError(400, 'Error Happened', error));
+			}
+		} else {
 			return response
 				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+				.json(new ApiError(400, 'Query Parameter is invalid'));
 		}
 	}
 );
 
-export const getScheduledRoom = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const roomId = request.params.roomId;
-		console.log(roomId);
-		console.log(response);
+// export const getScheduledRoom = asyncHandler(
+// 	async (request: AuthenticatedRequest, response: Response) => {
+// 		const roomId = request.params.roomId;
+// 		console.log(roomId);
+// 		console.log(response);
 
-		try {
-			const rooms = await prisma.room.findUnique({
-				where: {
-					type: 'SCHEDULE',
-					roomId: roomId,
-				},
-			});
-			return response.status(200).json(new ApiResponse(200, rooms));
-		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
-		}
-	}
-);
+// 		try {
+// 			const rooms = await prisma.room.findUnique({
+// 				where: {
+// 					type: 'SCHEDULE',
+// 					roomId: roomId,
+// 				},
+// 			});
+// 			return response.status(200).json(new ApiResponse(200, rooms));
+// 		} catch (error) {
+// 			return response
+// 				.status(400)
+// 				.json(new ApiError(400, 'Error Happened', error));
+// 		}
+// 	}
+// );
