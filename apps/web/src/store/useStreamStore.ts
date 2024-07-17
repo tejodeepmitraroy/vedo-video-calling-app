@@ -7,66 +7,117 @@ interface MediaDevices {
 }
 
 interface WebRTCStore {
-	remoteSocketId: string | null;
-	stream: MediaStream | null;
-	screenStream: MediaStream | null;
+	localStream: MediaStream | null;
+	localScreenStream: MediaStream | null;
+	remoteStream: MediaStream | null;
+	// webRTCService: any | null;
+	// startConnection: (isHost: boolean, socket: Socket) => void;
+	// disconnect: () => void;
+	////
+
 	mediaDevices: MediaDevices;
 	selectedCamera: string;
 	selectedMicrophone: string;
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
-	setRemoteSocketId: (remoteSocketId: string | null) => void;
-	setStream: (stream: MediaStream | null) => void;
-	setScreenStream: (stream: MediaStream | null) => void;
+	peerOffer: RTCSessionDescriptionInit | null;
+	remoteSocketId: string | null;
+	setLocalStream: (localStream: MediaStream | null) => void;
+	setLocalScreenStream: (localScreenStream: MediaStream | null) => void;
 	setMediaDevices: (mediaDevices: MediaDevices) => void;
 	setSelectedCamera: (devicesId: string) => void;
 	setSelectedMicrophone: (devicesId: string) => void;
+	setPeerOffer: (peerOffer: RTCSessionDescriptionInit | undefined) => void;
+	setRemoteSocketId: (remoteSocketId: string | null) => void;
 	toggleCamera: () => void;
 	toggleMicrophone: () => void;
 	toggleScreenShare: () => void;
-	toggleStopStream:()=>void
+	toggleStopStream: () => void;
 }
 
-export const useRoomStore = create<WebRTCStore>((set, get) => ({
-	remoteSocketId: null,
-	stream: null,
-	screenStream: null,
+const useStreamStore = create<WebRTCStore>((set, get) => ({
+	localStream: null,
+	localScreenStream: null,
+	remoteStream: null,
+	// webRTCService: null,
+	// startConnection: async (isHost, socket) => {
+	// 	// const webRTCService = new webRTCService((stream) => {
+	// 	// 	set({ remoteStream: stream });
+	// 	// }, isHost);
+	// 	const webRTCService = new webRTCService((stream) => {
+	// 		set({ remoteStream: stream });
+	// 	}, isHost);
+
+	// 	const localStream = await webRTCService.getUserMedia();
+	// 	set({ localStream });
+
+	// 	if (isHost) {
+	// 		webRTCService.startConnection(socket);
+	// 	} else {
+	// 		socket.emit('joinRoom');
+	// 	}
+
+	// 	socket.on('signal', async (data) => {
+	// 		await webRTCService.handleSignalData(data, socket);
+	// 	});
+
+	// 	socket.on('hostReady', () => {
+	// 		webRTCService.startConnection(socket);
+	// 	});
+
+	// 	set({ webRTCService });
+	// },
+	// disconnect: () => {
+	// 	get().webRTCService?.disconnectPeer();
+	// 	set({ localStream: null, remoteStream: null, webRTCService: null });
+	// },
+
 	mediaDevices: { cameras: [], microphones: [] },
 	selectedCamera: '',
 	selectedMicrophone: '',
 	isCameraOn: false,
 	isMicrophoneOn: false,
 	isScreenSharing: false,
+	peerOffer: null,
+	remoteSocketId: null,
+	setLocalStream: (localStream) => set({ localStream }),
+	setPeerOffer: (peerOffer) => set({ peerOffer }),
 	setRemoteSocketId: (remoteSocketId) => set({ remoteSocketId }),
-	setStream: (stream) => set({ stream }),
-	setScreenStream: (screenStream) => set({ screenStream }),
+	setLocalScreenStream: (localScreenStream) => set({ localScreenStream }),
 	setMediaDevices: (mediaDevices) => set({ mediaDevices }),
 	setSelectedCamera: (deviceId: string) => set({ selectedCamera: deviceId }),
 	setSelectedMicrophone: (deviceId: string) =>
 		set({ selectedMicrophone: deviceId }),
 	toggleCamera: () => {
-		const { stream, isCameraOn } = get();
-		if (stream) {
-			stream.getVideoTracks().forEach((track) => (track.enabled = !isCameraOn));
+		const { localStream, isCameraOn } = get();
+		if (localStream) {
+			localStream
+				.getVideoTracks()
+				.forEach((track) => (track.enabled = !isCameraOn));
 		}
 		set({ isCameraOn: !isCameraOn });
 	},
 	toggleMicrophone: () => {
-		const { stream, isMicrophoneOn } = get();
-		if (stream) {
-			stream
+		const { localStream, isMicrophoneOn } = get();
+		if (localStream) {
+			localStream
 				.getAudioTracks()
 				.forEach((track) => (track.enabled = !isMicrophoneOn));
 		}
 		set({ isMicrophoneOn: !isMicrophoneOn });
 	},
 	toggleScreenShare: async () => {
-		const { stream, screenStream, isScreenSharing, setScreenStream } = get();
+		const {
+			localStream,
+			localScreenStream,
+			isScreenSharing,
+			setLocalScreenStream,
+		} = get();
 
-		if (isScreenSharing && screenStream) {
-			screenStream.getTracks().forEach((track) => track.stop());
-			setScreenStream(null);
+		if (isScreenSharing && localScreenStream) {
+			localScreenStream.getTracks().forEach((track) => track.stop());
+			setLocalScreenStream(null);
 		} else {
 			try {
 				const screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -75,12 +126,14 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 				});
 
 				const mergedStream = new MediaStream();
-				stream!.getTracks().forEach((track) => mergedStream.addTrack(track));
+				localStream!
+					.getTracks()
+					.forEach((track) => mergedStream.addTrack(track));
 				screenStream
 					.getTracks()
 					.forEach((track) => mergedStream.addTrack(track));
 				console.log('Video Stream-------->>', screenStream);
-				setScreenStream(screenStream);
+				setLocalScreenStream(screenStream);
 			} catch (error) {
 				console.error('Error starting screen share:', error);
 			}
@@ -88,11 +141,13 @@ export const useRoomStore = create<WebRTCStore>((set, get) => ({
 		set({ isScreenSharing: !isScreenSharing });
 	},
 	toggleStopStream: () => {
-		const { stream, } = get();
-		if (stream) {
-			stream.getTracks().forEach((track) => track.stop());
+		const { localStream } = get();
+		if (localStream) {
+			localStream.getTracks().forEach((track) => track.stop());
 
-			console.log('Get Track Off', stream);
+			console.log('Get Track Off', localStream);
 		}
 	},
 }));
+
+export default useStreamStore;

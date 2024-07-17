@@ -1,6 +1,10 @@
 # dependencies
 node_modules
 
+# packages
+package.json
+tsconfig.json
+
 # config files
 package.json
 package-lock.json
@@ -10,6 +14,9 @@ postcss.config.js
 tsconfig.json
 commitlint.config.cjs
 commitlint.config.ts
+.prettierrc
+eslint.config.mjs
+
 
 # asset
 public
@@ -21,7 +28,7 @@ public
 
 # production
 build
-./dist
+dist
 
 # misc
 .DS_Store

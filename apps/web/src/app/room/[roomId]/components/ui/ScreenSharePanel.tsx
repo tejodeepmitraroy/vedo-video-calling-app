@@ -1,16 +1,16 @@
 'use client';
 
-import { useRoomStore } from '@/store/useStreamStore';
+import useStreamStore from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
 import React from 'react';
 
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 const ScreenSharePanel = () => {
-	const screenStream = useRoomStore((state) => state.screenStream);
+	const screenStream = useStreamStore((state) => state.localScreenStream);
 
 	return (
-		<div className="relative flex  w-full h-full items-center justify-center border-2 border-white bg-black">
+		<div className="relative flex h-full w-full items-center justify-center border-2 border-white bg-black">
 			<ReactPlayer
 				url={screenStream!}
 				playing

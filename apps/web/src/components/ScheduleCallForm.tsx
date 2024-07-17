@@ -8,7 +8,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from './ui/dialog';
-import { CalendarIcon, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { Button } from './ui/button';
 
 import { z } from 'zod';
@@ -24,22 +24,30 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Calendar } from './ui/calendar';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs';
 
 const formSchema = z.object({
 	title: z.string().min(2).max(50),
 	description: z.string().min(2).max(50),
-	startTime: z.date(),
-	endTime: z.date(),
+	// startTime: z.date(),
+	// endTime: z.date(),
 	participantIds: z.string().array(),
 });
 
 type form = z.infer<typeof formSchema>;
+
+// const convertTo24Hour = (isoString: Date) => {
+// 		const date = new Date(isoString); // Create a Date object from the ISO string
+// 		const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
+// 		const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
+
+// 		if (isoString) {
+// 			return `${hours}:${minutes}`;
+// 		} else {
+// 			return '';
+// 		}
+// 	};
 
 const ScheduleCallForm = () => {
 	const { getToken } = useAuth();
@@ -56,22 +64,20 @@ const ScheduleCallForm = () => {
 	async function onSubmit({
 		title,
 		description,
-		startTime,
-		endTime,
+		// startTime,
+		// endTime,
 		participantIds,
 	}: z.infer<typeof formSchema>) {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
-		console.log({ title, description, startTime, endTime, participantIds });
+		console.log({ title, description, participantIds });
 		const token = await getToken();
 		try {
 			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_BACKEND_URL}/call/createScheduleCall`,
+				`${process.env.NEXT_PUBLIC_BACKEND_URL}/room/schedule`,
 				{
 					title,
 					description,
-					startTime,
-					endTime,
 					participantIds,
 				},
 				{
@@ -87,44 +93,18 @@ const ScheduleCallForm = () => {
 		}
 	}
 
-	// const handleCreateScheduleCall = async (
-
-	// ) => {
-	// 	try {
-	// 		const { data } = await axios.post(
-	// 			`${process.env.NEXT_PUBLIC_BACKEND_URL}/call/createScheduleCall`,
-	// 			{
-	// 				title,
-	// 				description,
-	// 				startTime,
-	// 				endTime,
-	// 				participantIds,
-	// 			},
-	// 			{
-	// 				headers: {
-	// 					'Content-Type': 'application/json',
-	// 					Authorization: `Bearer ${token}`,
-	// 				},
-	// 			}
-	// 		);
-	// 		console.log(data);
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 	}
-	// };
-
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
 				<Button
 					variant={'outline'}
-					className="flex items-center justify-center gap-3 border border-dashed p-10 text-center shadow-sm"
+					className="flex w-full items-center justify-center gap-3 border py-10 text-center text-base shadow-sm hover:text-primary"
 				>
 					<Video />
 					Create a Room for later
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="">
 				<DialogHeader>
 					<DialogTitle>Create a Room for later</DialogTitle>
 					<DialogDescription>
@@ -161,19 +141,19 @@ const ScheduleCallForm = () => {
 									)}
 								/>
 
-								<FormField
+								{/* <FormField
 									control={form.control}
 									name="startTime"
 									render={({ field }) => (
-										<FormItem className="w-full">
-											<FormLabel>Start Time</FormLabel>
+										<FormItem className="flex flex-col">
+											<FormLabel>Date of birth</FormLabel>
 											<Popover>
 												<PopoverTrigger asChild>
 													<FormControl>
 														<Button
 															variant={'outline'}
 															className={cn(
-																'w-full pl-3 text-left font-normal',
+																'w-[240px] pl-3 text-left font-normal',
 																!field.value && 'text-muted-foreground'
 															)}
 														>
@@ -186,7 +166,10 @@ const ScheduleCallForm = () => {
 														</Button>
 													</FormControl>
 												</PopoverTrigger>
-												<PopoverContent className="w-auto p-0" align="start">
+												<PopoverContent
+													className="z-[60] w-auto border border-black p-0"
+													align="start"
+												>
 													<Calendar
 														mode="single"
 														selected={field.value}
@@ -244,7 +227,7 @@ const ScheduleCallForm = () => {
 											<FormMessage />
 										</FormItem>
 									)}
-								/>
+								/> */}
 
 								<Button type="submit">Submit</Button>
 							</form>

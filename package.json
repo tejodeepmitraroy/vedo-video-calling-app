@@ -5,8 +5,12 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky"
+    "lint:fix": "turbo run lint:fix",
+    "prettier": "turbo run prettier",
+    "prettier:fix": "turbo run prettier:fix",
+    "prepare": "husky",
+
+    "fix:all": "yarn prettier && yarn prettier:fix && yarn lint:fix && yarn lint && yarn build"
   },
   "devDependencies": {
     "husky": "^9.0.11",

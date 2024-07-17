@@ -1,5 +1,5 @@
-"use client"
-import React from 'react'
+'use client';
+import React from 'react';
 import {
 	LineChart,
 	Home,
@@ -16,7 +16,7 @@ import { Badge } from './ui/badge';
 import { UserProfile } from '@clerk/nextjs';
 
 const TopSection = () => {
-  return (
+	return (
 		<header className="flex h-14 items-center justify-end gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
 			<Sheet>
 				<SheetTrigger asChild>
@@ -73,13 +73,12 @@ const TopSection = () => {
 							Analytics
 						</Link>
 					</nav>
-					
 				</SheetContent>
 			</Sheet>
-			
+
 			<UserProfile />
 		</header>
 	);
-}
+};
 
-export default TopSection
+export default TopSection;

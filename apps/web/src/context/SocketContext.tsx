@@ -31,7 +31,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const [socket, setSocket] = useState<Socket>();
 	useEffect(() => {
 		if (isSignedIn) {
-			
 			const _socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_SERVER_URL!);
 
 			setSocket(_socket);

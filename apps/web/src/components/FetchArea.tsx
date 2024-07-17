@@ -1,40 +1,38 @@
-"use client";
-import { useAuth, } from "@clerk/nextjs";
+'use client';
+import { useAuth } from '@clerk/nextjs';
 
-
-import { useState } from "react";
+import { useState } from 'react';
 
 export default function FetchArea() {
-  const { getToken } = useAuth();
-  
-  const [data, setData] = useState(null);
-  
-  const fetchData = async () => {
-    
-    const token = await getToken();
+	const { getToken } = useAuth();
 
-    console.log("token", token);
+	const [data, setData] = useState(null);
 
-    try {
-      const response = await fetch("http://localhost:8000", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+	const fetchData = async () => {
+		const token = await getToken();
 
-      const result = await response.json();
-      setData(result);
+		console.log('token', token);
 
-      console.log(result);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  return (
-    <div>
-      <button onClick={()=>fetchData()}>Fetch Protected Data</button>
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
-    </div>
-  );
+		try {
+			const response = await fetch('http://localhost:8000', {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			const result = await response.json();
+			setData(result);
+
+			console.log(result);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	return (
+		<div>
+			<button onClick={() => fetchData()}>Fetch Protected Data</button>
+			{data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+		</div>
+	);
 }

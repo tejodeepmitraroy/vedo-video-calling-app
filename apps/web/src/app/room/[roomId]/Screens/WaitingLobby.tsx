@@ -1,185 +1,190 @@
 'use client';
-
 import { Button } from '@/components/ui/button';
 import { Share } from 'lucide-react';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import UserVideoPanel from '../components/ui/UserVideoPanel';
 import { useAuth, useUser } from '@clerk/nextjs';
 import {
 	Card,
-	CardContent,
 	CardDescription,
 	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
-import { useRoomStore } from '@/store/useStreamStore';
 import { toast } from 'react-toastify';
-
 import { useSocket } from '@/context/SocketContext';
 import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
+import webRTCService from '@/services/webRTCService';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import useStreamStore from '@/store/useStreamStore';
+import useRoomStore from '@/store/useRoomStore';
+import WaitingRoomControls from '../components/ui/WaitingRoomControls';
 
-export interface MeetingDetails {
-	createdAt: Date;
-	createdById: string;
-	description: string | null;
-	endTime: Date | null;
-	id: string;
-	meetingId: string;
-	participantIds: string[];
-	startTime: Date | null;
-	title: string;
-	updatedAt: Date;
-	videoCallUrl: string;
-}
-
-interface WaitingLobbyProps {
-	meetingDetails: MeetingDetails;
-	roomId: string;
-}
-
-export interface Device {
-	deviceId: string;
-	label: string;
-	groupId: string;
-}
-
-// interface MediaDevices {
-// 	cameras: Device[];
-// 	microphones: Device[];
-// }
-
-const WaitingLobby: FC<WaitingLobbyProps> = ({
-	meetingDetails,
-	roomId,
-	// isFetchingRoomDetails,
-}) => {
-	// const stream = useRoomStore((state) => state.stream);
-	const setStream = useRoomStore((state) => state.setStream);
-	// const isCameraOn = useRoomStore((state) => state.isCameraOn);
-	// const isMicrophoneOn = useRoomStore((state) => state.isMicrophoneOn);
-	const selectedCamera = useRoomStore((state) => state.selectedCamera);
-	const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
-	const setSelectedCamera = useRoomStore((state) => state.setSelectedCamera);
-	const setSelectedMicrophone = useRoomStore(
-		(state) => state.setSelectedMicrophone
+const WaitingLobby = ({ roomId }: { roomId: string }) => {
+	const setLocalStream = useStreamStore((state) => state.setLocalStream);
+	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
+	const selectedCamera = useStreamStore((state) => state.selectedCamera);
+	const selectedMicrophone = useStreamStore(
+		(state) => state.selectedMicrophone
 	);
-
-	const setMediaDevices = useRoomStore((state) => state.setMediaDevices);
-	const mediaDevices = useRoomStore((state) => state.mediaDevices);
-
-	const [roomUrl, setRoomUrl] = useState('');
-	const { userId } = useAuth();
+	const setMediaDevices = useStreamStore((state) => state.setMediaDevices);
 	const { user } = useUser();
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
-	// const [isFetchingRoomDetails, setIsFetchingRoomDetails] =
-	// 	useState<boolean>(false);
-	// const [roomDetails, setRoomDetails] = useState<MeetingDetails | undefined>(
-	// 	meetingDetails
-	// );
+	const peerOffer = useStreamStore((state) => state.peerOffer);
+	const { getToken, userId } = useAuth();
+	const router = useRouter();
+	const roomDetails = useRoomStore((state) => state.roomDetails);
+	const setPeerOffer = useStreamStore((state) => state.setPeerOffer);
+	const setRoomDetails = useRoomStore((state) => state.setRoomDetails);
+	const setRoomState = useRoomStore((state) => state.setRoomState);
 
-	console.log('socektID->', socket?.id);
+	///////////////////////////////////////////////////////////////////////////////////////////
 
-	console.log('User details in waiting room', user?.fullName);
+	console.log('Waiting Component mounted++++++++++');
+	const getRoomDetails = useCallback(async () => {
+		const token = await getToken();
 
+		console.log('Token---->', token);
 
-	
-	const getMediaDevices = useCallback(async () => {
-		try {
-			const devices = await navigator.mediaDevices.enumerateDevices();
-			const cameras = devices.filter((device) => device.kind === 'videoinput');
-			const microphones = devices.filter(
-				(device) => device.kind === 'audioinput'
-			);
-
-			setMediaDevices({ cameras, microphones });
-		} catch (error) {
-			console.error('Error opening video camera.', error);
-		}
-	}, [setMediaDevices]);
-
-	const getUserMedia = useCallback(async () => {
-		try {
-			const constraints = {
-				video: selectedCamera
-					? {
-							deviceId: { exact: selectedCamera },
-							width: { ideal: 1280 },
-							height: { ideal: 720 },
-						}
-					: {
-							width: { ideal: 1280 },
-							height: { ideal: 720 },
+		if (roomId) {
+			try {
+				const { data } = await axios(
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
 						},
-
-				audio: selectedMicrophone
-					? { deviceId: { exact: selectedMicrophone } }
-					: true,
-			};
-
-			// console.log(' constraints', constraints);
-
-			const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-			setStream(stream);
-		} catch (error) {
-			console.error('Error accessing media devices:', error);
+					}
+				);
+				const response = data.data;
+				if (response) {
+					setRoomDetails(response);
+				} else {
+					toast.error('Room Id Not Existed');
+					router.push('/');
+				}
+			} catch (error) {
+				console.log(error);
+			}
 		}
-	}, [setStream]);
+	}, [getToken, roomId, router, setRoomDetails]);
 
+	useEffect(() => {
+		getRoomDetails();
+	}, [getRoomDetails]);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Host join Room
-	const handleHostEnterRoom = async () => {
+	const handleHostEnterRoom = useCallback(async () => {
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
 			userId,
 			username: user?.fullName,
 			hostUser: true,
 		});
-	};
+	}, [roomId, socketEmit, user?.fullName, userId]);
 
-	const handleAskedToEnter = async () => {
-		console.log('Room number--->', roomId);
-
-		console.log('User Id--->', userId);
-
+	//Client join Room
+	const handleAskedToEnter = useCallback(async () => {
 		socketEmit('event:askToEnter', {
 			roomId,
 			username: user?.fullName,
 			profilePic: user?.imageUrl,
+			offer: peerOffer,
 		});
 
 		setAskToEnter(true);
-	};
+	}, [peerOffer, roomId, socketEmit, user?.fullName, user?.imageUrl]);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const getMediaDevices = useCallback(async () => {
+		const mediaDevice = await webRTCService.getAllMediaDevices();
+		setMediaDevices(mediaDevice!);
+	}, [setMediaDevices]);
+
+	const getUserMedia = useCallback(async () => {
+		const mediaStream = await webRTCService.getUserMedia();
+		console.log('Media Stream in Waiting room ------------->>>', mediaStream);
+		setLocalStream(mediaStream!);
+	}, [setLocalStream]);
 
 	useEffect(() => {
-		// if (selectedCamera || selectedMicrophone) {
-		// 	console.log('Camera-->', selectedCamera);
-		// 	console.log('Microphone-->', selectedMicrophone);
-		// }
-		getUserMedia();
-	}, [getUserMedia, selectedCamera, selectedMicrophone]);
+		if (selectedCamera || selectedMicrophone) {
+			console.log('Camera-->', selectedCamera);
+			console.log('Microphone-->', selectedMicrophone);
+			getUserMedia();
+		}
 
-	useEffect(() => {
 		getMediaDevices();
-	}, [getMediaDevices]);
+	}, [getMediaDevices, getUserMedia, selectedCamera, selectedMicrophone]);
 
-	useEffect(() => {
-		setRoomUrl(window.location.href);
-	}, []);
+	const creationOffer = useCallback(async () => {
+		const offer = await webRTCService.getOffer();
+		setPeerOffer(offer);
+		console.log('Current--->', offer);
+	}, [setPeerOffer]);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//// All socket Event Function are Define Here
+	const handleJoinRoom = useCallback(
+		async ({
+			answer: hostAnswer,
+			hostOffer,
+			hostUserSocketId,
+		}: {
+			answer: RTCSessionDescriptionInit;
+			hostOffer: RTCSessionDescriptionInit;
+			hostUserSocketId: string;
+		}) => {
+			console.log('Second Socket User Joined', hostUserSocketId);
+			if (hostUserSocketId) {
+				setRemoteSocketId(hostUserSocketId);
+				console.log('SET  Remote Socket ID--->', hostUserSocketId);
+			}
+
+			if (roomDetails?.meetingId !== userId) {
+				socketEmit('event:joinRoom', {
+					roomId: roomId,
+					userId,
+					username: user?.fullName,
+					hostUser: false,
+				});
+			}
+			console.log('Host Offer ------------>', hostOffer);
+			await webRTCService.addAnswer(hostAnswer);
+			console.log('Host answer Added', hostAnswer);
+
+			const answer = await webRTCService.createAnswer(hostOffer);
+
+			console.log('Client answer', answer);
+
+			socketEmit('event:sendAnswerHost', {
+				hostUserSocketId,
+				answer,
+			});
+		},
+		[
+			roomDetails?.meetingId,
+			roomId,
+			setRemoteSocketId,
+			socketEmit,
+			user?.fullName,
+			userId,
+		]
+	);
+
+	const handleEnterRoom = useCallback(() => {
+		setRoomState('meetingRoom');
+	}, [setRoomState]);
 
 	//// All socket Notification Function are Define Here
 	const roomEnterPermissionDenied = useCallback(() => {
@@ -197,21 +202,20 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 		toast.warn(`Room Limit Full`);
 	}, []);
 
-	///// All socket Events are Executed Here
-	useEffect(() => {
-		return () => {};
-	}, [socketOff, socketOn]);
-
-	//// All socket Notification are Executed Here
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	useEffect(() => {
+		socketOn('event:joinRoom', handleJoinRoom);
+		socketOn('event:enterRoom', handleEnterRoom);
 		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 		socketOn(
 			'notification:roomEnterPermissionDenied',
 			roomEnterPermissionDenied
 		);
-		socketOn('notification:roomLimitFull', handleRoomLimitFull);
+
 		return () => {
+			socketOff('event:joinRoom', handleJoinRoom);
+			socketOff('event:enterRoom', handleEnterRoom);
 			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
 			socketOff(
 				'notification:roomEnterPermissionDenied',
@@ -220,146 +224,126 @@ const WaitingLobby: FC<WaitingLobbyProps> = ({
 			socketOff('notification:roomLimitFull', handleRoomLimitFull);
 		};
 	}, [
+		handleEnterRoom,
 		handleHostIsNoExistInRoom,
+		handleJoinRoom,
+		handleRoomLimitFull,
 		roomEnterPermissionDenied,
 		socketOff,
 		socketOn,
 	]);
 
+	///// All socket Events are Executed Here
+
+	// useEffect(() => {
+	// 	socketOn('event:joinRoom', handleJoinRoom);
+	// 	socketOn('event:enterRoom', handleEnterRoom);
+
+	// 	return () => {
+	// 		socketOff('event:joinRoom', handleJoinRoom);
+	// 		socketOff('event:enterRoom', handleEnterRoom);
+	// 	};
+	// }, [handleEnterRoom, handleJoinRoom, socketOff, socketOn]);
+
+	//// All socket Notification are Executed Here
+
+	// useEffect(() => {
+	// 	socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+	// 	socketOn(
+	// 		'notification:roomEnterPermissionDenied',
+	// 		roomEnterPermissionDenied
+	// 	);
+	// 	socketOn('notification:roomLimitFull', handleRoomLimitFull);
+	// 	return () => {
+	// 		socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+	// 		socketOff(
+	// 			'notification:roomEnterPermissionDenied',
+	// 			roomEnterPermissionDenied
+	// 		);
+	// 		socketOff('notification:roomLimitFull', handleRoomLimitFull);
+	// 	};
+	// }, [
+	// 	handleHostIsNoExistInRoom,
+	// 	handleRoomLimitFull,
+	// 	roomEnterPermissionDenied,
+	// 	socketOff,
+	// 	socketOn,
+	// ]);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="grid h-screen w-full md:pl-[60px]">
+		<div className="grid h-screen w-full bg-primary md:pl-[60px]">
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Waiting Lobby" />
-				<main className="mb-14 flex flex-1 flex-col-reverse gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
-					<div className="flex h-full w-full flex-col items-center md:w-[40%]">
-						{/* <h1 className="text-lg font-semibold md:text-2xl">Control page</h1> */}
+				<main className="flex h-full w-full flex-1 flex-col gap-4 pb-2 pr-2 lg:gap-6">
+					<div className="flex flex-1 rounded-lg bg-background p-4 shadow-sm">
+						<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
+							<div className="relative aspect-video w-full">
+								<UserVideoPanel muted={true} />
+								<WaitingRoomControls />
+							</div>
+						</div>
+						<div className="flex h-full w-full flex-col items-center justify-center p-5 md:w-[50%]">
+							<Card className="w-full border border-dashed">
+								{roomDetails ? (
+									<>
+										<CardHeader>
+											<div className="flex items-center justify-between">
+												Title{' '}
+												<RWebShare
+													data={{
+														text: 'Share',
+														url: window.location.href,
+														title: 'roomUrl',
+													}}
+													onClick={() =>
+														console.log('roomUrl shared successfully!')
+													}
+												>
+													<Button
+														variant="outline"
+														size="sm"
+														className="ml-auto gap-1.5 text-sm"
+													>
+														<Share className="size-3.5" />
+														Share
+													</Button>
+												</RWebShare>
+											</div>
+											<CardTitle>
+												{roomDetails ? roomDetails.title : <Spinner />}
+											</CardTitle>
+											<div>Description</div>
+											<CardDescription>
+												{roomDetails ? roomDetails?.description : <Spinner />}
+											</CardDescription>
+										</CardHeader>
 
-						<Card className="w-full border border-dashed">
-							{meetingDetails ? <Spinner /> : <></>}
-							<CardHeader>
-								<div className="flex items-center justify-between">
-									Title{' '}
-									<RWebShare
-										data={{
-											text: 'Share',
-											url: roomUrl,
-											title: 'roomUrl',
-										}}
-										onClick={() => console.log('roomUrl shared successfully!')}
-									>
-										<Button
-											variant="outline"
-											size="sm"
-											className="ml-auto gap-1.5 text-sm"
-										>
-											<Share className="size-3.5" />
-											Share
-										</Button>
-									</RWebShare>
-								</div>
-								<CardTitle>
-									{meetingDetails ? meetingDetails.title : <Spinner />}
-								</CardTitle>
-								<div>Description</div>
-								<CardDescription>
-									{meetingDetails ? meetingDetails?.description : <Spinner />}
-								</CardDescription>
-							</CardHeader>
-							{meetingDetails ? (
-								<>
-									<CardContent className="mt-5 flex flex-col gap-3">
-										<div className="flex w-full items-center justify-between">
-											<span>Select your Camera</span>
-											<Select
-												onValueChange={(value) => {
-													setSelectedCamera(value);
-												}}
-												defaultValue={selectedCamera}
-											>
-												<SelectTrigger className="w-1/2">
-													<SelectValue placeholder="Select a Camera" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														<SelectLabel>Camera</SelectLabel>
-														{mediaDevices.cameras.length === 1 ? (
-															<SelectItem value={'NoCamera'}>
-																No Camera Detected
-															</SelectItem>
-														) : (
-															mediaDevices.cameras.map((camera) => (
-																<SelectItem
-																	value={camera.deviceId}
-																	key={camera.deviceId}
-																>
-																	{camera.label || `Camera ${camera.deviceId}`}
-																</SelectItem>
-															))
-														)}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</div>
-										<div className="flex w-full items-center justify-between">
-											<span>Select your Mic</span>
-											<Select
-												onValueChange={(value) => {
-													setSelectedMicrophone(value);
-												}}
-												defaultValue={selectedMicrophone}
-											>
-												<SelectTrigger className="w-1/2">
-													<SelectValue placeholder="Select a Microphone" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														<SelectLabel>Microphone</SelectLabel>
-														{mediaDevices.microphones.length === 1 ? (
-															<SelectItem value={'NoMicrophone'}>
-																No Microphone Detected
-															</SelectItem>
-														) : (
-															mediaDevices.microphones.map((microphone) => (
-																<SelectItem
-																	key={microphone.deviceId}
-																	value={microphone.deviceId}
-																>
-																	{microphone.label ||
-																		`Microphone ${microphone.deviceId}`}
-																</SelectItem>
-															))
-														)}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</div>
-									</CardContent>
-									<CardFooter className="item-center flex flex-col">
-										{meetingDetails?.createdById === userId ? (
-											<Button onClick={() => handleHostEnterRoom()}>
-												Join Room
+										<CardFooter className="item-center flex justify-evenly">
+											{roomDetails?.createdById === userId ? (
+												<Button onClick={() => handleHostEnterRoom()}>
+													Join Room
+												</Button>
+											) : (
+												<Button
+													disabled={askToEnter}
+													onClick={() => handleAskedToEnter()}
+												>
+													{askToEnter ? <Spinner /> : <>ask to Join</>}
+												</Button>
+											)}
+											<Button onClick={() => creationOffer()}>
+												Create a Offer
 											</Button>
-										) : (
-											<Button
-												disabled={askToEnter}
-												onClick={() => handleAskedToEnter()}
-											>
-												{askToEnter ? <Spinner /> : <>ask to Join</>}
-											</Button>
-										)}
-									</CardFooter>
-								</>
-							) : (
-								<Spinner />
-							)}
-						</Card>
-					</div>
-					<div className="flex h-full w-full flex-col items-center p-5 px-20 md:w-[60%]">
-						{/* <h1 className="text-lg font-semibold md:text-2xl">Video source</h1> */}
-						{/* <div>Video source</div> */}
-						<div className="aspect-video w-full">
-							<UserVideoPanel muted={true} />
+										</CardFooter>
+									</>
+								) : (
+									<div className="flex w-full items-center justify-center">
+										<Spinner />
+									</div>
+								)}
+							</Card>
 						</div>
 					</div>
 				</main>

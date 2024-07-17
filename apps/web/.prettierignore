@@ -1,18 +1,27 @@
 # dependencies
 node_modules
 
+# packages
+package.json
+tsconfig.json
+components.json
+
 # config files
 package.json
 package-lock.json
 next.config.mjs
+postcss.config.mjs
 yarn.lock
 postcss.config.js
 tsconfig.json
 commitlint.config.cjs
 commitlint.config.ts
+.prettierrc
+eslint.config.mjs
 
 # asset
 public
+globals.css
 
 
 # next.js
