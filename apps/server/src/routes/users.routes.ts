@@ -1,15 +1,15 @@
 import { Router } from 'express';
 import {
 	findAUser,
-	getFriendList,
+	getAllFriendList,
 	sendFriendRequest,
 } from '../controllers/users.controllers';
 import authMiddleware from '../middleware/clerk.middleware';
 
 const router = Router();
 
-router.route('/:userName').get(findAUser);
+router.route('/').get(findAUser);
 router.route('/friend').post(authMiddleware, sendFriendRequest);
-router.route('/friend').get(authMiddleware, getFriendList);
+router.route('/friend').get(authMiddleware, getAllFriendList);
 
 export default router;

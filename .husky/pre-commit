@@ -1,6 +1,34 @@
-yarn prettier
-yarn prettier:fix
-yarn lint
 yarn lint:fix
+yarn prettier:fix
 
-yarn build
+
+#Check tsconfig standards
+# yarn check-types || {
+#     echo '😂🤮❌Failed Type check😂🤮❌
+#     Are you seriously trying to write that? Make the changes required above.'
+#     false;
+# }
+
+
+#Check Prettier standards
+yarn prettier || {
+    echo '😂🤮Its Raw - Your styling looks disgusting😂🤮
+    Prettier check Failed. Run npm run format, add changes and try commit again.'
+    false;
+}
+#Check ESLint standards
+yarn lint || {
+    echo '😂🤮❌Get that weak Shit out there!😂🤮❌
+    EsLint Check Failed. Make the required changes listed above, add changes and try commit again.'
+    false;
+}
+#If every thing Passes.... try to run a build
+    echo '😂... Alright... Code looks good to me.. Trying to build now. 😂'
+
+yarn build || {
+    echo '❌⚒️💡 Better call to your Senior... Because your build failed ❌⚒️💡
+    Next build Failed: View the erros above to see why.'
+    false
+}
+#If it build we can commit
+    echo '✅✅✅ You win this time... I am commiting this now ✅✅✅'

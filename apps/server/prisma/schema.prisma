@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "relationJoins"]
 }
 
 datasource db {
@@ -16,30 +16,57 @@ datasource db {
 }
 
 model User {
-  id         String    @id @unique
+  id         String @id @unique
   first_name String
   last_name  String
-  email      String    @unique
+  email      String @unique
   image_url  String
-  Rooms      Room[]
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @updatedAt
+
+  room               Room[]
+  participantsOnRoom ParticipantsOnRoom[]
+  friends            FriendShip[]         @relation("UserFriends")
+  friendOf           FriendShip[]         @relation("UserFriendOf")
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 model Room {
-  id             String    @id @unique @default(uuid())
-  type           RoomType  @default(INSTANT)
-  roomId         String    @unique
-  url            String    @unique
-  title          String
-  description    String?
-  startTime      DateTime?
-  endTime        DateTime?
-  createdById    String
-  participantIds String[]
-  createdBy      User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt      DateTime? @default(now())
-  updatedAt      DateTime? @updatedAt
+  id           String               @id @unique @default(uuid())
+  type         RoomType             @default(INSTANT)
+  roomId       String               @unique
+  url          String               @unique
+  title        String
+  description  String?
+  startTime    DateTime?
+  endTime      DateTime?
+  createdById  String
+  createdBy    User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  participants ParticipantsOnRoom[]
+  createdAt    DateTime?            @default(now())
+  updatedAt    DateTime?            @updatedAt
+}
+
+model ParticipantsOnRoom {
+  user_id   String
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  room_id   String
+  Room      Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@id([user_id, room_id])
+}
+
+model FriendShip {
+  user_id   String
+  friend_id String
+  user      User      @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
+  friend    User      @relation("UserFriendOf", fields: [friend_id], references: [id], onDelete: Cascade)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@id([user_id, friend_id])
 }
 
 enum RoomType {

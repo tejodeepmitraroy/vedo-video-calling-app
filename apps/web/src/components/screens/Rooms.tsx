@@ -1,6 +1,8 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+// import { Video, Plus } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import NavBar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
@@ -18,11 +20,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs';
 import Image from 'next/image';
-// import { useRouter } from 'next/navigation';
 
 const Room = () => {
 	const { getToken } = useAuth();
-	// const router = useRouter();
 	const [userId, setUserId] = useState<string>('');
 	const [friendList, setFriendList] = useState<FriendListResponse[]>([]);
 	const [selectedFriend, setSelectedFriend] =
@@ -74,18 +74,6 @@ const Room = () => {
 			console.log(error);
 		}
 	}, [getToken]);
-
-	// const convertTo24Hour = (isoString: Date) => {
-	// 	const date = new Date(isoString); // Create a Date object from the ISO string
-	// 	const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
-	// 	const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
-
-	// 	if (isoString) {
-	// 		return `${hours}:${minutes}`;
-	// 	} else {
-	// 		return '';
-	// 	}
-	// };
 
 	useEffect(() => {
 		getFriendList();

@@ -55,7 +55,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		if (roomId) {
 			try {
 				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room/${roomId}`,
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
 					{
 						headers: {
 							'Content-Type': 'application/json',
@@ -272,77 +272,79 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="grid h-screen w-full md:pl-[60px]">
+		<div className="grid h-screen w-full bg-primary md:pl-[60px]">
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar heading="Waiting Lobby" />
-				<main className="mb-14 flex flex-1 flex-col gap-4 overflow-y-auto p-4 md:flex-row lg:gap-6 lg:p-6">
-					<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
-						<div className="relative aspect-video w-full">
-							<UserVideoPanel muted={true} />
-							<WaitingRoomControls />
+				<main className="flex h-full w-full flex-1 flex-col gap-4 pb-2 pr-2 lg:gap-6">
+					<div className="flex flex-1 rounded-lg bg-background p-4 shadow-sm">
+						<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
+							<div className="relative aspect-video w-full">
+								<UserVideoPanel muted={true} />
+								<WaitingRoomControls />
+							</div>
 						</div>
-					</div>
-					<div className="flex h-full w-full flex-col items-center justify-center p-5 md:w-[50%]">
-						<Card className="w-full border border-dashed">
-							{roomDetails ? (
-								<>
-									<CardHeader>
-										<div className="flex items-center justify-between">
-											Title{' '}
-											<RWebShare
-												data={{
-													text: 'Share',
-													url: window.location.href,
-													title: 'roomUrl',
-												}}
-												onClick={() =>
-													console.log('roomUrl shared successfully!')
-												}
-											>
-												<Button
-													variant="outline"
-													size="sm"
-													className="ml-auto gap-1.5 text-sm"
+						<div className="flex h-full w-full flex-col items-center justify-center p-5 md:w-[50%]">
+							<Card className="w-full border border-dashed">
+								{roomDetails ? (
+									<>
+										<CardHeader>
+											<div className="flex items-center justify-between">
+												Title{' '}
+												<RWebShare
+													data={{
+														text: 'Share',
+														url: window.location.href,
+														title: 'roomUrl',
+													}}
+													onClick={() =>
+														console.log('roomUrl shared successfully!')
+													}
 												>
-													<Share className="size-3.5" />
-													Share
-												</Button>
-											</RWebShare>
-										</div>
-										<CardTitle>
-											{roomDetails ? roomDetails.title : <Spinner />}
-										</CardTitle>
-										<div>Description</div>
-										<CardDescription>
-											{roomDetails ? roomDetails?.description : <Spinner />}
-										</CardDescription>
-									</CardHeader>
+													<Button
+														variant="outline"
+														size="sm"
+														className="ml-auto gap-1.5 text-sm"
+													>
+														<Share className="size-3.5" />
+														Share
+													</Button>
+												</RWebShare>
+											</div>
+											<CardTitle>
+												{roomDetails ? roomDetails.title : <Spinner />}
+											</CardTitle>
+											<div>Description</div>
+											<CardDescription>
+												{roomDetails ? roomDetails?.description : <Spinner />}
+											</CardDescription>
+										</CardHeader>
 
-									<CardFooter className="item-center flex justify-evenly">
-										{roomDetails?.createdById === userId ? (
-											<Button onClick={() => handleHostEnterRoom()}>
-												Join Room
+										<CardFooter className="item-center flex justify-evenly">
+											{roomDetails?.createdById === userId ? (
+												<Button onClick={() => handleHostEnterRoom()}>
+													Join Room
+												</Button>
+											) : (
+												<Button
+													disabled={askToEnter}
+													onClick={() => handleAskedToEnter()}
+												>
+													{askToEnter ? <Spinner /> : <>ask to Join</>}
+												</Button>
+											)}
+											<Button onClick={() => creationOffer()}>
+												Create a Offer
 											</Button>
-										) : (
-											<Button
-												disabled={askToEnter}
-												onClick={() => handleAskedToEnter()}
-											>
-												{askToEnter ? <Spinner /> : <>ask to Join</>}
-											</Button>
-										)}
-										<Button onClick={() => creationOffer()}>
-											Create a Offer
-										</Button>
-									</CardFooter>
-								</>
-							) : (
-								<div className="flex w-full items-center justify-center">
-									<Spinner />
-								</div>
-							)}
-						</Card>
+										</CardFooter>
+									</>
+								) : (
+									<div className="flex w-full items-center justify-center">
+										<Spinner />
+									</div>
+								)}
+							</Card>
+						</div>
 					</div>
 				</main>
 			</div>

@@ -1,18 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import { nanoid } from 'nanoid';
 import prisma from '../lib/prismaClient';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
-import { WithAuthProp } from '@clerk/clerk-sdk-node';
-
-interface ClerkUser {
-	id: string;
-	firstName: string;
-	lastName: string;
-	emailAddresses: { id: string; emailAddress: string }[];
-	// Add other Clerk user properties if needed
-}
+import { AuthenticatedRequest } from '../types/apiRequest';
 
 // declare global {
 //   namespace Express {
@@ -26,22 +18,12 @@ interface ClerkUser {
 //   }
 // }
 
-interface ClerkUser {
-	userId: string;
-	firstName: string;
-	lastName: string;
-	emailAddresses: { id: string; emailAddress: string }[];
-	// Add other Clerk user properties if needed
-}
-
-export interface AuthenticatedRequest extends Request {
-	auth?: WithAuthProp<ClerkUser>;
-}
-
 export const createInstantRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
 		const user = request.auth?.userId;
 		const shortId = nanoid(8);
+
+		console.log('User Id========>>', user);
 
 		try {
 			const meetingDetails = await prisma.room.create({
@@ -52,7 +34,26 @@ export const createInstantRoom = asyncHandler(
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
 					createdById: user!,
 					startTime: new Date().toISOString(),
-					participantIds: [user!],
+					participants: {
+						create: [
+							{
+								user_id: user!,
+							},
+						],
+					},
+				},
+				select: {
+					title: true,
+					type: true,
+					roomId: true,
+					url: true,
+					createdBy: true,
+					startTime: true,
+					participants: {
+						include: {
+							user: true,
+						},
+					},
 				},
 			});
 
@@ -69,44 +70,116 @@ export const createInstantRoom = asyncHandler(
 
 export const getAllRooms = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.id;
+		const userId = request.auth?.userId;
+		const roomId = request.query.roomId;
 
-		try {
-			const rooms = await prisma.room.findMany({
-				where: {
-					type: 'INSTANT',
-					createdById: userId!,
-				},
-			});
-			return response.status(200).json(new ApiResponse(200, rooms));
-		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+		if (typeof roomId === 'string') {
+			try {
+				const meetingData = await prisma.room.findUnique({
+					where: {
+						type: 'INSTANT',
+						roomId: roomId,
+					},
+					select: {
+						id: true,
+						type: true,
+						roomId: true,
+						url: true,
+						title: true,
+						createdBy: {
+							select: {
+								id: true,
+								image_url: true,
+								first_name: true,
+							},
+						},
+						description: true,
+						startTime: true,
+						createdById: true,
+						createdAt: true,
+					},
+				});
+
+				return response.status(200).json(new ApiResponse(200, meetingData));
+			} catch (error) {
+				return response
+					.status(400)
+					.json(new ApiError(400, 'Error While getting a Call', error));
+			}
+		} else {
+			try {
+				const rooms = await prisma.room.findMany({
+					where: {
+						type: 'INSTANT',
+						createdById: userId!,
+					},
+					select: {
+						id: true,
+						type: true,
+						roomId: true,
+						url: true,
+						title: true,
+						createdBy: {
+							select: {
+								id: true,
+								image_url: true,
+								first_name: true,
+							},
+						},
+						description: true,
+						startTime: true,
+						createdById: true,
+						createdAt: true,
+					},
+				});
+				return response.status(200).json(new ApiResponse(200, rooms));
+			} catch (error) {
+				return response
+					.status(400)
+					.json(new ApiError(400, 'Error Happened', error));
+			}
 		}
 	}
 );
 
-export const getRoomDetails = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const roomId = request.params.roomId;
+// export const getRoomDetails = asyncHandler(
+// 	async (request: AuthenticatedRequest, response: Response) => {
+// 		const roomId = request.params.roomId;
 
-		try {
-			const meetingData = await prisma.room.findUnique({
-				where: {
-					type: 'INSTANT',
-					roomId: roomId,
-				},
-			});
+// 		try {
+// 			const meetingData = await prisma.room.findUnique({
+// 				where: {
+// 					type: 'INSTANT',
+// 					roomId: roomId,
+// 				},
+// 				select: {
+// 					id: true,
+// 					type: true,
+// 					roomId: true,
+// 					url: true,
+// 					title: true,
+// 					createdBy: {
+// 						select: {
+// 							id: true,
+// 							image_url: true,
+// 							first_name: true,
+// 						},
+// 					},
+// 					description: true,
+// 					startTime: true,
+// 					createdById: true,
+// 					createdAt: true,
+// 				},
+// 			});
 
-			return response.status(200).json(new ApiResponse(200, meetingData));
-		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error While getting a Call', error));
-		}
-	}
-);
+// 			return response.status(200).json(new ApiResponse(200, meetingData));
+// 		} catch (error) {
+// 			return response
+// 				.status(400)
+// 				.json(new ApiError(400, 'Error While getting a Call', error));
+// 		}
+// 	}
+// );
 
 export const createScheduleCall = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
@@ -124,7 +197,11 @@ export const createScheduleCall = asyncHandler(
 					description,
 					startTime,
 					endTime,
-					participantIds: participantIds ? participantIds : [user!],
+					participants: {
+						createMany: {
+							data: [participantIds ? participantIds : user!],
+						},
+					},
 					roomId: shortId,
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
 					createdById: user!,
@@ -143,48 +220,54 @@ export const createScheduleCall = asyncHandler(
 	}
 );
 
-export const getScheduledRoom = asyncHandler(
+export const getAllScheduledRoomsDetails = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.id;
-		const roomId = request.query.roomId;
+		const userId = request.auth?.userId;
 
-		if (typeof roomId === 'string') {
-			try {
-				const rooms = await prisma.room.findUnique({
-					where: {
-						type: 'SCHEDULE',
-						roomId: roomId,
+		console.log('Schedule Rooms---->>>');
+		try {
+			const rooms = await prisma.room.findMany({
+				where: {
+					type: 'SCHEDULE',
+					createdById: userId!,
+				},
+				select: {
+					id: true,
+					type: true,
+					roomId: true,
+					url: true,
+					title: true,
+					createdBy: {
+						select: {
+							id: true,
+							image_url: true,
+							first_name: true,
+							last_name: true,
+						},
 					},
-				});
-				return response.status(200).json(new ApiResponse(200, rooms));
-			} catch (error) {
-				return response
-					.status(400)
-					.json(new ApiError(400, 'Error Happened', error));
-			}
-		} else {
-			try {
-				const rooms = await prisma.room.findMany({
-					where: {
-						type: 'SCHEDULE',
-						createdById: userId!,
-					},
-				});
-				return response.status(200).json(new ApiResponse(200, rooms));
-			} catch (error) {
-				return response
-					.status(400)
-					.json(new ApiError(400, 'Error Happened', error));
-			}
+					description: true,
+					startTime: true,
+					createdById: true,
+					createdAt: true,
+				},
+			});
+
+			console.log('Schedule Rooms---->>>', rooms);
+
+			return response.status(200).json(new ApiResponse(200, rooms));
+		} catch (error) {
+			return response
+				.status(400)
+				.json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );
 
 export const updateScheduledRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const { roomId, title, description, startTime, endTime, participantIds } =
+		const { roomId, title, description, startTime, endTime, participants } =
 			request.body;
-		const userId = request.auth?.id;
+		const userId = request.auth?.userId;
 
 		try {
 			const updatedRoom = await prisma.room.update({
@@ -198,7 +281,7 @@ export const updateScheduledRoom = asyncHandler(
 					description,
 					startTime,
 					endTime,
-					participantIds,
+					participants,
 				},
 			});
 
@@ -240,24 +323,23 @@ export const deleteScheduledRoom = asyncHandler(
 	}
 );
 
-// export const getScheduledRoom = asyncHandler(
-// 	async (request: AuthenticatedRequest, response: Response) => {
-// 		const roomId = request.params.roomId;
-// 		console.log(roomId);
-// 		console.log(response);
+export const getScheduledRoom = asyncHandler(
+	async (request: AuthenticatedRequest, response: Response) => {
+		const roomId = request.params.roomId;
 
-// 		try {
-// 			const rooms = await prisma.room.findUnique({
-// 				where: {
-// 					type: 'SCHEDULE',
-// 					roomId: roomId,
-// 				},
-// 			});
-// 			return response.status(200).json(new ApiResponse(200, rooms));
-// 		} catch (error) {
-// 			return response
-// 				.status(400)
-// 				.json(new ApiError(400, 'Error Happened', error));
-// 		}
-// 	}
-// );
+		try {
+			const rooms = await prisma.room.findUnique({
+				where: {
+					type: 'SCHEDULE',
+					roomId: roomId,
+				},
+			});
+
+			return response.status(200).json(new ApiResponse(200, rooms));
+		} catch (error) {
+			return response
+				.status(400)
+				.json(new ApiError(400, 'Error Happened', error));
+		}
+	}
+);

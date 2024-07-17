@@ -1,25 +1,39 @@
-import { Home, Phone, Presentation } from 'lucide-react';
+import { Home, Laptop, Phone } from 'lucide-react';
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { Button } from './ui/button';
-import Link from 'next/link';
 import UserProfile from './UserProfile';
+import useScreenStateStore from '@/store/useScreenStateStore';
 
 const BottomNavigation = () => {
+	const setCurrentState = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
+	const currentState = useScreenStateStore((state) => state.currentScreen);
 	return (
-		<div className="fixed bottom-0 left-0 flex h-14 w-full items-center border border-t bg-background md:hidden">
+		<div className="fixed bottom-0 left-0 flex h-20 w-full items-center border border-t bg-slate-100 md:hidden">
 			<nav className="flex w-full justify-evenly gap-1">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Link href="/">
-							<Button
-								variant="ghost"
-								className="rounded-lg hover:bg-primary hover:text-white"
-								aria-label="Dashboard"
+						{/* <Link href="/"> */}
+						<Button
+							variant="ghost"
+							onClick={() => setCurrentState('dashboard')}
+							className="flex flex-col gap-1 p-0"
+							aria-label="Home"
+						>
+							<div
+								className={`${currentState === 'dashboard' ? 'bg-primary text-white' : 'text-black'} rounded-lg px-3`}
 							>
 								<Home className="size-7" />
-							</Button>
-						</Link>
+							</div>
+							<span
+								className={`${currentState === 'dashboard' ? 'font-bold' : 'font-medium'}`}
+							>
+								Home
+							</span>
+						</Button>
+						{/* </Link> */}
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
 						Dashboard
@@ -27,15 +41,25 @@ const BottomNavigation = () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Link href="/room">
-							<Button
-								variant="ghost"
-								className="rounded-lg hover:bg-primary hover:text-white"
-								aria-label="Room"
+						{/* <Link href="/room"> */}
+						<Button
+							variant="ghost"
+							onClick={() => setCurrentState('room')}
+							className="flex flex-col gap-1 p-0"
+							aria-label="Room"
+						>
+							<div
+								className={`${currentState === 'room' ? 'bg-primary text-white' : 'text-black'} rounded-lg px-3`}
 							>
 								<Phone className="size-7" />
-							</Button>
-						</Link>
+							</div>
+							<span
+								className={`${currentState === 'room' ? 'font-bold' : 'font-medium'} `}
+							>
+								Phone
+							</span>
+						</Button>
+						{/* </Link> */}
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
 						Room
@@ -43,21 +67,54 @@ const BottomNavigation = () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Link href="/meet">
-							<Button
-								variant="ghost"
-								className="rounded-lg hover:bg-primary hover:text-white"
-								aria-label="Room"
+						{/* <Link href="/room"> */}
+						<Button
+							variant="ghost"
+							onClick={() => setCurrentState('meet')}
+							className="flex flex-col gap-1 p-0"
+							aria-label="Room"
+						>
+							<div
+								className={`${currentState === 'meet' ? 'bg-primary text-white' : 'text-black'} rounded-lg px-3`}
 							>
-								<Presentation className="size-7" />
-							</Button>
-						</Link>
+								<Laptop className="size-7" />
+							</div>
+							<span
+								className={`${currentState === 'meet' ? 'font-bold' : 'font-medium'} `}
+							>
+								Conference
+							</span>
+						</Button>
+						{/* </Link> */}
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
-						Meeting
+						Conference
 					</TooltipContent>
 				</Tooltip>
 				<Tooltip>
+					<TooltipTrigger asChild>
+						{/* <Link href="/room"> */}
+						<Button
+							variant="ghost"
+							onClick={() => setCurrentState('meet')}
+							className="group flex flex-col p-0 font-medium hover:font-bold"
+							aria-label="Room"
+						>
+							<div
+								className={`rounded-lg px-3 group-hover:bg-primary group-hover:text-white`}
+							>
+								<UserProfile />
+							</div>
+							<span>Account</span>
+						</Button>
+						{/* </Link> */}
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={5}>
+						Account
+					</TooltipContent>
+				</Tooltip>
+
+				{/* <Tooltip>
 					<TooltipTrigger asChild>
 						<Button
 							variant="ghost"
@@ -70,7 +127,7 @@ const BottomNavigation = () => {
 					<TooltipContent side="right" sideOffset={5}>
 						Account
 					</TooltipContent>
-				</Tooltip>
+				</Tooltip> */}
 			</nav>
 		</div>
 
