@@ -4,24 +4,24 @@ import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@clerk/nextjs';
 import { toast } from 'react-toastify';
-import ControlPanel from '../components/ui/ControlPanel';
-import UserVideoPanel from '../components/ui/UserVideoPanel';
+import ControlPanel from './components/ControlPanel';
+import UserVideoPanel from '../components/UserVideoPanel';
 
-import RemoteUserVideoPanel from '../components/ui/RemoteUserVideoPanel';
+import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 // import ScreenSharePanel from '../components/ui/ScreenSharePanel';
 import Image from 'next/image';
-import webRTCService from '@/services/webRTCService';
 import useStreamStore from '@/store/useStreamStore';
+import WebRTC from '@/services/webRTC';
 
-const MeetRoom = ({ roomId }: { roomId: string }) => {
+const ConferenceRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
 	// const localScreenStream = useRoomStore((state) => state.localScreenStream);
-	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
+	// const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	// const [remoteStream, setRemoteStream] = useState<MediaStream>();
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const peerOffer = useStreamStore((state) => state.peerOffer);
-	const remoteStream = webRTCService.getRemoteStream();
+	const remoteStream = WebRTC.getRemoteStream();
 
 	console.log('Remote Users Stream--------->', remoteStream);
 
@@ -180,7 +180,6 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 			console.log('Notiof', { userId, username });
 
 			if (id === userId) {
-				// toast.success(`suceesfully joined ${socketId}`);
 				toast.success(`suceesfully joined`);
 			} else {
 				toast(`${username} Joined`);
@@ -208,7 +207,7 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 
 			console.log(` Client's client------->`, offer);
 
-			const answer = await webRTCService.createAnswer(offer);
+			const answer = await WebRTC.createAnswer(offer);
 
 			console.log(` HOST created answer----->`, answer);
 
@@ -290,10 +289,12 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 		async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
 			console.log('Final Negotiation is completed', answer);
 
-			await webRTCService.addAnswer(answer);
+			await WebRTC.addAnswer(answer);
 		},
 		[]
 	);
+
+	///////////////////////////////////////////////////////////////////////////////////////////
 
 	///// All socket Event Function are Executed Here
 
@@ -335,11 +336,11 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 								<>
 									<RemoteUserVideoPanel stream={remoteStream} />
 									<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-										<UserVideoPanel muted={!isMicrophoneOn} />
+										<UserVideoPanel />
 									</div>
 								</>
 							) : (
-								<UserVideoPanel muted={!isMicrophoneOn} />
+								<UserVideoPanel />
 							)}
 							{/* <ScreenSharePanel /> */}
 						</div>
@@ -395,4 +396,4 @@ const MeetRoom = ({ roomId }: { roomId: string }) => {
 	);
 };
 
-export default MeetRoom;
+export default ConferenceRoom;

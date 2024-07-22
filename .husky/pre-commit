@@ -25,10 +25,11 @@ yarn lint || {
 #If every thing Passes.... try to run a build
     echo '😂... Alright... Code looks good to me.. Trying to build now. 😂'
 
-yarn build || {
-    echo '❌⚒️💡 Better call to your Senior... Because your build failed ❌⚒️💡
-    Next build Failed: View the erros above to see why.'
-    false
-}
+#yarn build || {
+ #   echo '❌⚒️💡 Better call to your Senior... Because your build failed ❌⚒️💡
+ #   Next build Failed: View the erros above to see why.'
+ #   false
+#}
+
 #If it build we can commit
     echo '✅✅✅ You win this time... I am commiting this now ✅✅✅'

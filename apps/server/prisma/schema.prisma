@@ -59,8 +59,8 @@ model ParticipantsOnRoom {
 }
 
 model FriendShip {
-  user_id   String
-  friend_id String
+  user_id   String 
+  friend_id String 
   user      User      @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
   friend    User      @relation("UserFriendOf", fields: [friend_id], references: [id], onDelete: Cascade)
   createdAt DateTime? @default(now())
