@@ -1,11 +1,9 @@
 import http from 'http';
 import * as dotenv from 'dotenv';
-import SocketService from './services/socket';
 import app from './app';
+import socketService from './services/socket';
 
 dotenv.config();
-
-const socketService = new SocketService();
 
 const httpServer = http.createServer(app);
 

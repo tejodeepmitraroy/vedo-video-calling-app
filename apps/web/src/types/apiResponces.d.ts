@@ -32,6 +32,7 @@ interface FriendListResponse {
 	last_name: string;
 	email: string;
 	image_url: string;
-	created_at: Date | null;
+	friendShip: boolean;
+	createdAt: Date | null;
 	updatedAt: Date | null;
 }

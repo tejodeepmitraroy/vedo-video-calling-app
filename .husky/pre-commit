@@ -2,14 +2,6 @@ yarn lint:fix
 yarn prettier:fix
 
 
-#Check tsconfig standards
-# yarn check-types || {
-#     echo '😂🤮❌Failed Type check😂🤮❌
-#     Are you seriously trying to write that? Make the changes required above.'
-#     false;
-# }
-
-
 #Check Prettier standards
 yarn prettier || {
     echo '😂🤮Its Raw - Your styling looks disgusting😂🤮
@@ -30,5 +22,6 @@ yarn build || {
     Next build Failed: View the erros above to see why.'
     false
 }
+
 #If it build we can commit
     echo '✅✅✅ You win this time... I am commiting this now ✅✅✅'

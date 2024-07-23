@@ -1,6 +1,7 @@
 'use client';
-import webRTCService from '@/services/webRTCService';
-// import webRTCService from '@/services/webRTCService';
+
+import { useWebRTC } from '@/context/WebRTCContext';
+// import WebRTC from '@/services/webRTC';
 import dynamic from 'next/dynamic';
 import React, { FC } from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
@@ -9,7 +10,8 @@ interface RemoteUserVideoPanelProps {
 	stream: MediaStream | undefined;
 }
 const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
-	const remoteStream = webRTCService.getRemoteStream();
+	const { getRemoteStream } = useWebRTC();
+	const remoteStream = getRemoteStream();
 
 	console.log('current remote stream', stream);
 	return (

@@ -9,8 +9,7 @@
     "prettier": "turbo run prettier",
     "prettier:fix": "turbo run prettier:fix",
     "prepare": "husky",
-
-    "fix:all": "yarn prettier && yarn prettier:fix && yarn lint:fix && yarn lint && yarn build"
+    "fix:all": "yarn lint:fix && yarn prettier:fix && yarn prettier && yarn lint && yarn build"
   },
   "devDependencies": {
     "husky": "^9.0.11",

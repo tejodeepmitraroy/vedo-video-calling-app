@@ -38,12 +38,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 				_socket.disconnect();
 			};
 		}
-
-		// socketService.connect();
-
-		// return () => {
-		// 	socketService.disconnect();
-		// };
 	}, [isSignedIn]);
 
 	const socketOn: ISocketContext['socketOn'] = useCallback(

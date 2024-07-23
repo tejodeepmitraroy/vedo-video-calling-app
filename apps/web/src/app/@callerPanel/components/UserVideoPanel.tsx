@@ -1,13 +1,10 @@
 'use client';
 import useStreamStore from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
-import React, { FC } from 'react';
+import React from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
-interface UserVideoPanelProps {
-	muted: boolean;
-}
 
-const UserVideoPanel: FC<UserVideoPanelProps> = ({ muted }) => {
+const UserVideoPanel = () => {
 	const localStream = useStreamStore((state) => state.localStream);
 
 	// console.log("STREAM URL------>",URL.createObjectURL(localStream!))
@@ -25,7 +22,7 @@ const UserVideoPanel: FC<UserVideoPanelProps> = ({ muted }) => {
 						height: '100%',
 						objectFit: 'contain',
 					}}
-					muted={muted}
+					muted={true}
 					width={'100%'}
 					height={'100%'}
 				/>

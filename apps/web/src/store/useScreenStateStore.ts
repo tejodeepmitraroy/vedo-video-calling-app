@@ -7,7 +7,7 @@ interface useScreenStateStore {
 }
 
 const useScreenStateStore = create<useScreenStateStore>((set) => ({
-	currentScreen: 'dashboard',
+	currentScreen: 'Dashboard',
 	setCurrentScreen: (currentScreen) => set({ currentScreen }),
 }));
 
