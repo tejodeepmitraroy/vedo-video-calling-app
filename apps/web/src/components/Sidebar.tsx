@@ -26,6 +26,7 @@ import {
 import useDeviceStore from '@/store/useDeviceStore';
 
 import { Label } from './ui/label';
+import Link from 'next/link';
 
 const Sidebar = () => {
 	const setCurrentState = useScreenStateStore(
@@ -42,6 +43,7 @@ const Sidebar = () => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
+
 	return (
 		<aside className="inset-y fixed left-0 z-20 hidden h-full w-[60px] flex-col md:flex">
 			<div className="flex h-[60px] items-center justify-center pt-2">
@@ -59,15 +61,17 @@ const Sidebar = () => {
 			<nav className="item flex h-full flex-col items-center gap-2 pt-3">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setCurrentState('Dashboard')}
-							className={`${currentState === 'Dashboard' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
-							aria-label="Home"
-						>
-							<Home className="size-5" />
-						</Button>
+						<Link href={'/'}>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setCurrentState('Dashboard')}
+								className={`${currentState === 'Dashboard' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
+								aria-label="Home"
+							>
+								<Home className="size-5" />
+							</Button>
+						</Link>
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
 						Dashboard
@@ -75,16 +79,18 @@ const Sidebar = () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setCurrentState('Call')}
-							// className={`${option === 'room' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
-							className={`${currentState === 'Call' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
-							aria-label="Models"
-						>
-							<Phone className="size-5" />
-						</Button>
+						<Link href={'/'}>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setCurrentState('Call')}
+								// className={`${option === 'room' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
+								className={`${currentState === 'Call' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
+								aria-label="Models"
+							>
+								<Phone className="size-5" />
+							</Button>
+						</Link>
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
 						Call
@@ -96,7 +102,7 @@ const Sidebar = () => {
 							variant="ghost"
 							size="icon"
 							onClick={() => setCurrentState('Conference')}
-							className={`${currentState === 'Conference' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
+							className={`${currentState === 'Conference' || currentState === 'ConferenceRoom' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
 							aria-label="Models"
 						>
 							<Laptop className="size-5" />

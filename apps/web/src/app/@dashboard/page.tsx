@@ -61,7 +61,7 @@ export default function Dashboard() {
 			const roomId = data.data.roomId;
 			// const userId = data.data.createdById;
 
-			router.push(`/room/${roomId}`);
+			router.push(`?roomId=${roomId}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -84,7 +84,7 @@ export default function Dashboard() {
 
 				console.log(data);
 
-				router.push(`/room/${roomId}`);
+				router.push(`?roomId=${roomId}`);
 			} catch (error) {
 				console.log(error);
 			}

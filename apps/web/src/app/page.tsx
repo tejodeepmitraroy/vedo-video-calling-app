@@ -1,33 +1,32 @@
 'use client';
 import useScreenStateStore from '@/store/useScreenStateStore';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import Dashboard from './@dashboard/page';
 import CallRoom from './@callRoom/page';
 import ConferenceRoom from './@conferenceRoom/page';
-// import { useSearchParams } from 'next/navigation';
-// import WaitingLobby from './room/[roomId]/@waitingLobby/page';
+import { useSearchParams } from 'next/navigation';
+import CallPanel from './@callerPanel/page';
+
 
 const Home = () => {
 	const currentState = useScreenStateStore((state) => state.currentScreen);
-	// const setCurrentState = useScreenStateStore(
-	// 	(state) => state.setCurrentScreen
-	// );
-	// const searchParams = useSearchParams();
-	// const [room, setRoom] = useState<string>('');
+	const setCurrentState = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
+	const searchParams = useSearchParams();
+	const roomId = searchParams.get('roomId');
 
-	// const roomId = searchParams.get('roomId');
 
-	// console.log("Room==========>",roomId)
+	console.log('Room==========>', roomId);
 
-	// useEffect(() => {
-	// 	if (roomId) {
-	// 		setRoom(roomId);
-	// 		setCurrentState('WaitingLobby');
-	// 	}
-	// }, [roomId, setCurrentState]);
+	useEffect(() => {
+		if (roomId) {
+			setCurrentState('ConferenceRoom');
+		}
+	}, [roomId, setCurrentState]);
 
 	console.log('Component');
 
@@ -41,7 +40,7 @@ const Home = () => {
 						{currentState === 'Dashboard' && <Dashboard />}
 						{currentState === 'Call' && <CallRoom />}
 						{currentState === 'Conference' && <ConferenceRoom />}
-						{/* {currentState === 'WaitingLobby' && <WaitingLobby roomId={room} />} */}
+						{currentState === 'ConferenceRoom' && <CallPanel />}
 					</>
 				</main>
 			</div>

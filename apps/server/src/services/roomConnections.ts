@@ -35,7 +35,12 @@ export function roomConnections(
 			profilePic: string | null | undefined;
 			offer: RTCSessionDescriptionInit;
 		}) => {
-			console.log('User want to ask-->', { roomId, username, profilePic });
+			console.log('User want to ask-->', {
+				roomId,
+				username,
+				profilePic,
+				offer,
+			});
 
 			// console.log(
 			//   'Host User Id--->',
@@ -46,7 +51,7 @@ export function roomConnections(
 
 			if (rooms[roomId]) {
 				if (rooms[roomId].length === 2) {
-					io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+					io.to(socket.id).emit('notification:roomLimitFull');
 				} else {
 					const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
 					if (hostSocketId) {
@@ -57,27 +62,12 @@ export function roomConnections(
 							offer,
 						});
 					} else {
-						io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+						io.to(socket.id).emit('notification:hostIsNoExistInRoom');
 					}
 				}
 			} else {
-				io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+				io.to(socket.id).emit('notification:hostIsNoExistInRoom');
 			}
-
-			// if (rooms[roomId].length === 2) {
-			// 	io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
-			// }
-
-			// if (hostSocketId) {
-			// 	io.to(hostSocketId!).emit('event:userWantToEnter', {
-			// 		username,
-			// 		profilePic,
-			// 		socketId: socket.id,
-			// 		offer,
-			// 	});
-			// } else {
-			// 	io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
-			// }
 		}
 	);
 
@@ -148,7 +138,7 @@ export function roomConnections(
 
 			console.log('USER ENTERED AND ROOM DETAILS+============>>>>', rooms);
 
-			io.to(socket.id).emit('event:enterRoom', {});
+			io.to(socket.id).emit('event:enterRoom');
 
 			io.to(roomId).emit('notification:informAllNewUserAdded', {
 				userId,
@@ -161,7 +151,6 @@ export function roomConnections(
 				username,
 				roomId,
 				socketId: socket.id,
-
 				roomStatus: rooms[roomId],
 			});
 
@@ -225,6 +214,23 @@ export function roomConnections(
 				from: socket.id,
 				answer,
 			});
+		}
+	);
+
+	socket.on(
+		'event:sendIceCandidate',
+		({
+			remoteSocketId,
+			iceCandidate,
+		}: {
+			remoteSocketId: string;
+			iceCandidate: RTCPeerConnection;
+		}) => {
+
+
+			socket
+				.to(remoteSocketId)
+				.emit('event:sendIceCandidate', { iceCandidate });
 		}
 	);
 

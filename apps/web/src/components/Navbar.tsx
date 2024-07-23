@@ -7,8 +7,9 @@ import { toast } from 'react-toastify';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth } from '@clerk/nextjs';
 import { Phone, PhoneOff } from 'lucide-react';
-import WebRTC from '@/services/webRTC';
+
 import useDeviceStore from '@/store/useDeviceStore';
+import webRTC from '@/services/webRTC';
 
 const NavBar = () => {
 	const { userId } = useAuth();
@@ -22,7 +23,7 @@ const NavBar = () => {
 
 	// Get All Media Devices When Component Render
 	const getDevices = useCallback(async () => {
-		const device = await WebRTC.getAllMediaDevices();
+		const device = await webRTC.getAllMediaDevices();
 		setMediaDevices(device);
 		console.log('Devices=========>', device);
 	}, [setMediaDevices]);
@@ -46,6 +47,88 @@ const NavBar = () => {
 			toast.info('Connecting with server');
 		}
 	}, [setOnLineStatus, socket]);
+
+	////// Conference Rooms all Socket Notification👇
+	/////////////////////////////////////////////////////////////////////
+
+	//Waiting Rooms Event & Notification Functions👇
+	////////////////////////////////////////////////////////////
+
+	const roomEnterPermissionDenied = useCallback(() => {
+		// setAskToEnter(false);
+		toast.error("Sorry host don't want to Enter you");
+	}, []);
+
+	const handleHostIsNoExistInRoom = useCallback(() => {
+		// setAskToEnter(false);
+		toast.warn(`Host is Not Existed in Room. Please wait`);
+	}, []);
+
+	const handleRoomLimitFull = useCallback(() => {
+		// setAskToEnter(false);
+		toast.warn(`Room Limit Full`);
+	}, []);
+
+	// Waiting Rooms notification👇
+	////////////////////////////////////////////////////////////
+
+	useEffect(() => {
+		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+		socketOn(
+			'notification:roomEnterPermissionDenied',
+			roomEnterPermissionDenied
+		);
+		socketOn('notification:roomLimitFull', handleRoomLimitFull);
+		return () => {
+			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+			socketOff(
+				'notification:roomEnterPermissionDenied',
+				roomEnterPermissionDenied
+			);
+			socketOff('notification:roomLimitFull', handleRoomLimitFull);
+		};
+	}, [
+		handleHostIsNoExistInRoom,
+		handleRoomLimitFull,
+		roomEnterPermissionDenied,
+		socketOff,
+		socketOn,
+	]);
+
+	//Meeting Rooms Event & Notification Functions👇
+	////////////////////////////////////////////////////////////
+
+	//// All socket Notification Function are Define Here
+	/////////////////////////////////////////////////////
+	const handleInformAllNewUserAdded = useCallback(
+		({ userId: id, username }: { userId: string; username: string }) => {
+			console.log('Notiof', { userId, username });
+
+			if (id === userId) {
+				toast.success(`suceesfully joined`);
+			} else {
+				toast(`${username} Joined`);
+			}
+		},
+		[userId]
+	);
+	const handleRoomIsFull = useCallback(async () => {
+		toast.loading(`roomIsFull`);
+	}, []);
+
+	// Meeting Rooms notification👇
+	////////////////////////////////////////////////////////////
+
+	useEffect(() => {
+		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
+
+		return () => {
+			socketOff(
+				'notification:informAllNewUserAdded',
+				handleInformAllNewUserAdded
+			);
+		};
+	}, [handleInformAllNewUserAdded, handleRoomIsFull, socketOff, socketOn]);
 
 	/////////////////////////////////////////////////////////////////////
 	// Call Accept & Received

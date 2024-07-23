@@ -13,6 +13,8 @@ import {
 import {
 	EllipsisVertical,
 	Phone,
+	Plus,
+	Rss,
 	Search,
 	Trash2,
 	UserRoundPlus,
@@ -24,8 +26,6 @@ import Image from 'next/image';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useSocket } from '@/context/SocketContext';
 import { toast } from 'react-toastify';
-
-import WebRTC from '@/services/webRTC';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -34,10 +34,12 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import useDeviceStore from '@/store/useDeviceStore';
+
+import { useRouter } from 'next/navigation';
 
 const ConferenceRoom = () => {
 	const { getToken } = useAuth();
+	const router = useRouter();
 	const { user } = useUser();
 	const friendListArray = useGlobalStore((state) => state.friendList);
 	const [friendList, setFriendList] = useState<
@@ -48,23 +50,52 @@ const ConferenceRoom = () => {
 	const setModifiedFriendList = useGlobalStore((state) => state.setFriendList);
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
-	const [userName, setUserName] = useState<string | undefined>();
-	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-	const selectedMicrophone = useDeviceStore(
-		(state) => state.selectedMicrophone
-	);
+	const [roomId, setRoomId] = useState<string>('');
+	
+	//////////////////////////////////////////////////////////////////////////////////////////
 
-	const handleSendFriend = async (friendId: string) => {
+	const handleInstantCreateCall = async () => {
 		const token = await getToken();
-		console.log('Friend adding==========>', friendId);
-		if (friendId) {
-			try {
-				toast.info('User Addding');
-				const { data } = await axios.post(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/friend`,
+		console.log('Token---->', token);
+
+		try {
+			const { data } = await toast.promise(
+				axios.post(
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
+					{},
 					{
-						friendId,
-					},
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+					}
+				),
+
+				{
+					pending: 'Wait to create a new Room',
+					success: 'New Room Created👌',
+					error: 'Error happend, New Room Creation rejected 🤯',
+				}
+			);
+
+			console.log(data.data);
+			const roomId = data.data.roomId;
+			// const userId = data.data.createdById;
+
+			router.push(`?roomId=${roomId}`);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	const handleEnterRoom = async () => {
+		const token = await getToken();
+		console.log('Enter Room', roomId);
+		if (roomId) {
+			try {
+				const { data } = await axios<ApiResponse>(
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
 					{
 						headers: {
 							'Content-Type': 'application/json',
@@ -73,45 +104,16 @@ const ConferenceRoom = () => {
 					}
 				);
 
-				const response = data.data;
+				console.log(data);
 
-				toast.success('User Successfully Added');
-
-				console.log('Respoce Details----->>', response);
-				return response;
+				router.push(`?roomId=${roomId}`);
 			} catch (error) {
 				console.log(error);
 			}
 		}
 	};
 
-	const getUnknownUser = async (value: string) => {
-		const token = await getToken();
-		console.log('UserId==========>', value);
-		if (value.length === 0) {
-			return [];
-		} else {
-			try {
-				const { data } = await axios(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user?user=${value}`,
-					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
-					}
-				);
-
-				const response: FriendListResponse[] = data.data;
-
-				console.log('friendList=======>>>>>', friendList);
-
-				return response;
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	};
+	///////////////////////////////////////////////////////////////////////////////////////////
 
 	const getFriendList = useCallback(async () => {
 		const token = await getToken();
@@ -138,52 +140,6 @@ const ConferenceRoom = () => {
 	console.log(friendList);
 	console.log('friendListArray', friendListArray);
 
-	const handleSearch = async () => {
-		console.log('value length', userName!.length, userName);
-		if (userName!.length === 0) {
-			setFriendList(friendListArray);
-		} else {
-			const searchedResult = friendList?.filter(
-				(item) => item.first_name === userName
-			);
-
-			if (searchedResult?.length === 0) {
-				const result = await getUnknownUser(userName!);
-				console.log('New Result=======>', result);
-				setFriendList(result);
-			} else {
-				setFriendList(searchedResult);
-			}
-		}
-	};
-
-	const handleRemoveFriend = async (friendId: string) => {
-		const token = await getToken();
-		console.log('Remove Friend==========>', friendId);
-		if (friendId) {
-			try {
-				const { data } = await axios.delete(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/friend?friendId=${friendId}`,
-					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
-					}
-				);
-
-				const response = data.data;
-
-				toast.success('friend Successfully Removed');
-
-				console.log('Respoce Details----->>', response);
-				return response;
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	};
-
 	const handleCallUser = (userId: string) => {
 		socketEmit('callUser', { to: userId, userName: user?.fullName });
 	};
@@ -191,25 +147,6 @@ const ConferenceRoom = () => {
 	const handleUserIsNotOnline = useCallback(() => {
 		toast.warn(`User is Offline`);
 	}, []);
-
-	const getMediaStream = useCallback(async () => {
-		const localStream = await WebRTC.getUserMedia({
-			camera: selectedCamera,
-			microphone: selectedMicrophone,
-		});
-
-		console.log('localStream=========>>>', localStream);
-	}, [selectedCamera, selectedMicrophone]);
-
-	const stopMediaStream = useCallback(async () => {
-		const localStream = await WebRTC.disconnectPeer();
-
-		console.log('localStream=========>>>', localStream);
-	}, []);
-
-	useEffect(() => {
-		getMediaStream();
-	}, [getMediaStream]);
 
 	useEffect(() => {
 		getFriendList();
@@ -226,17 +163,30 @@ const ConferenceRoom = () => {
 		<div className="flex flex-1 rounded-lg bg-background shadow-sm">
 			<div className="flex w-full gap-2">
 				<div className="h-full w-full max-w-[27rem] rounded-lg rounded-l-lg rounded-r-none border bg-card bg-slate-100 text-card-foreground shadow-sm">
-					<div className="flex h-32 flex-col gap-3 space-y-1.5 p-6">
-						<div className="text-2xl font-semibold leading-none tracking-tight">
-							Search for a Call
+					<div className="flex h-32 flex-col gap-2 space-y-1.5 p-6">
+						<div className="flex w-full items-center gap-5">
+							<Button
+								// variant={'outline'}
+								onClick={() => handleInstantCreateCall()}
+								className="flex w-1/2 gap-2"
+							>
+								{' '}
+								<Plus />
+								Instant Room
+							</Button>
+							<Button className="flex w-1/2 gap-2">
+								<Rss />
+								Schedule Room
+							</Button>
 						</div>
-						<div className="flex gap-7 text-sm text-muted-foreground">
+						<div className="flex gap-3 text-sm text-muted-foreground">
 							<Input
-								onChange={(event) => setUserName(event.target.value)}
+								onChange={(event) => setRoomId(event.target.value)}
 								placeholder="Name, email"
 							/>
-							<Button onClick={() => handleSearch()}>
+							<Button onClick={() => handleEnterRoom()} className="flex gap-2">
 								<Search />
+								Join
 							</Button>
 						</div>
 					</div>
@@ -279,10 +229,7 @@ const ConferenceRoom = () => {
 														<DropdownMenuContent>
 															<DropdownMenuLabel>Options</DropdownMenuLabel>
 															<DropdownMenuSeparator />
-															<DropdownMenuItem
-																onClick={() => handleRemoveFriend(friend.id)}
-																className="flex items-center gap-2"
-															>
+															<DropdownMenuItem className="flex items-center gap-2">
 																<Trash2 size={'20'} /> Delete
 															</DropdownMenuItem>
 														</DropdownMenuContent>
@@ -290,7 +237,6 @@ const ConferenceRoom = () => {
 												) : (
 													<Button
 														size={'sm'}
-														onClick={() => handleSendFriend(friend.id)}
 														className="z-30 group-hover:bg-background group-hover:text-primary"
 													>
 														<UserRoundPlus />
@@ -421,14 +367,7 @@ const ConferenceRoom = () => {
 								>
 									<Phone />
 								</Button>
-								<Button
-									onClick={() => {
-										stopMediaStream();
-									}}
-									className="flex items-center gap-2 bg-green-600"
-								>
-									Stop
-								</Button>
+							
 							</CardFooter>
 						</Card>
 					) : (

@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
+// import { roomConnections } from './roomConnections';
 import { roomConnections } from './roomConnections';
-import { callConnections } from './callConnection';
 
 // const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
 // 	let result: string | undefined;
@@ -49,6 +49,8 @@ class SocketService {
 				socket.emit('userConnected');
 			});
 
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			roomConnections(
 				socket,
 				io,
@@ -56,27 +58,6 @@ class SocketService {
 				this.socketIdToUserIdMap,
 				this.hostSocketIdToRoomId
 			);
-
-			callConnections(
-				socket,
-				io,
-				this.rooms,
-				this.socketIdToUserIdMap,
-				this.userIdToSocketIdMap,
-				this.hostSocketIdToRoomId
-			);
-
-			// socket.on('event:askToEnter');
-
-			// function KeyByValue(map: Map<string, string>, KeyValue: string) {
-			// 	let result: string | undefined;
-
-			// 	console.log('KeyByValue', map);
-			// 	map.forEach((value, key) => {
-			// 		result = value === KeyValue ? key : result;
-			// 	});
-			// 	return result;
-			// }
 
 			// socket.on(
 			// 	'event:askToEnter',
@@ -98,22 +79,45 @@ class SocketService {
 			// 		//   KeyByValue(this.hostSocketIdToRoomId, roomId)
 			// 		// );
 
-			// 		const hostSocketId = KeyByValue(this.hostSocketIdToRoomId, roomId);
+			// 		console.log(this.rooms[roomId]);
 
-			// 		if (this.rooms[roomId].length === 2) {
-			// 			io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
-			// 		}
-
-			// 		if (hostSocketId) {
-			// 			io.to(hostSocketId!).emit('event:userWantToEnter', {
-			// 				username,
-			// 				profilePic,
-			// 				socketId: socket.id,
-			// 				offer,
-			// 			});
+			// 		if (this.rooms[roomId]) {
+			// 			if (this.rooms[roomId].length === 2) {
+			// 				io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+			// 			} else {
+			// 				const hostSocketId = KeyByValue(
+			// 					this.hostSocketIdToRoomId,
+			// 					roomId
+			// 				);
+			// 				if (hostSocketId) {
+			// 					io.to(hostSocketId!).emit('event:userWantToEnter', {
+			// 						username,
+			// 						profilePic,
+			// 						socketId: socket.id,
+			// 						offer,
+			// 					});
+			// 				} else {
+			// 					io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+			// 				}
+			// 			}
 			// 		} else {
 			// 			io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
 			// 		}
+
+			// 		// if (rooms[roomId].length === 2) {
+			// 		// 	io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+			// 		// }
+
+			// 		// if (hostSocketId) {
+			// 		// 	io.to(hostSocketId!).emit('event:userWantToEnter', {
+			// 		// 		username,
+			// 		// 		profilePic,
+			// 		// 		socketId: socket.id,
+			// 		// 		offer,
+			// 		// 	});
+			// 		// } else {
+			// 		// 	io.to(socket.id).emit('notification:hostIsNoExistInRoom', {});
+			// 		// }
 			// 	}
 			// );
 
@@ -182,6 +186,11 @@ class SocketService {
 			// 		socket.join(roomId);
 			// 		this.rooms[roomId].push(socket.id);
 
+			// 		console.log(
+			// 			'USER ENTERED AND ROOM DETAILS+============>>>>',
+			// 			this.rooms
+			// 		);
+
 			// 		io.to(socket.id).emit('event:enterRoom', {});
 
 			// 		io.to(roomId).emit('notification:informAllNewUserAdded', {
@@ -190,12 +199,13 @@ class SocketService {
 			// 			socketId: socket.id,
 			// 		});
 
+					
+
 			// 		console.log('User Joined in Room', {
 			// 			userId,
 			// 			username,
 			// 			roomId,
 			// 			socketId: socket.id,
-
 			// 			roomStatus: this.rooms[roomId],
 			// 		});
 
@@ -313,6 +323,19 @@ class SocketService {
 			// 	console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);
 			// 	// the Set contains at least the socket ID
 			// });
+
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// callConnections(
+			// 	socket,
+			// 	io,
+			// 	this.rooms,
+			// 	this.socketIdToUserIdMap,
+			// 	this.userIdToSocketIdMap,
+			// 	this.hostSocketIdToRoomId
+			// );
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			// Disconnection Socket
 			socket.on('disconnect', (reason) => {

@@ -192,6 +192,8 @@ const CallRoom = () => {
 		toast.warn(`User is Offline`);
 	}, []);
 
+	/////////////////////////////////////////////////////////////////////////
+
 	const getMediaStream = useCallback(async () => {
 		const localStream = await WebRTC.getUserMedia({
 			camera: selectedCamera,
@@ -209,7 +211,10 @@ const CallRoom = () => {
 
 	useEffect(() => {
 		getMediaStream();
-	}, [getMediaStream]);
+		return()=>{
+			stopMediaStream()
+		}
+	}, [getMediaStream, stopMediaStream]);
 
 	useEffect(() => {
 		getFriendList();

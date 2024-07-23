@@ -1,6 +1,7 @@
 'use client';
-class WebRTCService2 {
-	private peer: RTCPeerConnection | null = null;
+class webRTCService {
+	peer: RTCPeerConnection | null = null;
+	// private peer: RTCPeerConnection | null;
 	private localStream: MediaStream | null;
 	private remoteStream: MediaStream | null;
 
@@ -22,6 +23,29 @@ class WebRTCService2 {
 
 		this.localStream = null;
 		this.remoteStream = new MediaStream();
+		//Peer Connection Lister
+		this.peer.addEventListener('signalingstatechange', (event) => {
+			console.log('signaling Event Change!');
+			console.log('Event=======>', event);
+			console.log(this.peer?.signalingState);
+		});
+
+		// //Listen Ice Candidate
+		// this.peer.addEventListener('icecandidate', (event) => {
+		// 	console.log('Found and ice candidate');
+		// 	if (event.candidate) {
+		// 		//emit the ice candidate to the signaling server
+		// 		console.log(event.candidate);
+		// 	}
+		// });
+
+		this.peer.addEventListener('track', async (event) => {
+			event.streams[0].getTracks().forEach((track) => {
+				console.log('Remote tracks---->', track);
+				console.log('Remote Stream---->', this.remoteStream);
+				this.remoteStream?.addTrack(track);
+			});
+		});
 	}
 
 	public async getAllMediaDevices() {
@@ -84,15 +108,51 @@ class WebRTCService2 {
 		}
 	}
 
-	async getOffer(): Promise<RTCSessionDescriptionInit | undefined> {
-		// await this.startConnection();
+	async createOffer(): Promise<RTCSessionDescriptionInit | undefined> {
+		if (this.peer && this.localStream) {
+			this.localStream.getTracks().forEach((track) => {
+				console.log('sending tracks---->', track);
+				this.peer?.addTrack(track, this.localStream as MediaStream);
+			});
 
-		if (this.peer) {
 			const offer = await this.peer.createOffer();
-			const sessionDescription = new RTCSessionDescription(offer!);
-			await this.peer?.setLocalDescription(sessionDescription);
+			await this.peer.setLocalDescription(new RTCSessionDescription(offer));
+
 			return offer;
 		}
+	}
+
+	async getAnswer(offer: RTCSessionDescriptionInit) {
+		if (this.peer) {
+			await this.peer.setRemoteDescription(offer);
+			const answer = await this.peer.createAnswer();
+
+			await this.peer.setLocalDescription(new RTCSessionDescription(answer));
+			return answer;
+		}
+	}
+
+	async setRemoteDescription(answer: RTCSessionDescriptionInit) {
+		if (this.peer) {
+			await this.peer.setRemoteDescription(new RTCSessionDescription(answer));
+		}
+	}
+
+	public connectionStatus() {
+		if (this.peer) {
+			if (this.peer.connectionState === 'connected') {
+				return 'connected';
+			} else {
+				return 'not connected';
+			}
+		}
+	}
+	async disconnectPeer() {
+		this.peer?.close();
+		this.peer = null;
+		this.localStream?.getTracks().forEach((track) => track.stop());
+		this.localStream = null;
+		this.remoteStream = null;
 	}
 
 	// public async startConnection() {
@@ -129,51 +189,6 @@ class WebRTCService2 {
 	// 	await this.peer?.setLocalDescription(sessionDescription);
 	// 	return answer;
 	// }
-
-	async addAnswer(answer: RTCSessionDescriptionInit) {
-		if (this.peer) {
-			// await this.createPeerConnection();
-			const remoteDesc = new RTCSessionDescription(answer);
-			await this.peer?.setRemoteDescription(remoteDesc);
-		}
-	}
-
-	async setLocalDescription(answer: RTCSessionDescriptionInit) {
-		if (this.peer) {
-			const remoteDesc = new RTCSessionDescription(answer);
-			await this.peer.setRemoteDescription(remoteDesc);
-		}
-	}
-
-	async disconnectPeer() {
-		this.peer?.close();
-		this.peer = null;
-		this.localStream?.getTracks().forEach((track) => track.stop());
-		this.localStream = null;
-		this.remoteStream = null;
-	}
-
-	async createAnswer(offer: RTCSessionDescriptionInit) {
-		// if (this.peer && this.localStream) {
-		// await this.startConnection();
-
-		await this.peer?.setRemoteDescription(new RTCSessionDescription(offer));
-
-		const answer = await this.peer?.createAnswer();
-		const sessionDescription = new RTCSessionDescription(answer!);
-		await this.peer?.setLocalDescription(sessionDescription);
-		return answer;
-		// }
-	}
-
-	// async addAnswer(answer: RTCSessionDescriptionInit) {
-	// 	if (this.peer) {
-	// 		// await this.createPeerConnection();
-	// 		// const remoteDesc = new RTCSessionDescription(answer);
-	// 		await this.peer?.setRemoteDescription(answer);
-	// 	}
-	// }
 }
 
-const webRTC = new WebRTCService2();
-export default webRTC;
+export default new webRTCService();
