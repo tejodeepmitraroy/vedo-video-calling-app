@@ -199,8 +199,6 @@ class SocketService {
 			// 			socketId: socket.id,
 			// 		});
 
-					
-
 			// 		console.log('User Joined in Room', {
 			// 			userId,
 			// 			username,

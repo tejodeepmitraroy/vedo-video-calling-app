@@ -226,8 +226,6 @@ export function roomConnections(
 			remoteSocketId: string;
 			iceCandidate: RTCPeerConnection;
 		}) => {
-
-
 			socket
 				.to(remoteSocketId)
 				.emit('event:sendIceCandidate', { iceCandidate });

@@ -33,9 +33,11 @@ export default function Dashboard() {
 	const router = useRouter();
 	const { getToken } = useAuth();
 
+	console.log('Dashboard Component++++++++++++');
+
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
-		console.log('Token---->', token);
+		// console.log('Token---->', token);
 
 		try {
 			const { data } = await toast.promise(
@@ -93,7 +95,7 @@ export default function Dashboard() {
 
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
-		console.log('Token---->', token);
+		// console.log('Token---->', token);
 
 		try {
 			const { data } = await axios<ApiResponse>(

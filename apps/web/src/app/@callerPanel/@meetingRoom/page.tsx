@@ -11,7 +11,8 @@ import useStreamStore from '@/store/useStreamStore';
 
 import ControlPanel from './components/ControlPanel';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-import webRTC from '@/services/webRTC';
+// import webRTC from '@/services/webRTC';
+import { useWebRTC } from '@/context/WebRTCContext';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
@@ -21,7 +22,17 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const peerOffer = useStreamStore((state) => state.peerOffer);
-	const remoteStream = webRTC.getRemoteStream();
+	const {
+		peer,
+		getRemoteStream,
+		createOffer,
+		getAnswer,
+		setRemoteDescription,
+		connectionStatus,
+	} = useWebRTC();
+
+	// const remoteStream = webRTC.getRemoteStream();
+	const remoteStream = getRemoteStream();
 
 	console.log('Remote Users Stream--------->', remoteStream);
 
@@ -207,13 +218,15 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 			console.log(` Client's client------->`, offer);
 
-			const answer = await webRTC.getAnswer(offer);
+			// const answer = await webRTC.getAnswer(offer);
+			const answer = await getAnswer(offer);
 
 			console.log(` HOST created answer----->`, answer);
 
 			console.log(` HOST's offer-------->`, peerOffer);
 
-			const hostOffer = await webRTC.createOffer();
+			// const hostOffer = await webRTC.createOffer();
+			const hostOffer = await createOffer();
 			setRemoteSocketId(socketId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				socketId,
@@ -223,7 +236,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			});
 			// handleCallUser(socketId);
 		},
-		[peerOffer, setRemoteSocketId, socketEmit]
+		[createOffer, getAnswer, peerOffer, setRemoteSocketId, socketEmit]
 	);
 
 	const roomEnterPermissionDenied = useCallback(
@@ -233,7 +246,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[socketEmit]
 	);
 
-	console.log('Connection Status========>', webRTC.connectionStatus());
+	// console.log('Connection Status========>', webRTC.connectionStatus());
+	console.log('Connection Status========>', connectionStatus());
 
 	const userWantToEnter = useCallback(
 		async ({
@@ -298,9 +312,10 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
 			console.log('Final Negotiation is completed', answer);
 
-			await webRTC.setRemoteDescription(answer);
+			// await webRTC.setRemoteDescription(answer);
+			setRemoteDescription(answer);
 		},
-		[]
+		[setRemoteDescription]
 	);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,28 +339,30 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	);
 
 	useEffect(() => {
-		webRTC.peer?.addEventListener('icecandidate', handleSendIceCandidate);
+		// webRTC.peer?.addEventListener('icecandidate', handleSendIceCandidate);
+		peer?.addEventListener('icecandidate', handleSendIceCandidate);
 
 		return () => {
-			webRTC.peer?.removeEventListener('icecandidate', handleSendIceCandidate);
+			// webRTC.peer?.removeEventListener('icecandidate', handleSendIceCandidate);
+			peer?.removeEventListener('icecandidate', handleSendIceCandidate);
 		};
-	}, [handleSendIceCandidate]);
+	}, [handleSendIceCandidate, peer]);
 
 	const handleAddIceCandidate = useCallback(
 		async ({ iceCandidate }: { iceCandidate: any }) => {
 			if (iceCandidate) {
 				try {
-					console.log('From', remoteSocketId);
 					console.log(
 						'=========================Get Ice Candidate=================='
 					);
-					await webRTC.peer?.addIceCandidate(iceCandidate);
+					// await webRTC.peer?.addIceCandidate(iceCandidate);
+					await peer?.addIceCandidate(iceCandidate);
 				} catch (e) {
 					console.error('Error adding received ice candidate', e);
 				}
 			}
 		},
-		[]
+		[peer]
 	);
 
 	useEffect(() => {

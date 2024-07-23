@@ -51,7 +51,7 @@ const ConferenceRoom = () => {
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [roomId, setRoomId] = useState<string>('');
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleInstantCreateCall = async () => {
@@ -367,7 +367,6 @@ const ConferenceRoom = () => {
 								>
 									<Phone />
 								</Button>
-							
 							</CardFooter>
 						</Card>
 					) : (

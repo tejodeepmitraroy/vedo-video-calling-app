@@ -25,7 +25,6 @@ import useGlobalStore from '@/store/useGlobalStore';
 import { useSocket } from '@/context/SocketContext';
 import { toast } from 'react-toastify';
 
-import WebRTC from '@/services/webRTC';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -34,7 +33,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import useDeviceStore from '@/store/useDeviceStore';
 
 const CallRoom = () => {
 	const { getToken } = useAuth();
@@ -49,10 +47,9 @@ const CallRoom = () => {
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [userName, setUserName] = useState<string | undefined>();
-	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-	const selectedMicrophone = useDeviceStore(
-		(state) => state.selectedMicrophone
-	);
+
+	console.log('Call Component++++++++++++');
+	////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleSendFriend = async (friendId: string) => {
 		const token = await getToken();
@@ -193,28 +190,6 @@ const CallRoom = () => {
 	}, []);
 
 	/////////////////////////////////////////////////////////////////////////
-
-	const getMediaStream = useCallback(async () => {
-		const localStream = await WebRTC.getUserMedia({
-			camera: selectedCamera,
-			microphone: selectedMicrophone,
-		});
-
-		console.log('localStream=========>>>', localStream);
-	}, [selectedCamera, selectedMicrophone]);
-
-	const stopMediaStream = useCallback(async () => {
-		const localStream = await WebRTC.disconnectPeer();
-
-		console.log('localStream=========>>>', localStream);
-	}, []);
-
-	useEffect(() => {
-		getMediaStream();
-		return()=>{
-			stopMediaStream()
-		}
-	}, [getMediaStream, stopMediaStream]);
 
 	useEffect(() => {
 		getFriendList();
@@ -425,14 +400,6 @@ const CallRoom = () => {
 									className="flex items-center gap-2 bg-green-600"
 								>
 									<Phone />
-								</Button>
-								<Button
-									onClick={() => {
-										stopMediaStream();
-									}}
-									className="flex items-center gap-2 bg-green-600"
-								>
-									Stop
 								</Button>
 							</CardFooter>
 						</Card>

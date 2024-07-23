@@ -12,7 +12,7 @@ export default function CallPanel() {
 	const searchParams = useSearchParams();
 	const roomId = searchParams.get('roomId');
 
-	console.log('Component mounted');
+	console.log('Caller Panel mounted++++++++++++++++++');
 	return (
 		<>
 			{roomState === 'waitingLobby' && <WaitingLobby roomId={roomId!} />}

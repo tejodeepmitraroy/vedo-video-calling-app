@@ -10,7 +10,6 @@ import ConferenceRoom from './@conferenceRoom/page';
 import { useSearchParams } from 'next/navigation';
 import CallPanel from './@callerPanel/page';
 
-
 const Home = () => {
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const setCurrentState = useScreenStateStore(
@@ -18,7 +17,6 @@ const Home = () => {
 	);
 	const searchParams = useSearchParams();
 	const roomId = searchParams.get('roomId');
-
 
 	console.log('Room==========>', roomId);
 
@@ -28,7 +26,7 @@ const Home = () => {
 		}
 	}, [roomId, setCurrentState]);
 
-	console.log('Component');
+	console.log('Master Component');
 
 	return (
 		<div className="grid h-screen w-full bg-primary md:pl-[55px]">

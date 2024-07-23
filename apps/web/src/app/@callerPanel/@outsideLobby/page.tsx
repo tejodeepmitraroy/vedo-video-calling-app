@@ -8,7 +8,6 @@ const OutsideLobby = () => {
 				<div className="flex items-center">
 					<h2 className="text-xl font-semibold tracking-tight">
 						This is OutSide
-					
 					</h2>
 				</div>
 				<div className="grid grid-cols-1 gap-5 md:grid-cols-2">

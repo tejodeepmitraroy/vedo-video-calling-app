@@ -18,11 +18,10 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useStreamStore from '@/store/useStreamStore';
 import useRoomStore from '@/store/useRoomStore';
-
 import useDeviceStore from '@/store/useDeviceStore';
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@callerPanel/components/UserVideoPanel';
-import webRTC from '@/services/webRTC';
+import { useWebRTC } from '@/context/WebRTCContext';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -43,12 +42,20 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const roomDetails = useRoomStore((state) => state.roomDetails);
 	const setRoomDetails = useRoomStore((state) => state.setRoomDetails);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
+	const {
+		getUserMedia,
+		createOffer,
+		setRemoteDescription,
+		getAnswer,
+		disconnectPeer,
+	} = useWebRTC();
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	console.log('Waiting Component mounted++++++++++');
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
+		console.log('token----->', token);
 
 		try {
 			const { data } = await axios(
@@ -81,31 +88,31 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Set User Media Stream
-	const getUserMedia = useCallback(async () => {
-		const mediaStream = await webRTC.getUserMedia({
+	const getMediaStream = useCallback(async () => {
+		// const mediaStream = await WgetUserMedia({
+		const mediaStream = await getUserMedia({
 			camera: selectedCamera,
 			microphone: selectedMicrophone,
 		});
 		console.log('Media Stream in Waiting room ------------->>>', mediaStream);
 		setLocalStream(mediaStream!);
-	}, [selectedCamera, selectedMicrophone, setLocalStream]);
+	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
 
 	const stopMediaStream = useCallback(async () => {
-		const localStream = await webRTC.disconnectPeer();
-		console.log('localStream=========>>>', localStream);
-	}, []);
+		disconnectPeer();
+	}, [disconnectPeer]);
 
 	useEffect(() => {
 		// if (selectedCamera || selectedMicrophone) {
 		// 	console.log('Camera-->', selectedCamera);
 		// 	console.log('Microphone-->', selectedMicrophone);
 		// }
-		getUserMedia();
+		getMediaStream();
 
 		() => {
 			stopMediaStream();
 		};
-	}, [getUserMedia, stopMediaStream]);
+	}, [getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,17 +141,18 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	//Client join Room
 	const handleAskedToEnter = useCallback(async () => {
 		// const offer = webRTC.createOffer
-		const offer = await webRTC.createOffer();
+		const offer = await createOffer();
+		console.log('Client Offer===========>', offer);
 		socketEmit('event:askToEnter', {
 			roomId,
 			username: user?.fullName,
 			profilePic: user?.imageUrl,
 			// offer: peerOffer,
-			offer: offer
+			offer: offer,
 		});
 
 		setAskToEnter(true);
-	}, [roomId, socketEmit, user?.fullName, user?.imageUrl]);
+	}, [createOffer, roomId, socketEmit, user?.fullName, user?.imageUrl]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -176,8 +184,10 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			console.log('Host Offer ------------>', hostOffer);
 			console.log('Host answer Added', hostAnswer);
 
-			await webRTC.setRemoteDescription(hostAnswer);
-			const answer = await webRTC.getAnswer(hostOffer);
+			// await webRTC.setRemoteDescription(hostAnswer);
+			setRemoteDescription(hostAnswer);
+			// const answer = await webRTC.getAnswer(hostOffer);
+			const answer = await getAnswer(hostOffer);
 
 			console.log('Client answer', answer);
 
@@ -187,8 +197,10 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			});
 		},
 		[
+			getAnswer,
 			roomDetails?.meetingId,
 			roomId,
+			setRemoteDescription,
 			setRemoteSocketId,
 			socketEmit,
 			user?.fullName,
@@ -200,23 +212,45 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		setRoomState('meetingRoom');
 	}, [setRoomState]);
 
-	// //// All socket Notification Function are Define Here
-	// const roomEnterPermissionDenied = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.error("Sorry host don't want to Enter you");
-	// }, [setAskToEnter]);
+	/////// All socket Notification Function are Define Here
+	const roomEnterPermissionDenied = useCallback(() => {
+		setAskToEnter(false);
+		toast.error("Sorry host don't want to Enter you");
+	}, [setAskToEnter]);
 
-	// const handleHostIsNoExistInRoom = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.warn(`Host is Not Existed in Room. Please wait`);
-	// }, [setAskToEnter]);
+	const handleHostIsNoExistInRoom = useCallback(() => {
+		setAskToEnter(false);
+		toast.warn(`Host is Not Existed in Room. Please wait`);
+	}, [setAskToEnter]);
 
-	// const handleRoomLimitFull = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.warn(`Room Limit Full`);
-	// }, [setAskToEnter]);
+	const handleRoomLimitFull = useCallback(() => {
+		setAskToEnter(false);
+		toast.warn(`Room Limit Full`);
+	}, [setAskToEnter]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
+	useEffect(() => {
+		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+		socketOn(
+			'notification:roomEnterPermissionDenied',
+			roomEnterPermissionDenied
+		);
+		socketOn('notification:roomLimitFull', handleRoomLimitFull);
+		return () => {
+			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+			socketOff(
+				'notification:roomEnterPermissionDenied',
+				roomEnterPermissionDenied
+			);
+			socketOff('notification:roomLimitFull', handleRoomLimitFull);
+		};
+	}, [
+		handleHostIsNoExistInRoom,
+		handleRoomLimitFull,
+		roomEnterPermissionDenied,
+		socketOff,
+		socketOn,
+	]);
 
 	//// All socket Notification are Executed Here
 	useEffect(() => {
