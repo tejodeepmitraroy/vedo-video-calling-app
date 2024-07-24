@@ -28,6 +28,7 @@ interface IWebRTCContext {
 	}) => Promise<MediaStream | undefined>;
 
 	getRemoteStream: () => MediaStream | undefined;
+	getLocalStream: () => MediaStream | undefined;
 
 	createOffer: () => Promise<RTCSessionDescriptionInit | undefined>;
 	getAnswer: (
@@ -48,15 +49,10 @@ export const useWebRTC = () => {
 };
 
 export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
-	// const [remoteStream, setRemoteStream] = useState<MediaStream | null>(
-	// 	new MediaStream()
-	// );
-
 	const peer = useRef<RTCPeerConnection | null>(null);
 	const localStream = useRef<MediaStream | null>(null);
-	const remoteStream = useRef<MediaStream | null>(new MediaStream());
 
-	// let remoteStream: MediaStream | null = null;
+	const remoteStream = useRef<MediaStream | null>(null);
 
 	useEffect(() => {
 		if (!peer.current) {
@@ -71,9 +67,9 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				],
 			};
 
-			// const newPeer = new RTCPeerConnection(configuration);
 			peer.current = new RTCPeerConnection(configuration);
 		}
+		remoteStream.current = new MediaStream();
 	}, [peer]);
 
 	useEffect(() => {
@@ -87,42 +83,29 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			peer.current.addEventListener('track', async (event) => {
 				event.streams[0].getTracks().forEach((track) => {
 					console.log('Remote tracks---->', track);
-					console.log('Remote Stream---->', remoteStream);
+					console.log('Remote Stream---->', remoteStream.current);
 					remoteStream.current?.addTrack(track);
 				});
 			});
-
-			// return () => {
-			// 	peer.current.removeEventListener('signalingstatechange', (event) => {
-			// 		console.log('signaling Event Change!');
-			// 		console.log('Event=======>', event);
-			// 		console.log(peer.signalingState);
-			// 	});
-
-			// 	peer.removeEventListener('track', async (event) => {
-			// 		event.streams[0].getTracks().forEach((track) => {
-			// 			console.log('Remote tracks---->', track);
-			// 			console.log('Remote Stream---->', remoteStream);
-			// 			remoteStream?.addTrack(track);
-			// 		});
-			// 	});
-			// };
 		}
 	}, [peer, remoteStream]);
 
-	const getAllMediaDevices: IWebRTCContext['getAllMediaDevices'] = async () => {
-		try {
-			const devices = await navigator.mediaDevices.enumerateDevices();
-			const cameras = devices.filter((device) => device.kind === 'videoinput');
-			const microphones = devices.filter(
-				(device) => device.kind === 'audioinput'
-			);
+	const getAllMediaDevices: IWebRTCContext['getAllMediaDevices'] =
+		useCallback(async () => {
+			try {
+				const devices = await navigator.mediaDevices.enumerateDevices();
+				const cameras = devices.filter(
+					(device) => device.kind === 'videoinput'
+				);
+				const microphones = devices.filter(
+					(device) => device.kind === 'audioinput'
+				);
 
-			return { cameras, microphones };
-		} catch (error) {
-			console.error('Error opening video camera.', error);
-		}
-	};
+				return { cameras, microphones };
+			} catch (error) {
+				console.error('Error opening video camera.', error);
+			}
+		}, []);
 
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
 		async ({ camera, microphone }: { camera: string; microphone: string }) => {
@@ -161,6 +144,11 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			return remoteStream.current;
 		}
 	};
+	const getLocalStream: IWebRTCContext['getLocalStream'] = () => {
+		if (localStream.current) {
+			return localStream.current;
+		}
+	};
 
 	const createOffer: IWebRTCContext['createOffer'] = async () => {
 		if (localStream.current && peer.current) {
@@ -179,7 +167,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 
 	const getAnswer: IWebRTCContext['getAnswer'] = async (offer) => {
 		if (peer.current) {
-			await peer.current.setRemoteDescription(offer);
+			await peer.current.setRemoteDescription(new RTCSessionDescription(offer));
 			const answer = await peer.current.createAnswer();
 			await peer.current.setLocalDescription(new RTCSessionDescription(answer));
 			return answer;
@@ -211,11 +199,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	const disconnectPeer = () => {
-		peer.current?.close();
-
-		localStream.current?.getTracks().forEach((track) => track.stop());
-		localStream.current = null;
-		remoteStream.current = null;
+		if (peer.current) {
+			peer.current.close();
+			localStream.current?.getTracks().forEach((track) => track.stop());
+			localStream.current = null;
+			remoteStream.current = null;
+		}
 	};
 
 	return (
@@ -224,8 +213,8 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				peer: peer.current,
 				getAllMediaDevices,
 				getUserMedia,
+				getLocalStream,
 				getRemoteStream,
-
 				createOffer,
 				getAnswer,
 				setRemoteDescription,

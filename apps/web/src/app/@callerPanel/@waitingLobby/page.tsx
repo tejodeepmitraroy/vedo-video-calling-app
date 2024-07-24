@@ -18,19 +18,13 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useStreamStore from '@/store/useStreamStore';
 import useRoomStore from '@/store/useRoomStore';
-import useDeviceStore from '@/store/useDeviceStore';
 import dynamic from 'next/dynamic';
-import UserVideoPanel from '@/app/@callerPanel/components/UserVideoPanel';
+import UserVideoPanel from '@/app/@callerPanel/@waitingLobby/components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
 const WaitingLobby = ({ roomId }: { roomId: string }) => {
-	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-	const selectedMicrophone = useDeviceStore(
-		(state) => state.selectedMicrophone
-	);
-	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const { user } = useUser();
 	const { socketOn, socketEmit, socketOff } = useSocket();
@@ -42,13 +36,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const roomDetails = useRoomStore((state) => state.roomDetails);
 	const setRoomDetails = useRoomStore((state) => state.setRoomDetails);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
-	const {
-		getUserMedia,
-		createOffer,
-		setRemoteDescription,
-		getAnswer,
-		disconnectPeer,
-	} = useWebRTC();
+	const { createOffer, setRemoteDescription, getAnswer } = useWebRTC();
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,35 +72,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	useEffect(() => {
 		getRoomDetails();
 	}, [getRoomDetails]);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Set User Media Stream
-	const getMediaStream = useCallback(async () => {
-		// const mediaStream = await WgetUserMedia({
-		const mediaStream = await getUserMedia({
-			camera: selectedCamera,
-			microphone: selectedMicrophone,
-		});
-		console.log('Media Stream in Waiting room ------------->>>', mediaStream);
-		setLocalStream(mediaStream!);
-	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
-
-	const stopMediaStream = useCallback(async () => {
-		disconnectPeer();
-	}, [disconnectPeer]);
-
-	useEffect(() => {
-		// if (selectedCamera || selectedMicrophone) {
-		// 	console.log('Camera-->', selectedCamera);
-		// 	console.log('Microphone-->', selectedMicrophone);
-		// }
-		getMediaStream();
-
-		() => {
-			stopMediaStream();
-		};
-	}, [getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -266,14 +225,14 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="flex flex-1 rounded-lg bg-background p-4 shadow-sm">
+		<div className="flex flex-1 flex-col rounded-lg bg-background p-4 shadow-sm md:flex-row">
 			<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
 					<MediaControls />
 				</div>
 			</div>
-			<div className="flex h-full w-full items-center justify-start p-5 md:w-[50%]">
+			<div className="flex h-full w-full items-center justify-center p-5 md:w-[50%] md:justify-start">
 				<Card className="w-full max-w-[400px] border border-dashed">
 					{roomDetails ? (
 						<>
@@ -322,7 +281,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 								)}
 								{/* <Button onClick={() => creationOffer()}>
 												Create a Offer
-											</Button> */}
+												</Button> */}
 							</CardFooter>
 						</>
 					) : (

@@ -98,15 +98,17 @@ const Sidebar = () => {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setCurrentState('Conference')}
-							className={`${currentState === 'Conference' || currentState === 'ConferenceRoom' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
-							aria-label="Models"
-						>
-							<Laptop className="size-5" />
-						</Button>
+						<Link href={'/'}>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setCurrentState('Conference')}
+								className={`${currentState === 'Conference' || currentState === 'ConferenceRoom' ? 'bg-background text-primary' : 'text-background'} hover:text-primary`}
+								aria-label="Models"
+							>
+								<Laptop className="size-5" />
+							</Button>
+						</Link>
 					</TooltipTrigger>
 					<TooltipContent side="right" sideOffset={5}>
 						Conference

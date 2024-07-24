@@ -162,7 +162,9 @@ const ConferenceRoom = () => {
 	return (
 		<div className="flex flex-1 rounded-lg bg-background shadow-sm">
 			<div className="flex w-full gap-2">
-				<div className="h-full w-full max-w-[27rem] rounded-lg rounded-l-lg rounded-r-none border bg-card bg-slate-100 text-card-foreground shadow-sm">
+				<div
+					className={`${selectedFriend ? 'hidden' : ''} h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
+				>
 					<div className="flex h-32 flex-col gap-2 space-y-1.5 p-6">
 						<div className="flex w-full items-center gap-5">
 							<Button
@@ -190,8 +192,8 @@ const ConferenceRoom = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="w-full p-6 pt-0">
-						<ScrollArea className="h-[42rem] w-full rounded-md border bg-white p-4">
+					<div className="w-full pt-0 md:p-6">
+						<ScrollArea className="h-[30rem] w-full rounded-md border bg-white p-4 md:h-[42rem]">
 							<div className="flex h-fit flex-col gap-3">
 								{friendList ? (
 									friendList.map((friend) => (
@@ -342,7 +344,9 @@ const ConferenceRoom = () => {
 					</div>
 				</div>
 
-				<div className="flex w-full items-center justify-center overflow-y-auto rounded-l-none rounded-r-lg bg-slate-100 xl:col-span-3">
+				<div
+					className={`${selectedFriend ? 'flex' : 'hidden'} flex w-full items-center justify-center overflow-y-auto rounded-l-none rounded-r-lg bg-slate-100 xl:col-span-3`}
+				>
 					{selectedFriend ? (
 						<Card className="w-full max-w-[400px]">
 							<CardHeader className="p-2flex flex-col items-center">

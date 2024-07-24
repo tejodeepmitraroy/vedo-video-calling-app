@@ -33,7 +33,7 @@ const Home = () => {
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar />
-				<main className="flex h-full w-full flex-1 flex-col gap-4 pb-2 md:px-2 lg:gap-6">
+				<main className="relative flex w-full flex-1 flex-col gap-4 px-2 pb-16 md:pb-2 lg:gap-6">
 					<>
 						{currentState === 'Dashboard' && <Dashboard />}
 						{currentState === 'Call' && <CallRoom />}
@@ -41,8 +41,8 @@ const Home = () => {
 						{currentState === 'ConferenceRoom' && <CallPanel />}
 					</>
 				</main>
+				<BottomNavigation />
 			</div>
-			<BottomNavigation />
 		</div>
 	);
 };
