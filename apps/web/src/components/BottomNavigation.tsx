@@ -4,23 +4,31 @@ import { Button } from './ui/button';
 import UserProfile from './UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 import { Input } from './ui/input';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from './ui/dialog';
+
+import { Separator } from './ui/separator';
+import useRoomStore from '@/store/useRoomStore';
+import Link from 'next/link';
 
 const BottomNavigation = () => {
 	const [roomId, setRoomId] = useState<string>('');
 	const setCurrentState = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
+	const currentState = useScreenStateStore((state) => state.currentScreen);
+	const roomState = useRoomStore((state) => state.roomState);
 
 	const { getToken } = useAuth();
 	const router = useRouter();
@@ -55,7 +63,7 @@ const BottomNavigation = () => {
 			const roomId = data.data.roomId;
 			// const userId = data.data.createdById;
 
-			router.push(`/room/${roomId}`);
+			router.push(`?roomId=${roomId}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -78,52 +86,58 @@ const BottomNavigation = () => {
 
 				console.log(data);
 
-				router.push(`/room/${roomId}`);
+				router.push(`?roomId=${roomId}`);
 			} catch (error) {
 				console.log(error);
 			}
 		}
 	};
 	return (
-		<div className="fixed bottom-4 left-1/2 z-50 h-16 w-full max-w-lg -translate-x-1/2 rounded-full border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden">
-			<div className="mx-auto grid h-full max-w-lg grid-cols-5">
-				<button
-					data-tooltip-target="tooltip-home"
-					onClick={() => setCurrentState('Dashboard')}
-					type="button"
-					className="group inline-flex flex-col items-center justify-center rounded-s-full px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
+		<div
+			className={`${roomState === 'meetingRoom' ? 'hidden' : 'fixed'} fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden`}
+		>
+			<div className="mx-auto grid h-full max-w-lg grid-cols-5 font-medium">
+				<Link
+					href={'/'}
+					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
-					<Home className="mb-1 h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500" />
-					<span className="sr-only">Home</span>
-				</button>
-				<div
-					id="tooltip-home"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
+					<button
+						type="button"
+						className="inline-flex flex-col items-center justify-center"
+						onClick={() => setCurrentState('Dashboard')}
+					>
+						<Home
+							className={`${currentState === 'Dashboard' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+						/>
+						<span
+							className={` ${currentState === 'Dashboard' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+						>
+							Home
+						</span>
+					</button>
+				</Link>
+				<Link
+					href={'/'}
+					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
-					Home
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
-				<button
-					data-tooltip-target="tooltip-wallet"
-					type="button"
-					onClick={() => setCurrentState('Call')}
-					className="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
-				>
-					<Phone className="mb-1 h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500" />
-					<span className="sr-only">Call</span>
-				</button>
-				<div
-					id="tooltip-wallet"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-				>
-					Call
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
+					<button
+						type="button"
+						className="inline-flex flex-col items-center justify-center"
+						onClick={() => setCurrentState('Call')}
+					>
+						<Phone
+							className={`${currentState === 'Call' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+						/>
+						<span
+							className={` ${currentState === 'Call' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+						>
+							Phone
+						</span>
+					</button>
+				</Link>
 				<div className="flex items-center justify-center">
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
+					<Dialog>
+						<DialogTrigger asChild>
 							<button
 								data-tooltip-target="tooltip-new"
 								type="button"
@@ -146,83 +160,81 @@ const BottomNavigation = () => {
 								</svg>
 								<span className="sr-only">New item</span>
 							</button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="mb-5 flex w-full flex-col gap-3 p-3">
-							<DropdownMenuCheckboxItem className="p-0">
-								<Button
-									variant={'outline'}
-									className="w-full"
-									onClick={() => handleInstantCreateCall()}
-								>
-									<Laptop />
-									Create a Instant Room
-								</Button>
-							</DropdownMenuCheckboxItem>
-							<DropdownMenuCheckboxItem className="p-0">
-								<Input
-									onChange={(event) => setRoomId(event.target.value)}
-									value={roomId}
-									className="w-full rounded-r-none"
-									placeholder="Enter Room Code "
-								/>
-								<Button
-									onClick={() => handleEnterRoom()}
-									size={'sm'}
-									type="submit"
-									className="rounded-l-none"
-								>
-									Join
-								</Button>
-							</DropdownMenuCheckboxItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+						</DialogTrigger>
+						<DialogContent className="sm:max-w-[425px]">
+							<DialogHeader>
+								<DialogTitle>Create a New Conference Room</DialogTitle>
+							</DialogHeader>
+							<div className="grid gap-4 py-4">
+								<DialogClose asChild>
+									<Button
+										variant={'outline'}
+										className="flex w-full gap-1"
+										onClick={() => handleInstantCreateCall()}
+									>
+										<Laptop />
+										Create a Instant Room
+									</Button>
+								</DialogClose>
+
+								<Separator />
+								<div className="flex items-center">
+									<Input
+										onChange={(event) => setRoomId(event.target.value)}
+										value={roomId}
+										className="w-full rounded-r-none"
+										placeholder="Enter Room Code "
+									/>
+									<DialogClose asChild>
+										<Button
+											onClick={() => handleEnterRoom()}
+											size={'sm'}
+											type="submit"
+											className="rounded-l-none"
+										>
+											Join
+										</Button>
+									</DialogClose>
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
 				</div>
-				<div
-					id="tooltip-new"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
+				<Link
+					href={'/'}
+					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
-					Create new item
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
+					<button
+						type="button"
+						className="inline-flex flex-col items-center justify-center"
+						onClick={() => setCurrentState('Conference')}
+					>
+						<Laptop
+							className={`${currentState === 'Conference' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+						/>
+						<span
+							className={` ${currentState === 'Conference' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+						>
+							Meeting
+						</span>
+					</button>
+				</Link>
 				<button
-					data-tooltip-target="tooltip-settings"
 					type="button"
-					onClick={() => setCurrentState('Room')}
 					className="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
-					<Laptop className="mb-1 h-6 w-6 text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500" />
-					<span className="sr-only">Room</span>
+					<div className="relative mb-1 h-7 w-7">
+						<UserProfile />
+						{onLineStatus ? (
+							<span className="absolute -right-2 -top-1 flex h-3 w-3 rounded-full bg-green-500"></span>
+						) : (
+							<span className="absolute -right-2 -top-1 flex h-3 w-3 rounded-full bg-red-500"></span>
+						)}
+					</div>
+					<span className="text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500">
+						Profile
+					</span>
 				</button>
-				<div
-					id="tooltip-settings"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-				>
-					Settings
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
-				<button
-					data-tooltip-target="tooltip-profile"
-					type="button"
-					className="group inline-flex flex-col items-center justify-center rounded-e-full px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
-				>
-					<UserProfile />
-					{onLineStatus ? (
-						<span className="absolute right-2 top-4 me-3 flex h-3 w-3 rounded-full bg-green-500"></span>
-					) : (
-						<span className="absolute right-2 top-4 me-3 flex h-3 w-3 rounded-full bg-red-500"></span>
-					)}
-					<span className="sr-only">Profile</span>
-				</button>
-				<div
-					id="tooltip-profile"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-				>
-					Profile
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
 			</div>
 		</div>
 	);

@@ -182,7 +182,7 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 
-				<Card className="row-span-2 flex-col overflow-y-auto bg-slate-100">
+				<Card className="row-span-2 hidden flex-col overflow-y-auto bg-slate-100 md:flex">
 					<CardHeader>
 						<CardTitle>Schedule Meetings</CardTitle>
 						<CardDescription>Schedule meeting & calls</CardDescription>

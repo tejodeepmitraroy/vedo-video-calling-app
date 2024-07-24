@@ -11,6 +11,7 @@ interface WebRTCStore {
 	peerOffer: RTCSessionDescriptionInit | null;
 	remoteSocketId: string | null;
 	setLocalStream: (localStream: MediaStream | null) => void;
+	setRemoteStream: (remoteStream: MediaStream | null) => void;
 	setLocalScreenStream: (localScreenStream: MediaStream | null) => void;
 	setPeerOffer: (peerOffer: RTCSessionDescriptionInit | undefined) => void;
 	setRemoteSocketId: (remoteSocketId: string | null) => void;
@@ -30,6 +31,7 @@ const useStreamStore = create<WebRTCStore>((set, get) => ({
 	peerOffer: null,
 	remoteSocketId: null,
 	setLocalStream: (localStream) => set({ localStream }),
+	setRemoteStream: (remoteStream) => set({ remoteStream }),
 	setPeerOffer: (peerOffer) => set({ peerOffer }),
 	setRemoteSocketId: (remoteSocketId) => set({ remoteSocketId }),
 	setLocalScreenStream: (localScreenStream) => set({ localScreenStream }),

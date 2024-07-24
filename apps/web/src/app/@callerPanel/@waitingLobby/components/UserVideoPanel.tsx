@@ -1,11 +1,13 @@
 'use client';
-import useStreamStore from '@/store/useStreamStore';
+import { useWebRTC } from '@/context/WebRTCContext';
 import dynamic from 'next/dynamic';
 import React from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 const UserVideoPanel = () => {
-	const localStream = useStreamStore((state) => state.localStream);
+	// const localStream = useStreamStore((state) => state.localStream);
+	const { getLocalStream } = useWebRTC();
+	const localStream = getLocalStream();
 
 	// console.log("STREAM URL------>",URL.createObjectURL(localStream!))
 	return (

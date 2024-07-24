@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@clerk/nextjs';
 import { toast } from 'react-toastify';
-import UserVideoPanel from '../components/UserVideoPanel';
+import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 // import ScreenSharePanel from '../components/ui/ScreenSharePanel';
 import Image from 'next/image';
 import useStreamStore from '@/store/useStreamStore';
 
 import ControlPanel from './components/ControlPanel';
-import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-// import webRTC from '@/services/webRTC';
 import { useWebRTC } from '@/context/WebRTCContext';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
@@ -246,7 +244,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[socketEmit]
 	);
 
-	// console.log('Connection Status========>', webRTC.connectionStatus());
 	console.log('Connection Status========>', connectionStatus());
 
 	const userWantToEnter = useCallback(
@@ -339,7 +336,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	);
 
 	useEffect(() => {
-		// webRTC.peer?.addEventListener('icecandidate', handleSendIceCandidate);
 		peer?.addEventListener('icecandidate', handleSendIceCandidate);
 
 		return () => {
@@ -396,76 +392,37 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	}, [handleUserLeftTheRoom, socketOff, socketOn]);
 
 	return (
-		// <div className="h-screen w-full">
-		// 	<div className="flex flex-col">
-		<main className="relative h-full w-full overflow-hidden">
-			<div className="flex h-[91vh] w-full items-center justify-center bg-black">
-				<div className="absolute top-2 z-30 rounded-xl bg-white p-5 text-black">
-					{roomId}
-				</div>
-				{/* <div className="flex h-full w-full max-w-7xl items-center justify-center rounded-xl sm:aspect-video sm:border-2 sm:border-white"> */}
-				<div className="flex h-full w-full max-w-[90rem] items-center justify-center rounded-xl">
-					{remoteStream ? (
-						<>
-							<RemoteUserVideoPanel stream={remoteStream} />
-							<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-								<UserVideoPanel />
-							</div>
-						</>
-					) : (
-						<UserVideoPanel />
-					)}
-					{/* <ScreenSharePanel /> */}
-				</div>
-				{/* <div className="flex h-full w-full flex-col gap-3 overflow-y-auto md:flex-row">
-							<div className="relative flex h-full w-full items-center justify-center rounded-xl border-2 border-white bg-black sm:h-1/2 md:aspect-video md:h-auto md:w-1/2">
-								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-							</div>
-							<div className="relative flex h-full w-full items-center justify-center rounded-xl border-2 border-white bg-black sm:h-1/2 md:aspect-video md:h-auto md:w-1/2">
-								<UserVideoPanel stream={stream} muted={!isMicrophoneOn} />
-							</div>
-						</div>
-						{/* {localScreenStream ? (
-							<div className="flex h-full w-full">
-								<div className="relative flex aspect-video w-[75%] items-center justify-center">
-									<ScreenSharePanel />
-								</div>
-								<div className="flex w-[25%] flex-col justify-center gap-5 p-5">
-									<RemoteUserVideoPanel stream={remoteStream} />
-									<UserVideoPanel muted={!isMicrophoneOn} />
-								</div>
-							</div>
-						) : remoteStream ? (
+		<div className="flex flex-1 flex-col rounded-lg bg-background bg-black shadow-sm">
+			<main className="relative h-full w-full">
+				<div className="flex h-[92.5%] w-full items-center justify-center">
+					{/* <div className="absolute top-2 z-30 rounded-xl bg-white p-5 text-black">
+						{roomId}
+					</div> */}
+
+					<div className="flex h-full w-full max-w-[90rem] items-center justify-center rounded-xl">
+						{remoteStream ? (
 							<>
-								<RemoteUserVideoPanel stream={remoteStream} />
+								{/* <RemoteUserVideoPanel stream={remoteStream} /> */}
 								<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
-									<UserVideoPanel muted={true} />
+									<UserVideoPanel />
 								</div>
 							</>
 						) : (
-							<UserVideoPanel muted={!isMicrophoneOn} />
-						)} */}
-			</div>
-			<div className="h-[10vh] w-full md:h-[9vh]">
-				<ControlPanel roomId={roomId} />
-			</div>
+							<UserVideoPanel />
+						)}
+						{/* <ScreenSharePanel /> */}
+					</div>
+				</div>
 
-			<div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
-				<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
-				{/* {remoteSocketId && (
-							<Button >Call</Button>
-							// <Button onClick={() => handleCallUser()}>Call</Button>
-						)} */}
+				<div className="h-[7.5%] w-full">
+					<ControlPanel roomId={roomId} />
+				</div>
 
-				{/* {stream && <Button onClick={sendStreams}>Send Stream</Button>} */}
-			</div>
-
-			{/* {remoteStream && (
-						
-					)} */}
-		</main>
-		// 	</div>
-		// </div>
+				{/* <div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
+					<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
+				</div> */}
+			</main>
+		</div>
 	);
 };
 

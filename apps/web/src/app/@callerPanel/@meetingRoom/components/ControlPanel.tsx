@@ -9,7 +9,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSocket } from '@/context/SocketContext';
-import WebRTC from '@/services/webRTC';
+import { useWebRTC } from '@/context/WebRTCContext';
 import useRoomStore from '@/store/useRoomStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
@@ -52,6 +52,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
+	const { disconnectPeer } = useWebRTC();
 	// const router = useRouter();
 
 	// console.log('selected Camera------>', selectedCamera);
@@ -71,12 +72,12 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 			roomId,
 			userId,
 		});
-		WebRTC.disconnectPeer();
+		disconnectPeer();
 		setRoomState('outSideLobby');
-	}, [roomId, setRoomState, socketEmit, userId]);
+	}, [disconnectPeer, roomId, setRoomState, socketEmit, userId]);
 
 	return (
-		<div className="fixed bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 border-t border-gray-200 bg-white px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">
+		<div className="bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 rounded-b-lg border border-t border-gray-200 bg-white px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">
 			<div className="me-auto hidden items-center justify-center gap-3 text-gray-500 dark:text-gray-400 md:flex">
 				<Clock className="h-4 w-4" />
 				<span className="text-sm">12:43 PM</span>
