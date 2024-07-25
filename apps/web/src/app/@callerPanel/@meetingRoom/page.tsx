@@ -11,6 +11,7 @@ import useStreamStore from '@/store/useStreamStore';
 
 import ControlPanel from './components/ControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
+import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
@@ -395,15 +396,11 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		<div className="flex flex-1 flex-col rounded-lg bg-background bg-black shadow-sm">
 			<main className="relative h-full w-full">
 				<div className="flex h-[92.5%] w-full items-center justify-center">
-					{/* <div className="absolute top-2 z-30 rounded-xl bg-white p-5 text-black">
-						{roomId}
-					</div> */}
-
-					<div className="flex h-full w-full max-w-[90rem] items-center justify-center rounded-xl">
+					<div className="flex h-full w-full max-w-[85rem] items-center justify-center rounded-xl">
 						{remoteStream ? (
 							<>
-								{/* <RemoteUserVideoPanel stream={remoteStream} /> */}
-								<div className="absolute bottom-[12vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[12%]">
+								<RemoteUserVideoPanel />
+								<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[15%] lg:w-[12%]">
 									<UserVideoPanel />
 								</div>
 							</>
@@ -417,10 +414,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				<div className="h-[7.5%] w-full">
 					<ControlPanel roomId={roomId} />
 				</div>
-
-				{/* <div className="absolute right-10 top-[15vh] z-40 w-1/6 bg-white">
-					<h4>{remoteSocketId ? 'Connected' : 'No one in this Room'}</h4>
-				</div> */}
 			</main>
 		</div>
 	);

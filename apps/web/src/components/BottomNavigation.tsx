@@ -63,7 +63,8 @@ const BottomNavigation = () => {
 			const roomId = data.data.roomId;
 			// const userId = data.data.createdById;
 
-			router.push(`?roomId=${roomId}`);
+			router.replace(`?roomId=${roomId}`);
+			// router.refresh()
 		} catch (error) {
 			console.log(error);
 		}
