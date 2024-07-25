@@ -49,6 +49,7 @@
 		"react-toastify": "^10.0.5",
 		"react-web-share": "^2.0.2",
 		"socket.io-client": "^4.7.5",
+		"svix": "^1.25.0",
 		"tailwind-merge": "^2.3.0",
 		"tailwindcss-animate": "^1.0.7",
 		"vaul": "^0.9.1",

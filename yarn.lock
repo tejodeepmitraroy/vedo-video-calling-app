@@ -6842,6 +6842,17 @@ svix@^1.24.0:
     svix-fetch "^3.0.0"
     url-parse "^1.4.3"
 
+svix@^1.25.0:
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/svix/-/svix-1.25.0.tgz#e441dae64bcdbeccb1b8d94c456cf43c64aa3dec"
+  integrity sha512-uW9xnwLqxfiUGwoWphKfthnymp7m14D4tdl1S+7MrH6A++ov/E3ONqLKS/6okOarMre64twxMbsg/QlT0PpnLA==
+  dependencies:
+    "@stablelib/base64" "^1.0.0"
+    es6-promise "^4.2.4"
+    fast-sha256 "^1.3.0"
+    svix-fetch "^3.0.0"
+    url-parse "^1.4.3"
+
 swr@^2.2.0:
   version "2.2.5"
   resolved "https://registry.npmjs.org/swr/-/swr-2.2.5.tgz"
