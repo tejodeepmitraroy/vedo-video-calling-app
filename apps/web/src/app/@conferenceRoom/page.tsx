@@ -5,51 +5,33 @@ import { Button } from '@/components/ui/button';
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardFooter,
 	CardHeader,
-	CardTitle,
 } from '@/components/ui/card';
-import {
-	EllipsisVertical,
-	Phone,
-	Plus,
-	Rss,
-	Search,
-	Trash2,
-	UserRoundPlus,
-} from 'lucide-react';
+import { Clock, Plus, Rss, Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import Image from 'next/image';
-import useGlobalStore from '@/store/useGlobalStore';
+
 import { useSocket } from '@/context/SocketContext';
 import { toast } from 'react-toastify';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 import { useRouter } from 'next/navigation';
 
 const ConferenceRoom = () => {
 	const { getToken } = useAuth();
 	const router = useRouter();
-	const { user } = useUser();
-	const friendListArray = useGlobalStore((state) => state.friendList);
-	const [friendList, setFriendList] = useState<
-		FriendListResponse[] | null | undefined
-	>();
-	const [selectedFriend, setSelectedFriend] =
-		useState<FriendListResponse | null>(null);
-	const setModifiedFriendList = useGlobalStore((state) => state.setFriendList);
 
-	const { socketOn, socketEmit, socketOff } = useSocket();
+	// const friendListArray = useGlobalStore((state) => state.friendList);
+	// const [friendList, setFriendList] = useState<
+	// 	FriendListResponse[] | null | undefined
+	// >();
+	const [allScheduledRoomsDetails, setAllScheduledRoomsDetails] = useState<
+		RoomDetails[]
+	>([]);
+
+	const { socketOn, socketOff } = useSocket();
 	const [roomId, setRoomId] = useState<string>('');
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -115,11 +97,13 @@ const ConferenceRoom = () => {
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	const getFriendList = useCallback(async () => {
+	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
+		// console.log('Token---->', token);
+
 		try {
-			const { data } = await axios(
-				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/friend`,
+			const { data } = await axios<ApiResponse>(
+				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
 				{
 					headers: {
 						'Content-Type': 'application/json',
@@ -128,29 +112,39 @@ const ConferenceRoom = () => {
 				}
 			);
 
-			const response: FriendListResponse[] = data.data;
-			setModifiedFriendList(response);
-			setFriendList(response);
-			console.log('Friend List Details----->>', response);
+			console.log(data);
+
+			setAllScheduledRoomsDetails(data.data);
 		} catch (error) {
 			console.log(error);
 		}
-	}, [getToken, setModifiedFriendList]);
+	}, [getToken]);
 
-	console.log(friendList);
-	console.log('friendListArray', friendListArray);
+	console.log('allScheduledRoomsDetails', allScheduledRoomsDetails);
 
-	const handleCallUser = (userId: string) => {
-		socketEmit('callUser', { to: userId, userName: user?.fullName });
-	};
+	// const handleCallUser = (userId: string) => {
+	// 	socketEmit('callUser', { to: userId, userName: user?.fullName });
+	// };
 
 	const handleUserIsNotOnline = useCallback(() => {
 		toast.warn(`User is Offline`);
 	}, []);
 
+	const convertTo24Hour = (isoString: Date) => {
+		const date = new Date(isoString); // Create a Date object from the ISO string
+		const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
+		const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
+
+		if (isoString) {
+			return `${hours}:${minutes}`;
+		} else {
+			return '';
+		}
+	};
+
 	useEffect(() => {
-		getFriendList();
-	}, [getFriendList]);
+		getRoomDetails();
+	}, [getRoomDetails]);
 
 	useEffect(() => {
 		socketOn('notification:userIsNotOnline', handleUserIsNotOnline);
@@ -163,9 +157,9 @@ const ConferenceRoom = () => {
 		<div className="flex flex-1 rounded-lg bg-background shadow-sm">
 			<div className="flex w-full gap-2">
 				<div
-					className={`${selectedFriend ? 'hidden' : ''} h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
+					className={`h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
 				>
-					<div className="flex h-32 flex-col gap-2 space-y-1.5 p-6">
+					<div className="flex h-32 flex-col gap-2 space-y-1.5 p-3 md:p-6">
 						<div className="flex w-full items-center gap-5">
 							<Button
 								// variant={'outline'}
@@ -193,59 +187,49 @@ const ConferenceRoom = () => {
 						</div>
 					</div>
 					<div className="w-full pt-0 md:p-6">
-						<ScrollArea className="h-[30rem] w-full rounded-md border bg-white p-4 md:h-[42rem]">
-							<div className="flex h-fit flex-col gap-3">
-								{friendList ? (
-									friendList.map((friend) => (
-										<div
-											key={friend.id}
-											className="group flex w-full justify-between rounded-lg border p-2 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
-											onClick={() => setSelectedFriend(friend)}
+						<ScrollArea className="h-[25rem] w-full rounded-md border bg-white p-0 md:h-[42rem] md:p-4">
+							<div className="flex h-fit flex-col gap-3 p-2">
+								{allScheduledRoomsDetails ? (
+									allScheduledRoomsDetails.map((room) => (
+										<Card
+											key={room.id}
+											className="flex w-full justify-between p-0 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
 										>
-											<div className="flex aspect-square h-[60px] w-[60px] items-center justify-center p-0">
-												<Image
-													src={friend.image_url}
-													alt={friend.first_name}
-													width={60}
-													height={60}
-													className="flex items-center justify-center rounded-md border"
-												/>
-											</div>
-											<div className="flex w-full flex-col justify-center py-0 pl-5">
-												<div className="text-lg font-bold">
-													{`${friend.first_name} ${friend.last_name}`}
+											<CardHeader className="p-2">
+												<div className="flex h-10 w-10 items-center justify-center rounded-md border">
+													<Image
+														src={room.createdBy.image_url}
+														alt={room.createdBy.first_name}
+														width={60}
+														height={60}
+														className="flex items-center justify-center rounded-md"
+													/>
 												</div>
-												<div className="text-sm">{friend.email}</div>
-											</div>
-											<div className="flex items-center justify-center p-0">
-												{friend.friendShip ? (
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button
-																size={'icon'}
-																className="group-hover:bg-background group-hover:text-primary"
-															>
-																<EllipsisVertical />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent>
-															<DropdownMenuLabel>Options</DropdownMenuLabel>
-															<DropdownMenuSeparator />
-															<DropdownMenuItem className="flex items-center gap-2">
-																<Trash2 size={'20'} /> Delete
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
-												) : (
-													<Button
-														size={'sm'}
-														className="z-30 group-hover:bg-background group-hover:text-primary"
-													>
-														<UserRoundPlus />
-													</Button>
-												)}
-											</div>
-										</div>
+											</CardHeader>
+											<CardContent className="flex w-full items-center justify-center p-0">
+												<div className="flex gap-5">
+													<div className="flex flex-col justify-between">
+														<span className="font-bold">
+															{convertTo24Hour(room.startTime!)}
+														</span>
+														<span className="text-xs">
+															{convertTo24Hour(room.endTime!)}
+														</span>
+													</div>
+													<div className="flex flex-col justify-between">
+														<span className="truncate font-bold">
+															{room.title}
+														</span>
+														<span className="truncate text-xs">
+															{`${room.createdBy.first_name} ${room.createdBy.last_name}`}
+														</span>
+													</div>
+												</div>
+											</CardContent>
+											<CardFooter className="flex items-center justify-center p-2">
+												<Clock className="h-5 w-5" />
+											</CardFooter>
+										</Card>
 									))
 								) : (
 									<>
@@ -344,7 +328,7 @@ const ConferenceRoom = () => {
 					</div>
 				</div>
 
-				<div
+				{/* <div
 					className={`${selectedFriend ? 'flex' : 'hidden'} flex w-full items-center justify-center overflow-y-auto rounded-l-none rounded-r-lg bg-slate-100 xl:col-span-3`}
 				>
 					{selectedFriend ? (
@@ -376,7 +360,7 @@ const ConferenceRoom = () => {
 					) : (
 						'No one selected'
 					)}
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);

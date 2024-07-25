@@ -21,11 +21,12 @@ import {
 	MicOff,
 	VideoOff,
 	SlidersVertical,
-	Clock,
+	// Clock,
 	Users,
 	Volume2,
 	Info,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useCallback } from 'react';
 
 export interface Device {
@@ -53,7 +54,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
 	const { disconnectPeer } = useWebRTC();
-	// const router = useRouter();
+	const router = useRouter();
 
 	// console.log('selected Camera------>', selectedCamera);
 	// console.log('selected Microphone------>', selectedMicrophone);
@@ -72,15 +73,29 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 			roomId,
 			userId,
 		});
+
 		disconnectPeer();
+		router.push('/');
 		setRoomState('outSideLobby');
-	}, [disconnectPeer, roomId, setRoomState, socketEmit, userId]);
+	}, [disconnectPeer, roomId, router, setRoomState, socketEmit, userId]);
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	// const convertTo24Hour = (isoString: Date) => {
+	// 	const date = new Date(isoString); // Create a Date object from the ISO string
+	// 	const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
+	// 	const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
+
+	// 	if (isoString) {
+	// 		return `${hours}:${minutes}`;
+	// 	} else {
+	// 		return '';
+	// 	}
+	// };
 
 	return (
 		<div className="bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 rounded-b-lg border border-t border-gray-200 bg-white px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">
 			<div className="me-auto hidden items-center justify-center gap-3 text-gray-500 dark:text-gray-400 md:flex">
-				<Clock className="h-4 w-4" />
-				<span className="text-sm">12:43 PM</span>
+				{/* <Clock className="h-4 w-4" />
+				<span className="text-sm">12:43 PM</span> */}
 			</div>
 			<div className="mx-auto flex items-center justify-center">
 				<Button

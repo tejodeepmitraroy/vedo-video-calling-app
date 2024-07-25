@@ -209,8 +209,8 @@ const CallRoom = () => {
 				<div
 					className={` ${selectedFriend ? 'hidden' : ''} h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
 				>
-					<div className="flex h-32 flex-col gap-3 space-y-1.5 p-6">
-						<div className="text-2xl font-semibold leading-none tracking-tight">
+					<div className="flex flex-col gap-3 space-y-1.5 p-3 md:h-32 md:p-6">
+						<div className="hidden text-2xl font-semibold leading-none tracking-tight md:flex">
 							Search for a Call
 						</div>
 						<div className="flex gap-7 text-sm text-muted-foreground">
@@ -223,9 +223,9 @@ const CallRoom = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="w-full pt-0 md:p-6">
-						<ScrollArea className="h-[30rem] w-full rounded-md border bg-white p-4 md:h-[42rem]">
-							<div className="flex h-fit flex-col gap-3">
+					<div className="h-full w-full pt-0 md:p-6">
+						<ScrollArea className="h-[28rem] w-full rounded-md border bg-white p-0 sm:h-[25rem] md:h-[42rem] md:p-4">
+							<div className="flex h-fit flex-col gap-3 p-2">
 								{friendList ? (
 									friendList.map((friend) => (
 										<div
@@ -233,7 +233,7 @@ const CallRoom = () => {
 											className="group flex w-full justify-between rounded-lg border p-2 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
 											onClick={() => setSelectedFriend(friend)}
 										>
-											<div className="flex aspect-square h-[60px] w-[60px] items-center justify-center p-0">
+											<div className="flex aspect-square h-[60px] w-fit items-center justify-center p-0 md:w-[60px]">
 												<Image
 													src={friend.image_url}
 													alt={friend.first_name}
@@ -242,11 +242,11 @@ const CallRoom = () => {
 													className="flex items-center justify-center rounded-md border"
 												/>
 											</div>
-											<div className="flex w-full flex-col justify-center py-0 pl-5">
-												<div className="text-lg font-bold">
+											<div className="flex w-full flex-col justify-center overflow-x-auto py-0 pl-5">
+												<div className="truncate text-lg font-bold">
 													{`${friend.first_name} ${friend.last_name}`}
 												</div>
-												<div className="text-sm">{friend.email}</div>
+												<div className="truncate text-sm">{friend.email}</div>
 											</div>
 											<div className="flex items-center justify-center p-0">
 												{friend.friendShip ? (

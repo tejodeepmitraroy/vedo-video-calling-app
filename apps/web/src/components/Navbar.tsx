@@ -10,16 +10,21 @@ import { Phone, PhoneOff } from 'lucide-react';
 
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
+import useRoomStore from '@/store/useRoomStore';
+import { useSearchParams } from 'next/navigation';
 
 const NavBar = () => {
 	const { userId } = useAuth();
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
+	const roomState = useRoomStore((state) => state.roomState);
 
 	const { socket, socketOn, socketOff, socketEmit } = useSocket();
 	const setMediaDevices = useDeviceStore((state) => state.setMediaDevices);
 
 	const { getAllMediaDevices } = useWebRTC();
+	const searchParams = useSearchParams();
+	const roomId = searchParams.get('roomId');
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get All Media Devices When Component Render
@@ -199,7 +204,7 @@ const NavBar = () => {
 	return (
 		<header className="sticky top-0 z-10 flex h-[55px] items-center gap-1 px-4">
 			<h1 className="text-lg font-semibold text-white md:text-2xl">
-				{currentState}
+				{roomState === 'meetingRoom' ? roomId! : currentState}
 			</h1>
 		</header>
 	);
