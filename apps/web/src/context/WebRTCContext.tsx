@@ -25,7 +25,7 @@ interface IWebRTCContext {
 	}: {
 		camera: string;
 		microphone: string;
-	}) => Promise<MediaStream | undefined>;
+	}) => Promise<MediaStream | null>;
 
 	getRemoteStream: () => MediaStream | undefined;
 	getLocalStream: () => MediaStream | undefined;
@@ -134,6 +134,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				return localStream.current;
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
+				return null;
 			}
 		},
 		[]
