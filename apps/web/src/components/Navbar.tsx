@@ -5,7 +5,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Button } from './ui/button';
 import { toast } from 'react-toastify';
 import useGlobalStore from '@/store/useGlobalStore';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { Phone, PhoneOff } from 'lucide-react';
 
 import useDeviceStore from '@/store/useDeviceStore';
@@ -15,6 +15,7 @@ import { useSearchParams } from 'next/navigation';
 
 const NavBar = () => {
 	const { userId } = useAuth();
+	const { user } = useUser();
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
 	const roomState = useRoomStore((state) => state.roomState);
@@ -195,11 +196,46 @@ const NavBar = () => {
 		socketOn,
 	]);
 
+	///////////////////////////////////////////////////////////////////////////////////
+
+	const handleGetOnlineUser = useCallback(
+		({
+			users,
+		}: {
+			users: {
+				userId: string;
+				fullName: string;
+				imageUrl: string;
+				emailAddress: string;
+			}[];
+		}) => {
+			console.log('Get Online User Details========>', {
+				users,
+			});
+		},
+		[]
+	);
+	///////////////////////////////////////////////////////////////////////////////////
+
 	useEffect(() => {
-		if (userId) {
-			socketEmit('connectWithUser', { userId });
+		if (user) {
+			socketEmit('connectWithUser', {
+				userId: user.id,
+				fullName: user.fullName,
+				imageUrl: user.imageUrl,
+				emailAddress: user.emailAddresses[0]
+					? user.emailAddresses[0].emailAddress
+					: '',
+			});
 		}
-	}, [socket, socketEmit, userId]);
+	}, [socket, socketEmit, user]);
+
+	useEffect(() => {
+		socketOn('getOnlineUsers', handleGetOnlineUser);
+		return () => {
+			socketOff('getOnlineUsers', handleGetOnlineUser);
+		};
+	}, [handleGetOnlineUser, socketOff, socketOn]);
 
 	return (
 		<header className="sticky top-0 z-10 flex h-[55px] items-center gap-1 px-4">

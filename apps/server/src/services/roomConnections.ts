@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+// import prisma from '../lib/prismaClient';
 
 interface RoomDetails {
 	[key: string]: string[];
@@ -6,6 +7,16 @@ interface RoomDetails {
 
 type socketIdToUserIdMap = Map<string, string>;
 type hostSocketIdToRoomId = Map<string, string>;
+type socketIdToUserMap = Map<
+	string,
+	{
+		userId: string;
+		fullName: string;
+		imageUrl: string;
+		emailAddress: string;
+	}
+>;
+
 const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
 	let result: string | undefined;
 	console.log('KeyByValue', map);
@@ -20,25 +31,26 @@ export function roomConnections(
 	io: Server,
 	rooms: RoomDetails,
 	socketIdToUserIdMap: socketIdToUserIdMap,
-	hostSocketIdToRoomId: hostSocketIdToRoomId
+	hostSocketIdToRoomId: hostSocketIdToRoomId,
+	socketIdToUserMap: socketIdToUserMap
 ) {
 	socket.on(
 		'event:askToEnter',
 		({
 			roomId,
-			username,
-			profilePic,
+			// username,
+			// profilePic,
 			offer,
 		}: {
 			roomId: string;
-			username: string | null | undefined;
-			profilePic: string | null | undefined;
+			// username: string | null | undefined;
+			// profilePic: string | null | undefined;
 			offer: RTCSessionDescriptionInit;
 		}) => {
 			console.log('User want to ask-->', {
 				roomId,
-				username,
-				profilePic,
+				username: socketIdToUserMap.get(socket.id)?.fullName,
+				profilePic: socketIdToUserMap.get(socket.id)?.imageUrl,
 				offer,
 			});
 
@@ -56,8 +68,8 @@ export function roomConnections(
 					const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
 					if (hostSocketId) {
 						io.to(hostSocketId!).emit('event:userWantToEnter', {
-							username,
-							profilePic,
+							username: socketIdToUserMap.get(socket.id)?.fullName,
+							profilePic: socketIdToUserMap.get(socket.id)?.imageUrl,
 							socketId: socket.id,
 							offer,
 						});
@@ -105,28 +117,27 @@ export function roomConnections(
 
 	socket.on(
 		'event:joinRoom',
-		({
+		async ({
 			roomId,
-			userId,
-			username,
+			// userId,
+			// username,
 			hostUser,
 		}: {
 			roomId: string;
-			userId: string;
-			username: string;
+			// userId: string;
+			// username: string;
 			hostUser: boolean;
 		}) => {
 			console.log('Room Id', roomId);
-			console.log('userId', userId);
+			console.log('userId', socketIdToUserMap.get(socket.id)?.userId);
 			console.log('hostUser', hostUser);
-			console.log('username', username);
+			console.log('username', socketIdToUserMap.get(socket.id)?.fullName);
 
 			console.log('Current socket ID--->', socket.id);
 
 			if (!rooms[roomId]) {
 				rooms[roomId] = [];
 			}
-			socketIdToUserIdMap.set(socket.id, userId);
 
 			if (hostUser) {
 				hostSocketIdToRoomId.set(socket.id, roomId);
@@ -136,41 +147,32 @@ export function roomConnections(
 			socket.join(roomId);
 			rooms[roomId].push(socket.id);
 
+			// const meetingDetails = await prisma.participantsOnRoom.create({
+			// 	data: {
+			// 		user_id: socketIdToUserMap.get(socket.id)!.userId,
+			// 		room_id: roomId,
+			// 	},
+			// });
+
+			// console.log('MEETING DETails=========>', meetingDetails);
+
 			console.log('USER ENTERED AND ROOM DETAILS+============>>>>', rooms);
 
 			io.to(socket.id).emit('event:enterRoom');
 
 			io.to(roomId).emit('notification:informAllNewUserAdded', {
-				userId,
-				username,
+				userId: socketIdToUserMap.get(socket.id)?.userId,
+				username: socketIdToUserMap.get(socket.id)?.fullName,
 				socketId: socket.id,
 			});
 
 			console.log('User Joined in Room', {
-				userId,
-				username,
+				userId: socketIdToUserMap.get(socket.id)?.userId,
+				username: socketIdToUserMap.get(socket.id)?.fullName,
 				roomId,
 				socketId: socket.id,
 				roomStatus: rooms[roomId],
 			});
-
-			// if (!socketIdToEmailMap.get(userId)) {
-			//   emailToSocketIdMap.set(userId, socket.id);
-			//   socketIdToEmailMap.set(socket.id, userId);
-			//   io.to(roomId).emit('event:UserJoined', { userId, id: socket.id });
-			//   socket.join(roomId);
-			//   console.log('New User Joined in Room', { userId, id: socket.id });
-			//   io.to(socket.id).emit('event:joinRoom', { roomId, userId });
-			// } else {
-			//   io.to(roomId).emit('event:UserJoined', { userId, id: socket.id });
-			//   console.log(' User Re:Joined in Room', { userId, id: socket.id });
-			// }
-			// emailToSocketIdMap.set(userId, socket.id);
-			// socketIdToEmailMap.set(socket.id, userId);
-			// io.to(roomId).emit('event:UserJoined', { userId, id: socket.id });
-			// socket.join(roomId);
-			// console.log('New User Joined in Room', { userId, id: socket.id });
-			// io.to(socket.id).emit('event:joinRoom', { roomId, userId });
 		}
 	);
 
