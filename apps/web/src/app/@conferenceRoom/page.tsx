@@ -20,7 +20,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 
 const ConferenceRoom = () => {
-	const { getToken } = useAuth();
+	const { getToken, userId } = useAuth();
 	const router = useRouter();
 
 	// const friendListArray = useGlobalStore((state) => state.friendList);
@@ -122,9 +122,19 @@ const ConferenceRoom = () => {
 
 	console.log('allScheduledRoomsDetails', allScheduledRoomsDetails);
 
-	// const handleCallUser = (userId: string) => {
-	// 	socketEmit('callUser', { to: userId, userName: user?.fullName });
-	// };
+	const handleCallOpenMeeting = ({
+		roomId,
+		userId: id,
+	}: {
+		roomId: string;
+		userId: string;
+	}) => {
+		if (id === userId) {
+			router.push(`?roomId=${roomId}`);
+		} else {
+			toast.error('This room is not created by you.But you can ask to join.');
+		}
+	};
 
 	const handleUserIsNotOnline = useCallback(() => {
 		toast.warn(`User is Offline`);
@@ -160,7 +170,7 @@ const ConferenceRoom = () => {
 					className={`h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
 				>
 					<div className="flex h-32 flex-col gap-2 space-y-1.5 p-3 md:p-6">
-						<div className="flex w-full items-center gap-5">
+						<div className="flex w-full items-center gap-2 md:gap-5">
 							<Button
 								// variant={'outline'}
 								onClick={() => handleInstantCreateCall()}
@@ -175,7 +185,7 @@ const ConferenceRoom = () => {
 								Schedule Room
 							</Button>
 						</div>
-						<div className="flex gap-3 text-sm text-muted-foreground">
+						<div className="flex gap-2 text-sm text-muted-foreground">
 							<Input
 								onChange={(event) => setRoomId(event.target.value)}
 								placeholder="Name, email"
@@ -186,14 +196,20 @@ const ConferenceRoom = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="w-full pt-0 md:p-6">
+					<div className="w-full pt-0 md:p-5">
 						<ScrollArea className="h-[25rem] w-full rounded-md border bg-white p-0 md:h-[42rem] md:p-4">
 							<div className="flex h-fit flex-col gap-3 p-2">
 								{allScheduledRoomsDetails ? (
 									allScheduledRoomsDetails.map((room) => (
 										<Card
 											key={room.id}
-											className="flex w-full justify-between p-0 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
+											onClick={() =>
+												handleCallOpenMeeting({
+													roomId: room.roomId,
+													userId: room.createdBy.id,
+												})
+											}
+											className="flex w-full cursor-pointer justify-between p-0 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
 										>
 											<CardHeader className="p-2">
 												<div className="flex h-10 w-10 items-center justify-center rounded-md border">
@@ -220,9 +236,9 @@ const ConferenceRoom = () => {
 														<span className="truncate font-bold">
 															{room.title}
 														</span>
-														<span className="truncate text-xs">
+														{/* <span className="truncate text-xs">
 															{`${room.createdBy.first_name} ${room.createdBy.last_name}`}
-														</span>
+														</span> */}
 													</div>
 												</div>
 											</CardContent>

@@ -1,15 +1,13 @@
 'use client';
-import { useWebRTC } from '@/context/WebRTCContext';
+
+import useStreamStore from '@/store/useStreamStore';
 import dynamic from 'next/dynamic';
 import React from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 const UserVideoPanel = () => {
-	// const localStream = useStreamStore((state) => state.localStream);
-	const { getLocalStream } = useWebRTC();
-	const localStream = getLocalStream();
+	const localStream = useStreamStore((state) => state.localStream);
 
-	// console.log("STREAM URL------>",URL.createObjectURL(localStream!))
 	return (
 		<div className="relative z-20 flex aspect-[16/9] h-full w-full">
 			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-black">

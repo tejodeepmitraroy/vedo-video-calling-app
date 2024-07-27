@@ -223,7 +223,7 @@ const CallRoom = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="h-full w-full pt-0 md:p-6">
+					<div className="h-full w-full pt-0 sm:h-fit md:p-5">
 						<ScrollArea className="h-[28rem] w-full rounded-md border bg-white p-0 sm:h-[25rem] md:h-[42rem] md:p-4">
 							<div className="flex h-fit flex-col gap-3 p-2">
 								{friendList ? (

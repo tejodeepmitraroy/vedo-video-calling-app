@@ -29,7 +29,7 @@ const Home = () => {
 	console.log('Master Component');
 
 	return (
-		<div className="grid h-screen w-full bg-primary md:pl-[55px]">
+		<div className="h-screen w-full bg-primary sm:grid md:pl-[55px]">
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar />

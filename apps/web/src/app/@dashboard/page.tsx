@@ -99,7 +99,7 @@ export default function Dashboard() {
 
 		try {
 			const { data } = await axios<ApiResponse>(
-				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room/schedule`,
+				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
 				{
 					headers: {
 						'Content-Type': 'application/json',
@@ -182,10 +182,10 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 
-				<Card className="row-span-2 hidden flex-col overflow-y-auto bg-slate-100 md:flex">
+				<Card className="row-span-2 flex-col overflow-y-auto bg-slate-100">
 					<CardHeader>
-						<CardTitle>Schedule Meetings</CardTitle>
-						<CardDescription>Schedule meeting & calls</CardDescription>
+						<CardTitle>Recent Meetings</CardTitle>
+						<CardDescription>meeting & calls logs</CardDescription>
 					</CardHeader>
 					<CardContent className="w-full">
 						<ScrollArea className="h-[68vh] w-full rounded-md border bg-white p-4">

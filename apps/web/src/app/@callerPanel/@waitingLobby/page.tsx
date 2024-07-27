@@ -91,11 +91,11 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const handleHostEnterRoom = useCallback(async () => {
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
-			userId,
-			username: user?.fullName,
+			// userId,
+			// username: user?.fullName,
 			hostUser: true,
 		});
-	}, [roomId, socketEmit, user?.fullName, userId]);
+	}, [roomId, socketEmit]);
 
 	//Client join Room
 	const handleAskedToEnter = useCallback(async () => {
@@ -104,14 +104,14 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		console.log('Client Offer===========>', offer);
 		socketEmit('event:askToEnter', {
 			roomId,
-			username: user?.fullName,
-			profilePic: user?.imageUrl,
+			// username: user?.fullName,
+			// profilePic: user?.imageUrl,
 			// offer: peerOffer,
 			offer: offer,
 		});
 
 		setAskToEnter(true);
-	}, [createOffer, roomId, socketEmit, user?.fullName, user?.imageUrl]);
+	}, [createOffer, roomId, socketEmit]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 

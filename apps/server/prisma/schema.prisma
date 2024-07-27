@@ -49,9 +49,9 @@ model Room {
 
 model ParticipantsOnRoom {
   user_id   String
-  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   room_id   String
-  Room      Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  room      Room      @relation(fields: [room_id], references: [roomId], onDelete: Cascade)
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
 
