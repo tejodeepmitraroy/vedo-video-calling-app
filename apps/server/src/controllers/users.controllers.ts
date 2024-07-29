@@ -263,6 +263,7 @@ export const sendFriendRequest = asyncHandler(
 		}
 	}
 );
+
 export const removeFriend = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
 		const friendId = request.query.friendId;

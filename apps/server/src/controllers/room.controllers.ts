@@ -6,18 +6,6 @@ import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
 import { AuthenticatedRequest } from '../types/apiRequest';
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       // auth?: {
-//       //   user: ClerkUser;
-//       // };
-
-//       auth: WithAuthProp;
-//     }
-//   }
-// }
-
 export const createInstantRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
 		const user = request.auth?.userId;
@@ -28,32 +16,21 @@ export const createInstantRoom = asyncHandler(
 		try {
 			const meetingDetails = await prisma.room.create({
 				data: {
+					id: shortId,
 					title: 'Instant Meeting',
 					type: 'INSTANT',
-					roomId: shortId,
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
 					createdById: user!,
+					hostById: user!,
 					startTime: new Date().toISOString(),
-					participants: {
-						create: [
-							{
-								user_id: user!,
-							},
-						],
-					},
 				},
 				select: {
+					id: true,
 					title: true,
 					type: true,
-					roomId: true,
 					url: true,
 					createdBy: true,
 					startTime: true,
-					participants: {
-						include: {
-							user: true,
-						},
-					},
 				},
 			});
 
@@ -77,13 +54,12 @@ export const getAllRooms = asyncHandler(
 			try {
 				const meetingData = await prisma.room.findUnique({
 					where: {
+						id: roomId,
 						type: 'INSTANT',
-						roomId: roomId,
 					},
 					select: {
 						id: true,
 						type: true,
-						roomId: true,
 						url: true,
 						title: true,
 						createdBy: {
@@ -116,7 +92,6 @@ export const getAllRooms = asyncHandler(
 					select: {
 						id: true,
 						type: true,
-						roomId: true,
 						url: true,
 						title: true,
 						createdBy: {
@@ -192,19 +167,20 @@ export const createScheduleCall = asyncHandler(
 		try {
 			const meetingDetails = await prisma.room.create({
 				data: {
+					id: shortId,
 					type: 'SCHEDULE',
 					title,
 					description,
 					startTime,
 					endTime,
-					participants: {
+					createdById: user!,
+					hostById: user!,
+					invitedUsers: {
 						createMany: {
 							data: [participantIds ? participantIds : user!],
 						},
 					},
-					roomId: shortId,
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-					createdById: user!,
 				},
 			});
 
@@ -234,7 +210,6 @@ export const getAllScheduledRoomsDetails = asyncHandler(
 				select: {
 					id: true,
 					type: true,
-					roomId: true,
 					url: true,
 					title: true,
 					createdBy: {
@@ -273,7 +248,7 @@ export const updateScheduledRoom = asyncHandler(
 			const updatedRoom = await prisma.room.update({
 				where: {
 					type: 'SCHEDULE',
-					roomId: roomId,
+					id: roomId,
 					createdById: userId,
 				},
 				data: {
@@ -305,7 +280,7 @@ export const deleteScheduledRoom = asyncHandler(
 				const deleteRoom = await prisma.room.delete({
 					where: {
 						type: 'SCHEDULE',
-						roomId,
+						id: roomId,
 					},
 				});
 
@@ -331,7 +306,7 @@ export const getScheduledRoom = asyncHandler(
 			const rooms = await prisma.room.findUnique({
 				where: {
 					type: 'SCHEDULE',
-					roomId: roomId,
+					id: roomId,
 				},
 			});
 

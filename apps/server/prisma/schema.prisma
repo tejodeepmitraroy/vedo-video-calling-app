@@ -22,45 +22,28 @@ model User {
   email      String @unique
   image_url  String
 
-  room               Room[]
-  participantsOnRoom ParticipantsOnRoom[]
-  friends            FriendShip[]         @relation("UserFriends")
-  friendOf           FriendShip[]         @relation("UserFriendOf")
+  rooms Room[] @relation("RoomToUser")
+
+  participantsOnRooms ParticipantsInRoom[]
+  invitedUsersOnRooms InvitedUsersOnRoom[]
+  hostsOfRooms        Room[]               @relation("RoomHost")
+
+  friends  FriendShip[] @relation("UserFriends")
+  friendOf FriendShip[] @relation("UserFriendOf")
+
+  callers   Call[] @relation("CallerUser")
+  receivers Call[] @relation("ReceiverUser")
+
+  notificationsFor Notification[] @relation("NotificationForUser")
+  NotificationFrom Notification[] @relation("NotificationFrom")
 
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
-}
-
-model Room {
-  id           String               @id @unique @default(uuid())
-  type         RoomType             @default(INSTANT)
-  roomId       String               @unique
-  url          String               @unique
-  title        String
-  description  String?
-  startTime    DateTime?
-  endTime      DateTime?
-  createdById  String
-  createdBy    User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  participants ParticipantsOnRoom[]
-  createdAt    DateTime?            @default(now())
-  updatedAt    DateTime?            @updatedAt
-}
-
-model ParticipantsOnRoom {
-  user_id   String
-  room_id   String
-  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  room      Room      @relation(fields: [room_id], references: [roomId], onDelete: Cascade)
-  createdAt DateTime? @default(now())
-  updatedAt DateTime? @updatedAt
-
-  @@id([user_id, room_id])
 }
 
 model FriendShip {
-  user_id   String 
-  friend_id String 
+  user_id   String
+  friend_id String
   user      User      @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
   friend    User      @relation("UserFriendOf", fields: [friend_id], references: [id], onDelete: Cascade)
   createdAt DateTime? @default(now())
@@ -69,7 +52,84 @@ model FriendShip {
   @@id([user_id, friend_id])
 }
 
+model Room {
+  id           String               @id @unique
+  type         RoomType             @default(INSTANT)
+  url          String               @unique
+  title        String
+  description  String?
+  startTime    DateTime?
+  endTime      DateTime?
+  createdById  String
+  createdBy    User                 @relation("RoomToUser", fields: [createdById], references: [id], onDelete: Cascade)
+  hostById     String
+  host         User                 @relation("RoomHost", fields: [hostById], references: [id], onDelete: Cascade)
+  participants ParticipantsInRoom[]
+  invitedUsers InvitedUsersOnRoom[]
+  createdAt    DateTime?            @default(now())
+  updatedAt    DateTime?            @updatedAt
+}
+
+model ParticipantsInRoom {
+  user_id   String
+  room_id   String
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  room      Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@id([user_id, room_id])
+}
+
+model InvitedUsersOnRoom {
+  user_id   String
+  room_id   String
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  room      Room      @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@id([user_id, room_id])
+}
+
 enum RoomType {
   INSTANT
   SCHEDULE
+}
+
+model Call {
+  id         String     @id @unique @default(uuid())
+  startTime  DateTime?  @default(now())
+  endTime    DateTime?
+  callerId   String
+  caller     User       @relation("CallerUser", fields: [callerId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User       @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
+  status     CallStatus @default(CALLING)
+  createdAt  DateTime?  @default(now())
+  updatedAt  DateTime?  @updatedAt
+}
+
+enum CallStatus {
+  CALLING
+  COMPLETED
+  MISSED
+  NOANSWER
+  REJECTED
+}
+
+model Notification {
+  id         String           @id @unique @default(uuid())
+  userId     String
+  user       User             @relation("NotificationForUser", fields: [userId], references: [id], onDelete: Cascade)
+  fromUserId String
+  fromUser   User             @relation("NotificationFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  trigger    String
+}
+
+enum NotificationType {
+  MISSIED
+  INVITED
 }

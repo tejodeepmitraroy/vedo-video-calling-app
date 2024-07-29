@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import userRouter from './routes/users.routes';
 import roomRouter from './routes/room.routes';
+import callRouter from './routes/call.routes';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(cookieParser());
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/room', roomRouter);
+app.use('/api/v1/call', callRouter);
 
 app.get('/', async (req, res) => {
 	res.json({ message: 'Server is 100% up running' });

@@ -21,6 +21,7 @@ import useRoomStore from '@/store/useRoomStore';
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@callerPanel/@waitingLobby/components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
+import useGlobalStore from '@/store/useGlobalStore';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -33,8 +34,8 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	// const setPeerOffer = useStreamStore((state) => state.setPeerOffer);
 	const { getToken, userId } = useAuth();
 	const router = useRouter();
-	const roomDetails = useRoomStore((state) => state.roomDetails);
-	const setRoomDetails = useRoomStore((state) => state.setRoomDetails);
+	const roomDetails = useGlobalStore((state) => state.roomDetails);
+	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
 	const { createOffer, setRemoteDescription, getAnswer } = useWebRTC();
 

@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import prisma from '../lib/prismaClient';
 // import prisma from '../lib/prismaClient';
 
 interface RoomDetails {
@@ -147,14 +148,21 @@ export function roomConnections(
 			socket.join(roomId);
 			rooms[roomId].push(socket.id);
 
-			// const meetingDetails = await prisma.participantsOnRoom.create({
-			// 	data: {
-			// 		user_id: socketIdToUserMap.get(socket.id)!.userId,
-			// 		room_id: roomId,
-			// 	},
-			// });
+			const meeting = await prisma.participantsInRoom.upsert({
+				where: {
+					user_id_room_id: {
+						room_id: roomId,
+						user_id: socketIdToUserMap.get(socket.id)!.userId,
+					},
+				},
+				update: {},
+				create: {
+					room_id: roomId,
+					user_id: socketIdToUserMap.get(socket.id)!.userId,
+				},
+			});
 
-			// console.log('MEETING DETails=========>', meetingDetails);
+			console.log('MEETING DETails=========>', meeting);
 
 			console.log('USER ENTERED AND ROOM DETAILS+============>>>>', rooms);
 

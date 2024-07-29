@@ -68,7 +68,18 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	// 	isScreenSharing
 	// );
 
-	const handleCallEnd = useCallback(() => {
+	const handleLeaveRoom = useCallback(() => {
+		socketEmit('event:callEnd', {
+			roomId,
+			userId,
+		});
+
+		disconnectPeer();
+		router.push('/');
+		setRoomState('outSideLobby');
+	}, [disconnectPeer, roomId, router, setRoomState, socketEmit, userId]);
+
+	const handleEndRoom = useCallback(() => {
 		socketEmit('event:callEnd', {
 			roomId,
 			userId,
@@ -239,16 +250,30 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</li>
 					</ul>
 				</div> */}
-				<Button
-					variant={'destructive'}
-					onClick={() => handleCallEnd()}
-					data-tooltip-target="tooltip-microphone"
-					type="button"
-					className="group me-4 rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-				>
-					<Phone className="h-6 w-7" />
-					<span className="sr-only">Mute microphone</span>
-				</Button>
+
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant={'destructive'}
+							data-tooltip-target="tooltip-microphone"
+							type="button"
+							className="group me-4 rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+						>
+							<Phone className="h-6 w-7" />
+							<span className="sr-only">Leave</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						<DropdownMenuLabel>As a Host</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem onClick={() => handleLeaveRoom()}>
+							Leave Room
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={() => handleEndRoom()}>
+							End Room
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 
 				<div
 					id="tooltip-microphone"
