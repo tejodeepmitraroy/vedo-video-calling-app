@@ -61,7 +61,7 @@ const ConferenceRoom = () => {
 			);
 
 			console.log(data.data);
-			const roomId = data.data.roomId;
+			const roomId = data.data.id;
 			// const userId = data.data.createdById;
 
 			router.push(`?roomId=${roomId}`);
@@ -343,40 +343,6 @@ const ConferenceRoom = () => {
 						</ScrollArea>
 					</div>
 				</div>
-
-				{/* <div
-					className={`${selectedFriend ? 'flex' : 'hidden'} flex w-full items-center justify-center overflow-y-auto rounded-l-none rounded-r-lg bg-slate-100 xl:col-span-3`}
-				>
-					{selectedFriend ? (
-						<Card className="w-full max-w-[400px]">
-							<CardHeader className="p-2flex flex-col items-center">
-								<Image
-									src={selectedFriend.image_url}
-									alt={selectedFriend.first_name}
-									width={60}
-									height={60}
-									className="flex items-center justify-center rounded-md"
-								/>
-								<CardTitle>{`${selectedFriend.first_name} ${selectedFriend.last_name}`}</CardTitle>
-								<CardDescription>{`${selectedFriend.email}`}</CardDescription>
-							</CardHeader>
-							<CardContent>{selectedFriend.id}</CardContent>
-
-							<CardFooter className="flex items-center justify-center">
-								<Button
-									onClick={() => {
-										handleCallUser(selectedFriend.id);
-									}}
-									className="flex items-center gap-2 bg-green-600"
-								>
-									<Phone />
-								</Button>
-							</CardFooter>
-						</Card>
-					) : (
-						'No one selected'
-					)}
-				</div> */}
 			</div>
 		</div>
 	);

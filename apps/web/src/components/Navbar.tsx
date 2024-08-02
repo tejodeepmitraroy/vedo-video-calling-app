@@ -37,6 +37,9 @@ const NavBar = () => {
 
 	useEffect(() => {
 		getDevices();
+		return () => {
+			getDevices();
+		};
 	}, [getDevices]);
 
 	/////////////////////////////////////////////////////////////////////

@@ -1,20 +1,8 @@
 import { Server } from 'socket.io';
-// import { roomConnections } from './roomConnections';
 import { roomConnections } from './roomConnections';
-
-// const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
-// 	let result: string | undefined;
-// 	console.log('KeyByValue', map);
-// 	map.forEach((value, key) => {
-// 		result = value === KeyValue ? key : result;
-// 	});
-// 	return result;
-// };
-
 class SocketService {
 	_io: Server;
 	private userIdToSocketIdMap: Map<string, string>;
-	private socketIdToUserIdMap: Map<string, string>;
 	private socketIdToUserMap: Map<
 		string,
 		{
@@ -25,9 +13,14 @@ class SocketService {
 		}
 	>;
 	private hostSocketIdToRoomId: Map<string, string>;
-	rooms: {
-		[key: string]: string[];
-	};
+	private rooms: Map<
+		string,
+		{
+			hostId: string;
+			hostSocketId: string;
+			participants: Set<unknown>;
+		}
+	>;
 
 	constructor() {
 		console.log('Init Socket Server');
@@ -38,10 +31,9 @@ class SocketService {
 			},
 		});
 		this.userIdToSocketIdMap = new Map();
-		this.socketIdToUserIdMap = new Map();
-		this.hostSocketIdToRoomId = new Map();
 		this.socketIdToUserMap = new Map();
-		this.rooms = {};
+		this.hostSocketIdToRoomId = new Map();
+		this.rooms = new Map();
 	}
 
 	public initListeners() {
@@ -49,15 +41,6 @@ class SocketService {
 		console.log('init Socket Listner.....');
 		io.on('connection', (socket) => {
 			console.log('New socket connected', socket.id);
-
-			// socket.on('connectWithUser', ({ userId }: { userId: string }) => {
-			// 	this.userIdToSocketIdMap.set(userId, socket.id);
-			// 	this.socketIdToUserIdMap.set(socket.id, userId);
-
-			// 	console.log(this.userIdToSocketIdMap);
-			// 	console.log(this.socketIdToUserIdMap);
-			// 	socket.emit('userConnected');
-			// });
 
 			//////////////////////////////////////////////////////////////////////////////////////////////
 			socket.on(
@@ -74,7 +57,6 @@ class SocketService {
 					emailAddress: string;
 				}) => {
 					this.userIdToSocketIdMap.set(userId, socket.id);
-					this.socketIdToUserIdMap.set(socket.id, userId);
 					this.socketIdToUserMap.set(socket.id, {
 						userId,
 						fullName,
@@ -88,9 +70,8 @@ class SocketService {
 					socket.emit('getOnlineUsers', {
 						users: getOnlineUsers(),
 					});
-					// // console.log(this.userIdToSocketIdMap);
-					// // console.log(this.socketIdToUserIdMap);
-					// console.log(this.socketIdToUserMap);
+
+					// console.log('connectWithUser',this.socketIdToUserMap);
 					socket.emit('userConnected');
 				}
 			);
@@ -98,8 +79,8 @@ class SocketService {
 			const getOnlineUsers = () => {
 				const AllUsers = this.socketIdToUserMap.values();
 				const valuesArray = Array.from(AllUsers);
-				console.log('Online UserSs', valuesArray);
-				console.log('Online UserSs2213', this.socketIdToUserMap);
+				// console.log('Online UserSs', valuesArray);
+				// console.log('Online UserSs2213', this.socketIdToUserMap);
 				return valuesArray;
 			};
 
@@ -109,7 +90,6 @@ class SocketService {
 				socket,
 				io,
 				this.rooms,
-				this.socketIdToUserIdMap,
 				this.hostSocketIdToRoomId,
 				this.socketIdToUserMap
 			);
@@ -122,10 +102,11 @@ class SocketService {
 
 				console.log(socket.id);
 
-				const userId = this.socketIdToUserIdMap.get(socket.id)!;
+				// const userId = this.socketIdToUserIdMap.get(socket.id)!;
+				const userId = this.socketIdToUserMap.get(socket.id)?.userId;
 
-				this.userIdToSocketIdMap.delete(userId);
-				this.socketIdToUserIdMap.delete(socket.id);
+				this.userIdToSocketIdMap.delete(userId!);
+				// this.socketIdToUserIdMap.delete(socket.id);
 				this.socketIdToUserMap.delete(socket.id);
 
 				socket.broadcast.emit('getOnlineUsers', {
@@ -135,12 +116,6 @@ class SocketService {
 				// console.log('After', this.userIdToSocketIdMap);
 				// console.log('After', this.socketIdToUserIdMap);
 				// console.log('After', this.socketIdToUserMap);
-
-				// this.userIdToSocketIdMap.delete(userId);
-				// this.socketIdToUserIdMap.delete(socket.id);
-				// console.log('before hostSocketIdToRoomId', this.hostSocketIdToRoomId);
-				// this.hostSocketIdToRoomId.delete(socket.id);
-				// console.log('after hostSocketIdToRoomId', this.hostSocketIdToRoomId);
 			});
 		});
 	}

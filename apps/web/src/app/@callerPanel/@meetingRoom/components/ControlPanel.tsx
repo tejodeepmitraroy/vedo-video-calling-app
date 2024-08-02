@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useSocket } from '@/context/SocketContext';
 import { useWebRTC } from '@/context/WebRTCContext';
+import useGlobalStore from '@/store/useGlobalStore';
 import useRoomStore from '@/store/useRoomStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
@@ -21,7 +22,6 @@ import {
 	MicOff,
 	VideoOff,
 	SlidersVertical,
-	// Clock,
 	Users,
 	Volume2,
 	Info,
@@ -40,15 +40,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
-	// const toggleScreenShare = useStreamStore((state) => state.toggleScreenShare);
-	// const isScreenSharing = useStreamStore((state) => state.isScreenSharing);
-	// const mediaDevices = useStreamStore((state) => state.mediaDevices);
-	// const selectedCamera = useRoomStore((state) => state.selectedCamera);
-	// const selectedMicrophone = useRoomStore((state) => state.selectedMicrophone);
-	// const setSelectedCamera = useStreamStore((state) => state.setSelectedCamera);
-	// const setSelectedMicrophone = useStreamStore(
-	// 	(state) => state.setSelectedMicrophone
-	// );
+	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	const { socketEmit } = useSocket();
@@ -68,16 +60,20 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	// 	isScreenSharing
 	// );
 
-	const handleCallEnd = useCallback(() => {
+	const handleLeaveRoom = useCallback(() => {
 		socketEmit('event:callEnd', {
 			roomId,
-			userId,
 		});
 
 		disconnectPeer();
 		router.push('/');
 		setRoomState('outSideLobby');
-	}, [disconnectPeer, roomId, router, setRoomState, socketEmit, userId]);
+	}, [disconnectPeer, roomId, router, setRoomState, socketEmit]);
+
+	const handleEndRoom = useCallback(() => {
+		socketEmit('event:endRoom', { roomId });
+	}, [roomId, socketEmit]);
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// const convertTo24Hour = (isoString: Date) => {
 	// 	const date = new Date(isoString); // Create a Date object from the ISO string
@@ -239,17 +235,43 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</li>
 					</ul>
 				</div> */}
-				<Button
-					variant={'destructive'}
-					onClick={() => handleCallEnd()}
-					data-tooltip-target="tooltip-microphone"
-					type="button"
-					className="group me-4 rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-				>
-					<Phone className="h-6 w-7" />
-					<span className="sr-only">Mute microphone</span>
-				</Button>
 
+				{roomDetails?.createdById === userId ? (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant={'destructive'}
+								data-tooltip-target="tooltip-microphone"
+								type="button"
+								className="group me-4 rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+							>
+								<Phone className="h-6 w-7" />
+								<span className="sr-only">Leave</span>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuLabel>As a Host</DropdownMenuLabel>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem onClick={() => handleLeaveRoom()}>
+								Leave Room
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleEndRoom()}>
+								End Room
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				) : (
+					<Button
+						variant={'destructive'}
+						data-tooltip-target="tooltip-microphone"
+						type="button"
+						onClick={() => handleLeaveRoom()}
+						className="group me-4 rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+					>
+						<Phone className="h-6 w-7" />
+						<span className="sr-only">Leave</span>
+					</Button>
+				)}
 				<div
 					id="tooltip-microphone"
 					role="tooltip"

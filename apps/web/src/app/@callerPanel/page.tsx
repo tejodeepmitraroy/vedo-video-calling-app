@@ -34,7 +34,8 @@ export default function CallPanel() {
 
 	const stopMediaStream = useCallback(async () => {
 		disconnectPeer();
-	}, [disconnectPeer]);
+		setLocalStream(null);
+	}, [disconnectPeer, setLocalStream]);
 
 	useEffect(() => {
 		getMediaStream();
@@ -42,6 +43,8 @@ export default function CallPanel() {
 			stopMediaStream();
 		};
 	}, [getMediaStream, stopMediaStream]);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	console.log('Caller Panel mounted++++++++++++++++++');
 	return (

@@ -60,7 +60,7 @@ export default function Dashboard() {
 			);
 
 			console.log(data.data);
-			const roomId = data.data.roomId;
+			const roomId = data.data.id;
 			// const userId = data.data.createdById;
 
 			router.push(`?roomId=${roomId}`);
