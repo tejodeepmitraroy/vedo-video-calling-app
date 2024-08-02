@@ -1,7 +1,13 @@
 'use client';
 import React from 'react';
 import { Button } from './ui/button';
-import { Home, Laptop, Phone, Settings, Video } from 'lucide-react';
+import {
+	Home,
+	Laptop,
+	//   Phone,
+	Settings,
+	Video,
+} from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import UserProfile from './UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
@@ -77,7 +83,7 @@ const Sidebar = () => {
 						Dashboard
 					</TooltipContent>
 				</Tooltip>
-				<Tooltip>
+				{/* <Tooltip>
 					<TooltipTrigger asChild>
 						<Link href={'/'}>
 							<Button
@@ -95,7 +101,7 @@ const Sidebar = () => {
 					<TooltipContent side="right" sideOffset={5}>
 						Call
 					</TooltipContent>
-				</Tooltip>
+				</Tooltip> */}
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Link href={'/'}>

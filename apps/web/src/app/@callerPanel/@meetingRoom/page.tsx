@@ -5,13 +5,14 @@ import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@clerk/nextjs';
 import { toast } from 'react-toastify';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
-// import ScreenSharePanel from '../components/ui/ScreenSharePanel';
 import Image from 'next/image';
 import useStreamStore from '@/store/useStreamStore';
 
 import ControlPanel from './components/ControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
+import { useRouter } from 'next/navigation';
+import useRoomStore from '@/store/useRoomStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
@@ -20,6 +21,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const [remoteStream, setRemoteStream] = useState<MediaStream>();
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
+	const setRoomState = useRoomStore((state) => state.setRoomState);
 	const peerOffer = useStreamStore((state) => state.peerOffer);
 	const {
 		peer,
@@ -28,10 +30,12 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		getAnswer,
 		setRemoteDescription,
 		connectionStatus,
+		disconnectPeer,
 	} = useWebRTC();
 
 	// const remoteStream = webRTC.getRemoteStream();
 	const remoteStream = getRemoteStream();
+	const router = useRouter();
 
 	console.log('Remote Users Stream--------->', remoteStream);
 
@@ -39,164 +43,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	const { userId } = useAuth();
 
-	const { socket, socketOn, socketEmit, socketOff } = useSocket();
+	const { socketOn, socketEmit, socketOff } = useSocket();
 
 	console.log('Meeting Component mounted++++++++++');
-
-	// const handleUserJoined = useCallback(
-	// 	({ userId, id }: { userId: string; id: string }) => {
-	// 		console.log('User Joined', userId);
-	// 		console.log('Socket User Joined', id);
-	// 		// setRemoteSocketId(id);
-	// 	},
-	// 	[]
-	// );
-
-	// const handleCallUser = useCallback(
-	// 	async (remoteSocketId: string | null) => {
-	// 		const offer = await webRTCService.getOffer();
-	// 		console.log('creating a Offer--->', offer);
-	// 		socketEmit('event:callUser', { to: remoteSocketId, offer });
-	// 	},
-	// 	[remoteSocketId]
-	// );
-
-	// const handleIncomingCall = useCallback(
-	// 	async ({
-	// 		from,
-	// 		offer,
-	// 	}: {
-	// 		from: string;
-	// 		offer: RTCSessionDescriptionInit;
-	// 	}) => {
-	// 		setRemoteSocketId(from);
-	// 		console.log('Incoming Call--->', { from, offer });
-
-	// 		// const answer = await webRTCService.getAnswer(offer);
-	// 		console.log('Creating Answer--->', answer);
-
-	// 		socket?.emit('call:accepted', { to: from, answer });
-	// 	},
-	// 	[setRemoteSocketId, socket]
-	// );
-
-	// const handleAcceptedCall = useCallback(
-	// 	async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
-	// 		await webRTCService.setLocalDescription(answer);
-	// 		console.log('call Accepted and Now Sending Stream-->>');
-
-	// 		// sendStreams();
-	// 		// for (const track of stream?.getTracks()) {
-	// 		// 	peer.peer?.addTrack(track,stream);
-	// 		// }
-	// 		// console.log('stream-->', stream?.getTracks());
-	// 		localStream?.getTracks().forEach((track: MediaStreamTrack) => {
-	// 			// console.log('Track---->', track);
-	// 			webRTCService.peer?.addTrack(track, localStream);
-	// 		});
-	// 	},
-	// 	[localStream]
-	// );
-
-	// const handleNegoNeeded = useCallback(async () => {
-	// 	const offer = await webRTCService.getOffer();
-	// 	socket?.emit('peer:nego:needed', { offer, to: remoteSocketId });
-	// }, [remoteSocketId, socket]);
-
-	// const handleNegoNeedIncoming = useCallback(
-	// 	async ({
-	// 		from,
-	// 		offer,
-	// 	}: {
-	// 		from: string;
-	// 		offer: RTCSessionDescriptionInit;
-	// 	}) => {
-	// 		const answer = await webRTCService.getAnswer(offer);
-
-	// 		console.log('peer:nego:done----> ', answer);
-
-	// 		socket?.emit('peer:nego:done', { to: from, answer });
-	// 		handleCallUser(remoteSocketId);
-	// 	},
-	// 	[socket]
-	// );
-
-	// const handleNegoNeedFinal = useCallback(
-	// 	async ({ answer }: { from: string; answer: RTCSessionDescriptionInit }) => {
-	// 		console.log('Final Answer---->', answer);
-	// 		await webRTCService.setLocalDescription(answer);
-	// 		// handleCallUser(remoteSocketId);
-	// 	},
-	// 	[]
-	// );
-
-	// const sendStreams = useCallback(() => {
-	// 	console.log('send stream-->', stream);
-	// 	stream?.getTracks().forEach((track) => {
-	// 		console.log('Send track-->', track);
-	// 		peer.peer?.addTrack(track, stream);
-	// 	});
-	// }, [stream]);
-
-	// useEffect(() => {
-	// 	webRTCService.peer?.addEventListener('negotiationneeded', handleNegoNeeded);
-
-	// 	return () => {
-	// 		webRTCService.peer?.removeEventListener(
-	// 			'negotiationneeded',
-	// 			handleNegoNeeded
-	// 		);
-	// 	};
-	// }, [handleNegoNeeded]);
-
-	// useEffect(() => {
-	// 	webRTCService.peer?.addEventListener('track', async (event) => {
-	// 		const [remoteStream] = event.streams;
-
-	// 		console.log('Remote Stream---->', remoteStream.getTracks());
-
-	// 		setRemoteStream(remoteStream);
-	// 	});
-	// }, []);
-
-	useEffect(() => {
-		// socketOn('event:UserJoined', handleUserJoined);
-		// socketOn('incoming:call', handleIncomingCall);
-		// socketOn('call:accepted', handleAcceptedCall);
-		// socketOn('peer:nego:needed', handleNegoNeedIncoming);
-		// socketOn('peer:nego:final', handleNegoNeedFinal);
-
-		return () => {
-			// socketOff('event:UserJoined', handleUserJoined);
-			// socketOff('incoming:call', handleIncomingCall);
-			// socketOff('call:accepted', handleAcceptedCall);
-			// socketOff('peer:nego:needed', handleNegoNeedIncoming);
-			// socketOff('peer:nego:final', handleNegoNeedFinal);
-		};
-	}, [
-		// handleAcceptedCall,
-		// handleIncomingCall,
-		// handleNegoNeedFinal,
-		// handleNegoNeedIncoming,
-		// handleUserJoined,
-		socket,
-	]);
-
-	// console.log('Meetroom--------->', localStream);
-
-	//// All socket Notification Function are Define Here
-	// const handleInformAllNewUserAdded = useCallback(
-	// 	({ userId: id, username }: { userId: string; username: string }) => {
-	// 		console.log('Notiof', { userId, username });
-
-	// 		if (id === userId) {
-	// 			toast.success(`suceesfully joined`);
-	// 		} else {
-	// 			toast(`${username} Joined`);
-	// 		}
-	// 	},
-	// 	[userId]
-	// );
 
 	const handleUserLeftTheRoom = useCallback(
 		({ userId: id }: { userId: string }) => {
@@ -316,6 +165,13 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[setRemoteDescription]
 	);
 
+	const handleRemoveEveryoneFromRoom = useCallback(async () => {
+		toast.success(`Host End the Room`);
+		disconnectPeer();
+		router.push('/');
+		setRoomState('outSideLobby');
+	}, [disconnectPeer, router, setRoomState]);
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleSendIceCandidate = useCallback(
@@ -376,12 +232,20 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	useEffect(() => {
 		socketOn('event:userWantToEnter', userWantToEnter);
 		socketOn('event:sendAnswerHost', handleSendAnswerHost);
+		socketOn('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
 
 		return () => {
 			socketOff('event:userWantToEnter', userWantToEnter);
 			socketOff('event:sendAnswerHost', handleSendAnswerHost);
+			socketOff('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
 		};
-	}, [handleSendAnswerHost, socketOff, socketOn, userWantToEnter]);
+	}, [
+		handleRemoveEveryoneFromRoom,
+		handleSendAnswerHost,
+		socketOff,
+		socketOn,
+		userWantToEnter,
+	]);
 
 	//All Notifications Event state here
 	useEffect(() => {

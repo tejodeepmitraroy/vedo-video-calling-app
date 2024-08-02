@@ -14,14 +14,14 @@ import { toast } from 'react-toastify';
 import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import useStreamStore from '@/store/useStreamStore';
 import useRoomStore from '@/store/useRoomStore';
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@callerPanel/@waitingLobby/components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -30,22 +30,19 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const { user } = useUser();
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
-	// const peerOffer = useStreamStore((state) => state.peerOffer);
-	// const setPeerOffer = useStreamStore((state) => state.setPeerOffer);
 	const { getToken, userId } = useAuth();
-	const router = useRouter();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
+	const router = useRouter();
 	const { createOffer, setRemoteDescription, getAnswer } = useWebRTC();
-
-	///////////////////////////////////////////////////////////////////////////////////////////
+	const [canJoin, setCanJoin] = useState<boolean>();
 
 	console.log('Waiting Component mounted++++++++++');
+
+	////////////////////////////////////////////////////////////////////////////////////////////
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
-		console.log('token----->', token);
-
 		try {
 			const { data } = await axios(
 				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
@@ -59,6 +56,17 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			const response = data.data;
 
 			console.log('Room Details ------------->>>', response);
+
+			/////////////////////////////////////////////////////////////////////////////
+			const checkJoinedRoom = response.createdById === userId;
+
+			console.log('checkPreviouslyJoinedRoom====>', checkJoinedRoom);
+			socketEmit('event:checkPreviouslyJoinedRoom', {
+				roomId,
+				hostUser: checkJoinedRoom,
+			});
+
+			/////////////////////////////////////////////////////////////////////////////
 			if (response) {
 				setRoomDetails(response);
 			} else {
@@ -68,13 +76,13 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		} catch (error) {
 			console.log(error);
 		}
-	}, [getToken, roomId, router, setRoomDetails]);
+	}, [getToken, roomId, router, setRoomDetails, socketEmit, userId]);
 
 	useEffect(() => {
 		getRoomDetails();
 	}, [getRoomDetails]);
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////
 
 	// const createOffer = useCallback(async () => {
 	// 	const offer = await webRTC.createOffer();
@@ -88,26 +96,38 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//Host join Room
-	const handleHostEnterRoom = useCallback(async () => {
+	//// Previously joined User
+	const handleDirectlyCanJoin = useCallback(
+		({ directlyCanJoin }: { directlyCanJoin: boolean }) => {
+			setCanJoin(directlyCanJoin);
+		},
+		[]
+	);
+
+	useEffect(() => {
+		socketOn('event:directlyCanJoin', handleDirectlyCanJoin);
+		return () => {
+			socketOff('event:directlyCanJoin', handleDirectlyCanJoin);
+		};
+	}, [handleDirectlyCanJoin, socketOff, socketOn]);
+
+	/////////////////////////////////////////////////////////////////////////
+
+	//User join Room
+	const handleJoinRoom = useCallback(async () => {
+		const checkJoinedRoom = roomDetails?.createdById === userId;
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
-			// userId,
-			// username: user?.fullName,
-			hostUser: true,
+			hostUser: checkJoinedRoom,
 		});
-	}, [roomId, socketEmit]);
+	}, [roomDetails?.createdById, roomId, socketEmit, userId]);
 
-	//Client join Room
-	const handleAskedToEnter = useCallback(async () => {
-		// const offer = webRTC.createOffer
+	//User ask join Room
+	const handleAskToJoin = useCallback(async () => {
 		const offer = await createOffer();
-		console.log('Client Offer===========>', offer);
-		socketEmit('event:askToEnter', {
+		// console.log('Client Offer===========>', offer);
+		socketEmit('event:askToJoin', {
 			roomId,
-			// username: user?.fullName,
-			// profilePic: user?.imageUrl,
-			// offer: peerOffer,
 			offer: offer,
 		});
 
@@ -117,7 +137,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//// All socket Event Function are Define Here
-	const handleJoinRoom = useCallback(
+	const joinRoom = useCallback(
 		async ({
 			answer: hostAnswer,
 			hostOffer,
@@ -128,6 +148,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			hostUserSocketId: string;
 		}) => {
 			console.log('Second Socket User Joined', hostUserSocketId);
+
 			if (hostUserSocketId) {
 				setRemoteSocketId(hostUserSocketId);
 				console.log('SET  Remote Socket ID--->', hostUserSocketId);
@@ -215,14 +236,14 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	//// All socket Notification are Executed Here
 	useEffect(() => {
 		console.log('Setup All Socket Events ------------->>>');
-		socketOn('event:joinRoom', handleJoinRoom);
+		socketOn('event:joinRoom', joinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
 		return () => {
 			console.log('Off All Socket Events ------------->>>');
-			socketOff('event:joinRoom', handleJoinRoom);
+			socketOff('event:joinRoom', joinRoom);
 			socketOff('event:enterRoom', handleEnterRoom);
 		};
-	}, [handleEnterRoom, handleJoinRoom, socketOff, socketOn]);
+	}, [joinRoom, handleEnterRoom, socketOff, socketOn]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
@@ -268,21 +289,16 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 							</CardHeader>
 
 							<CardFooter className="item-center flex justify-evenly">
-								{roomDetails?.createdById === userId ? (
-									<Button onClick={() => handleHostEnterRoom()}>
-										Join Room
-									</Button>
+								{canJoin ? (
+									<Button onClick={() => handleJoinRoom()}>Join Room</Button>
 								) : (
 									<Button
 										disabled={askToEnter}
-										onClick={() => handleAskedToEnter()}
+										onClick={() => handleAskToJoin()}
 									>
 										{askToEnter ? <Spinner /> : <>ask to Join</>}
 									</Button>
 								)}
-								{/* <Button onClick={() => creationOffer()}>
-												Create a Offer
-												</Button> */}
 							</CardFooter>
 						</>
 					) : (

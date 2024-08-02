@@ -37,8 +37,18 @@ model User {
   notificationsFor Notification[] @relation("NotificationForUser")
   NotificationFrom Notification[] @relation("NotificationFrom")
 
+  setting Setting?
+
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
+}
+
+model Setting {
+  id          String @id @unique @default(uuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  VideoDevice String
+  AudioDevice String
 }
 
 model FriendShip {

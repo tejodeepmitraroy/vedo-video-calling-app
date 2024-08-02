@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import Dashboard from './@dashboard/page';
-import CallRoom from './@callRoom/page';
+// import CallRoom from './@callRoom/page';
 import ConferenceRoom from './@conferenceRoom/page';
 import { useSearchParams } from 'next/navigation';
 import CallPanel from './@callerPanel/page';
@@ -23,6 +23,8 @@ const Home = () => {
 	useEffect(() => {
 		if (roomId) {
 			setCurrentState('ConferenceRoom');
+		} else {
+			setCurrentState('Dashboard');
 		}
 	}, [roomId, setCurrentState]);
 
@@ -36,7 +38,7 @@ const Home = () => {
 				<main className="relative flex w-full flex-1 flex-col gap-4 px-2 pb-20 md:pb-2 lg:gap-6">
 					<>
 						{currentState === 'Dashboard' && <Dashboard />}
-						{currentState === 'Call' && <CallRoom />}
+						{/* {currentState === 'Call' && <CallRoom />} */}
 						{currentState === 'Conference' && <ConferenceRoom />}
 						{currentState === 'ConferenceRoom' && <CallPanel />}
 					</>

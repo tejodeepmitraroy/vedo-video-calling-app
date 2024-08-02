@@ -1,4 +1,8 @@
-import { Home, Laptop, Phone } from 'lucide-react';
+import {
+	Home,
+	Laptop,
+	// Phone
+} from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import UserProfile from './UserProfile';
@@ -117,7 +121,7 @@ const BottomNavigation = () => {
 						</span>
 					</button>
 				</Link>
-				<Link
+				{/* <Link
 					href={'/'}
 					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
@@ -135,7 +139,7 @@ const BottomNavigation = () => {
 							Phone
 						</span>
 					</button>
-				</Link>
+				</Link> */}
 				<div className="flex items-center justify-center">
 					<Dialog>
 						<DialogTrigger asChild>
