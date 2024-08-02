@@ -1,7 +1,6 @@
 import { Server, Socket } from 'socket.io';
 // import prisma from '../lib/prismaClient';
 
-// type socketIdToUserIdMap = Map<string, string>;
 type hostSocketIdToRoomId = Map<string, string>;
 type socketIdToUserMap = Map<
 	string,
@@ -21,20 +20,19 @@ type rooms = Map<
 	}
 >;
 
-const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
-	let result: string | undefined;
-	console.log('KeyByValue', map);
-	map.forEach((value, key) => {
-		result = value === KeyValue ? key : result;
-	});
-	return result;
-};
+// const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
+// 	let result: string | undefined;
+// 	console.log('KeyByValue', map);
+// 	map.forEach((value, key) => {
+// 		result = value === KeyValue ? key : result;
+// 	});
+// 	return result;
+// };
 
 export function roomConnections(
 	socket: Socket,
 	io: Server,
 	rooms: rooms,
-	// socketIdToUserIdMap: socketIdToUserIdMap,
 	hostSocketIdToRoomId: hostSocketIdToRoomId,
 	socketIdToUserMap: socketIdToUserMap
 ) {
@@ -74,39 +72,15 @@ export function roomConnections(
 				offer,
 			});
 
-			// console.log(
-			//   'Host User Id--->',
-			//   KeyByValue(this.hostSocketIdToRoomId, roomId)
-			// );
-
-			// console.log(rooms[roomId]);
 			console.log(rooms);
 
-			// if (rooms[roomId]) {
-			// 	if (rooms[roomId].length === 2) {
-			// 		io.to(socket.id).emit('notification:roomLimitFull');
-			// 	} else {
-			// 		const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
-			// 		if (hostSocketId) {
-			// 			io.to(hostSocketId!).emit('event:userWantToEnter', {
-			// 				username: socketIdToUserMap.get(socket.id)?.fullName,
-			// 				profilePic: socketIdToUserMap.get(socket.id)?.imageUrl,
-			// 				socketId: socket.id,
-			// 				offer,
-			// 			});
-			// 		} else {
-			// 			io.to(socket.id).emit('notification:hostIsNoExistInRoom');
-			// 		}
-			// 	}
-			// } else {
-			// 	io.to(socket.id).emit('notification:hostIsNoExistInRoom');
-			// }
-
 			if (rooms.get(roomId)) {
-				if (rooms.size === 2) {
+				if (rooms.get(roomId)?.participants.size === 2) {
 					io.to(socket.id).emit('notification:roomLimitFull');
 				} else {
-					const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
+					// const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
+					const hostSocketId = rooms.get(roomId)?.hostSocketId;
+
 					if (hostSocketId) {
 						io.to(hostSocketId!).emit('event:userWantToEnter', {
 							username: socketIdToUserMap.get(socket.id)?.fullName,
@@ -175,7 +149,6 @@ export function roomConnections(
 				// const hostUserId = socketIdToUserIdMap.get(socket.id);
 				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
 
-				// const usersArray = new Set();
 				const roomDetails = {
 					hostId: hostUserId!,
 					hostSocketId: socket.id,
@@ -194,11 +167,8 @@ export function roomConnections(
 
 			socket.join(roomId);
 
-			// rooms[roomId].push(socket.id);
 			const roomInUsers = rooms.get(roomId)?.participants;
-			// roomInUsers?.add(socketIdToUserIdMap.get(socket.id));
 			roomInUsers?.add(socketIdToUserMap.get(socket.id)?.userId);
-			// rooms.set(roomId).push(socket.id);
 
 			// const meeting = await prisma.participantsInRoom.upsert({
 			// 	where: {
@@ -275,7 +245,6 @@ export function roomConnections(
 		'event:callEnd',
 		({ roomId }: { roomId: string; userId: string }) => {
 			socket.broadcast.emit('notification:userLeftTheRoom', {
-				// userId: socketIdToUserIdMap.get(socket.id),
 				userId: socketIdToUserMap.get(socket.id)?.userId,
 			});
 			socket.leave(roomId);
@@ -286,11 +255,13 @@ export function roomConnections(
 	);
 
 	socket.on('event:endRoom', ({ roomId }: { roomId: string }) => {
-		socket.broadcast.emit('event:removeEveryoneFromRoom');
-		socket.emit('event:removeEveryoneFromRoom');
-		// delete rooms[roomId];
-		rooms.delete(roomId);
-		io.socketsLeave(roomId);
+		const roomDetails = rooms.get(roomId);
+		if (roomDetails?.hostSocketId === socket.id) {
+			socket.broadcast.emit('event:removeEveryoneFromRoom');
+			socket.emit('event:removeEveryoneFromRoom');
+			rooms.delete(roomId);
+			io.socketsLeave(roomId);
+		}
 	});
 
 	socket.on('disconnecting', () => {
@@ -309,6 +280,5 @@ export function roomConnections(
 		// });
 
 		console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);
-		// the Set contains at least the socket ID
 	});
 }

@@ -33,8 +33,8 @@ export default function CallPanel() {
 	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
 
 	const stopMediaStream = useCallback(async () => {
-		setLocalStream(null);
 		disconnectPeer();
+		setLocalStream(null);
 	}, [disconnectPeer, setLocalStream]);
 
 	useEffect(() => {

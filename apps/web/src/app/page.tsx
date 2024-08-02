@@ -5,7 +5,6 @@ import Sidebar from '@/components/Sidebar';
 import NavBar from '@/components/Navbar';
 import BottomNavigation from '@/components/BottomNavigation';
 import Dashboard from './@dashboard/page';
-// import CallRoom from './@callRoom/page';
 import ConferenceRoom from './@conferenceRoom/page';
 import { useSearchParams } from 'next/navigation';
 import CallPanel from './@callerPanel/page';
