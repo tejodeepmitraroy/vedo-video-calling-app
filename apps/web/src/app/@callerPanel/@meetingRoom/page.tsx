@@ -15,10 +15,6 @@ import { useRouter } from 'next/navigation';
 import useRoomStore from '@/store/useRoomStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	// const localStream = useRoomStore((state) => state.localStream);
-	// const localScreenStream = useRoomStore((state) => state.localScreenStream);
-	// const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
-	// const [remoteStream, setRemoteStream] = useState<MediaStream>();
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const setRoomState = useRoomStore((state) => state.setRoomState);
@@ -261,16 +257,16 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			<main className="relative h-full w-full">
 				<div className="flex h-[92.5%] w-full items-center justify-center">
 					<div className="flex h-full w-full max-w-[85rem] items-center justify-center rounded-xl">
-						{remoteStream ? (
-							<>
-								<RemoteUserVideoPanel />
-								<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[15%] lg:w-[12%]">
-									<UserVideoPanel />
-								</div>
-							</>
-						) : (
+						{/* {remoteStream ? ( */}
+						<>
+							<RemoteUserVideoPanel />
+							<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[15%] lg:w-[12%]">
+								<UserVideoPanel />
+							</div>
+						</>
+						{/* ) : (
 							<UserVideoPanel />
-						)}
+						)} */}
 						{/* <ScreenSharePanel /> */}
 					</div>
 				</div>

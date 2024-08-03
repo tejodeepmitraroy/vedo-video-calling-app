@@ -290,6 +290,21 @@
     std-env "^3.7.0"
     swr "^2.2.0"
 
+"@clerk/themes@^2.1.16":
+  version "2.1.16"
+  resolved "https://registry.yarnpkg.com/@clerk/themes/-/themes-2.1.16.tgz#0f924c90aa1a6939d64e4af69a0d71491a98c153"
+  integrity sha512-ln+Un52L3ibx0Y0PUIDhYwUeCjdkTEL5vPfPxs78rTskCal9orVZ52YXwEs1+I/GIUBstFVB4cOLsuMKdkpdCw==
+  dependencies:
+    "@clerk/types" "4.11.0"
+    tslib "2.4.1"
+
+"@clerk/types@4.11.0":
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/@clerk/types/-/types-4.11.0.tgz#e7af3961d0fef19c5552858d89a4a778faf79488"
+  integrity sha512-sMp3ATIH5ZoZ9veu9/LNH68GvahDm7sPLJf8xYyjc9hJYILz85xzI0JbwS6iFJw2NpTssvyl9viL7tgBrw46iA==
+  dependencies:
+    csstype "3.1.1"
+
 "@clerk/types@4.6.0":
   version "4.6.0"
   resolved "https://registry.npmjs.org/@clerk/types/-/types-4.6.0.tgz"

@@ -132,7 +132,14 @@ export function roomConnections(
 
 	socket.on(
 		'event:joinRoom',
-		async ({ roomId, hostUser }: { roomId: string; hostUser: boolean }) => {
+		async ({
+			roomId,
+			hostUser,
+		}: {
+			roomId: string;
+			hostUser: boolean;
+			offer: RTCSessionDescriptionInit | undefined;
+		}) => {
 			// console.log('Room Id', roomId);
 			// console.log('userId', socketIdToUserMap.get(socket.id)?.userId);
 			// console.log('hostUser', hostUser);
@@ -158,6 +165,46 @@ export function roomConnections(
 				rooms.set(roomId, roomDetails);
 			}
 
+			// if (rooms.has(roomId)) {
+			// 	const roomDetails = rooms.get(roomId);
+			// 	if (
+			// 		roomDetails?.hostId === socketIdToUserMap.get(socket.id)?.userId ||
+			// 		roomDetails?.participants.has(
+			// 			socketIdToUserMap.get(socket.id)?.userId
+			// 		)
+			// 	) {
+			// 		//Rejoin User
+			// 		socket.join(roomId);
+			// 		// callback({ allowed: true });
+			// 	} else if (roomDetails?.hostSocketId) {
+			// 		// Notify Host to permission
+			// 		io.to(roomDetails.hostSocketId).emit('requestJoin', socket.id);
+
+			// 		//Get Responce from Host
+			// 		socket.on('responseJoin', (allowed) => {
+			// 			if (allowed) {
+			// 				socket.join(roomId);
+			// 				const roomInUsers = rooms.get(roomId)?.participants;
+			// 				// const participantData = {
+			// 				// 	userId:"",
+			// 				// 	socketId:'',
+			// 				// 	offer:"",
+			// 				// 	answer:""
+			// 				// }
+			// 				roomInUsers?.add(socketIdToUserMap.get(socket.id)?.userId);
+			// 				// callback({ allowed: true });
+
+			// 				// Inform Everyone i room a New User join
+			// 				io.to(roomId).emit('userJoined', socket.id);
+			// 			} else {
+			// 				callback({ allowed: false });
+			// 			}
+			// 		});
+			// 	}
+			// } else {
+			// 	callback({ allowed: false });
+			// }
+
 			// if (hostUser) {
 
 			// 	hostSocketIdToRoomId.set(socket.id, roomId);
@@ -168,6 +215,12 @@ export function roomConnections(
 			socket.join(roomId);
 
 			const roomInUsers = rooms.get(roomId)?.participants;
+			// const participantData = {
+			// 	userId:"",
+			// 	socketId:'',
+			// 	offer:"",
+			// 	answer:""
+			// }
 			roomInUsers?.add(socketIdToUserMap.get(socket.id)?.userId);
 
 			// const meeting = await prisma.participantsInRoom.upsert({
@@ -229,15 +282,12 @@ export function roomConnections(
 	socket.on(
 		'event:sendIceCandidate',
 		({
-			remoteSocketId,
 			iceCandidate,
 		}: {
 			remoteSocketId: string;
 			iceCandidate: RTCPeerConnection;
 		}) => {
-			socket
-				.to(remoteSocketId)
-				.emit('event:sendIceCandidate', { iceCandidate });
+			socket.broadcast.emit('event:sendIceCandidate', { iceCandidate });
 		}
 	);
 

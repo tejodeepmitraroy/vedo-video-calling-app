@@ -116,9 +116,11 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	//User join Room
 	const handleJoinRoom = useCallback(async () => {
 		const checkJoinedRoom = roomDetails?.createdById === userId;
+		// const offer = await createOffer();
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
 			hostUser: checkJoinedRoom,
+			// offer: offer,
 		});
 	}, [roomDetails?.createdById, roomId, socketEmit, userId]);
 

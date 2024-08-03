@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WebRTCProvider } from '@/context/WebRTCContext';
+import { neobrutalism } from '@clerk/themes';
 
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
@@ -19,7 +20,11 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<ClerkProvider>
+			<ClerkProvider
+				appearance={{
+					baseTheme: neobrutalism,
+				}}
+			>
 				<SocketProvider>
 					<WebRTCProvider>
 						<body>
