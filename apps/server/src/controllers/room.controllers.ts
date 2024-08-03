@@ -73,6 +73,7 @@ export const getAllRooms = asyncHandler(
 						startTime: true,
 						createdById: true,
 						createdAt: true,
+						participants: true,
 					},
 				});
 
