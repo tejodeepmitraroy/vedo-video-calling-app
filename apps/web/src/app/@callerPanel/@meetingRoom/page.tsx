@@ -59,6 +59,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[setRemoteSocketId, userId]
 	);
 
+	//////////////////////////////////////////////////////////////////////////////////////////////
+
 	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
 		async (socketId: string, offer: RTCSessionDescriptionInit) => {
@@ -140,7 +142,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 					</div>
 				</div>,
 				{
-					// onClose: () => roomEnterPermissionDenied(socketId),
+					onClose: () => roomEnterPermissionDenied(socketId),
 					position: 'top-center',
 					autoClose: false,
 					hideProgressBar: false,
@@ -178,18 +180,16 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		(event: any) => {
 			{
 				if (event.candidate) {
-					console.log('remoteSocketId', remoteSocketId);
 					console.log(
 						'=========================Sending Ice Candidate=================='
 					);
 					socketEmit('event:sendIceCandidate', {
-						remoteSocketId,
 						iceCandidate: event.candidate,
 					});
 				}
 			}
 		},
-		[remoteSocketId, socketEmit]
+		[socketEmit]
 	);
 
 	useEffect(() => {
