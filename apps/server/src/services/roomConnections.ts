@@ -168,8 +168,8 @@ export function roomConnections(
 
 			socket.join(roomId);
 
-			const roomInUsers = rooms.get(roomId)?.participants;
-			roomInUsers?.add(socketIdToUserMap.get(socket.id)!.userId);
+			const roomInUsers = rooms.get(roomId)!.participants;
+			roomInUsers.add(socketIdToUserMap.get(socket.id)!.userId);
 
 			const meeting = await prisma.participantsInRoom.upsert({
 				where: {
@@ -268,7 +268,7 @@ export function roomConnections(
 	socket.on('event:endRoom', ({ roomId }: { roomId: string }) => {
 		const roomDetails = rooms.get(roomId);
 		if (roomDetails?.hostSocketId === socket.id) {
-			socket.to(roomId).emit('event:removeEveryoneFromRoom');
+			io.to(roomId).emit('event:removeEveryoneFromRoom');
 			rooms.delete(roomId);
 			io.socketsLeave(roomId);
 		}

@@ -1,11 +1,11 @@
 'use client';
 import ScheduleCallForm from '@/components/ScheduleCallForm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
@@ -17,10 +17,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
-import { Clock, Laptop, Phone } from 'lucide-react';
-import Image from 'next/image';
+import { Laptop, Phone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -32,6 +32,8 @@ export default function Dashboard() {
 	>([]);
 	const router = useRouter();
 	const { getToken } = useAuth();
+
+	const { userId } = useAuth();
 
 	console.log('Dashboard Component++++++++++++');
 
@@ -120,17 +122,21 @@ export default function Dashboard() {
 		getRoomDetails();
 	}, [getRoomDetails]);
 
-	const convertTo24Hour = (isoString: Date) => {
-		const date = new Date(isoString); // Create a Date object from the ISO string
-		const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
-		const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
-
-		if (isoString) {
-			return `${hours}:${minutes}`;
+	const handleCallOpenMeeting = ({
+		roomId,
+		userId: id,
+	}: {
+		roomId: string;
+		userId: string;
+	}) => {
+		if (id === userId) {
+			router.push(`?roomId=${roomId}`);
 		} else {
-			return '';
+			toast('This room is not created by you.But you can ask to join.');
+			router.push(`?roomId=${roomId}`);
 		}
 	};
+
 	return (
 		<div className="flex flex-1 rounded-lg bg-background p-4 shadow-sm">
 			<div className="grid w-full grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 xl:grid-rows-2">
@@ -190,33 +196,47 @@ export default function Dashboard() {
 					<CardContent className="w-full">
 						<ScrollArea className="h-[68vh] w-full rounded-md border bg-white p-4">
 							<div className="flex flex-col gap-3">
-								{allScheduledRoomsDetails.map((room) => (
+								{allScheduledRoomsDetails.splice(0, 5).map((room) => (
 									<Card
 										key={room.id}
-										className="flex w-full justify-between p-0 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
+										onClick={() =>
+											handleCallOpenMeeting({
+												roomId: room.id,
+												userId: room.createdBy.id,
+											})
+										}
+										className="group flex w-full cursor-pointer justify-between p-0 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
 									>
 										<CardHeader className="p-2">
-											<div className="flex h-10 w-10 items-center justify-center rounded-md border">
-												<Clock className="h-5 w-5" />
-											</div>
+											<Avatar>
+												<AvatarImage src={room.createdBy.image_url} />
+												<AvatarFallback>
+													{room.createdBy.first_name}
+												</AvatarFallback>
+											</Avatar>
+											{/* <div className="flex h-10 w-10 items-center justify-center rounded-md border group-hover:bg-background">
+												<Clock className="h-5 w-5 group-hover:text-black" />
+											</div> */}
 										</CardHeader>
 										<CardContent className="flex w-full justify-start gap-7 p-2 px-10">
 											<div className="flex flex-col justify-between">
-												<span className="font-bold">
-													{convertTo24Hour(room.startTime!)}
+												<span className="font-semibold">
+													{convertISOTo12HourFormat(room.startTime!).time}
 												</span>
 												<span className="text-xs">
-													{convertTo24Hour(room.endTime!)}
+													{convertISOTo12HourFormat(room.startTime!).date}
 												</span>
 											</div>
 											<div className="flex flex-col justify-between">
-												<span className="truncate font-bold">{room.title}</span>
+												<span className="truncate font-semibold">
+													{room.title}
+												</span>
 												<span className="truncate text-xs">
 													{`${room.createdBy.first_name} ${room.createdBy.last_name}`}
 												</span>
 											</div>
 										</CardContent>
-										<CardFooter className="flex items-center justify-center p-2">
+										{/* <CardFooter className="flex items-center justify-center p-2">
 											<Image
 												src={room.createdBy.image_url}
 												alt={room.createdBy.first_name}
@@ -224,7 +244,7 @@ export default function Dashboard() {
 												height={60}
 												className="flex items-center justify-center rounded-md"
 											/>
-										</CardFooter>
+										</CardFooter> */}
 									</Card>
 								))}
 							</div>

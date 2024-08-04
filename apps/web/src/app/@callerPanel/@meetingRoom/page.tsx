@@ -11,7 +11,7 @@ import useStreamStore from '@/store/useStreamStore';
 import ControlPanel from './components/ControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-import { useRouter } from 'next/navigation';
+
 import useRoomStore from '@/store/useRoomStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
@@ -35,7 +35,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	// const remoteStream = webRTC.getRemoteStream();
 	const remoteStream = getRemoteStream();
-	const router = useRouter();
 
 	console.log('Remote Users Stream--------->', remoteStream);
 
@@ -170,9 +169,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const handleRemoveEveryoneFromRoom = useCallback(async () => {
 		toast.success(`Host End the Room`);
 		disconnectPeer();
-		router.push('/');
 		setRoomState('outSideLobby');
-	}, [disconnectPeer, router, setRoomState]);
+	}, [disconnectPeer, setRoomState]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -73,7 +73,6 @@ export const getAllRooms = asyncHandler(
 						startTime: true,
 						createdById: true,
 						createdAt: true,
-						participants: true,
 					},
 				});
 
@@ -88,7 +87,18 @@ export const getAllRooms = asyncHandler(
 				const rooms = await prisma.room.findMany({
 					where: {
 						type: 'INSTANT',
-						createdById: userId!,
+						OR: [
+							{
+								createdById: userId!,
+							},
+							{
+								participants: {
+									some: {
+										user_id: userId,
+									},
+								},
+							},
+						],
 					},
 					select: {
 						id: true,
@@ -100,15 +110,40 @@ export const getAllRooms = asyncHandler(
 								id: true,
 								image_url: true,
 								first_name: true,
+								last_name: true,
 							},
 						},
 						description: true,
 						startTime: true,
 						createdById: true,
 						createdAt: true,
+						participants: {
+							select: {
+								user: true,
+							},
+						},
 					},
 				});
-				return response.status(200).json(new ApiResponse(200, rooms));
+
+				const ModifyRoomDetails = rooms.map((room) => {
+					return {
+						id: room.id,
+						type: room.type,
+						url: room.url,
+						title: room.title,
+						createdBy: room.createdBy,
+						description: room.description,
+						startTime: room.startTime,
+						createdById: room.createdById,
+						createdAt: room.createdAt,
+						participants: room.participants.map((item) => item.user),
+					};
+				});
+
+				console.log('Meeting Data==========>', ModifyRoomDetails);
+				return response
+					.status(200)
+					.json(new ApiResponse(200, ModifyRoomDetails));
 			} catch (error) {
 				return response
 					.status(400)

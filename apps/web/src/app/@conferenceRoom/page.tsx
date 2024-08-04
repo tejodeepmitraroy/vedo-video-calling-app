@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import {
 	Table,
 	TableBody,
+	TableCaption,
 	TableCell,
 	TableHead,
 	TableHeader,
@@ -28,6 +29,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 
 const ConferenceRoom = () => {
 	const { getToken, userId } = useAuth();
@@ -107,12 +109,11 @@ const ConferenceRoom = () => {
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	const getRoomDetails = useCallback(async () => {
+	const getAllRoomDetails = useCallback(async () => {
 		const token = await getToken();
-		// console.log('Token---->', token);
 
 		try {
-			const { data } = await axios<ApiResponse>(
+			const { data } = await axios(
 				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
 				{
 					headers: {
@@ -142,7 +143,8 @@ const ConferenceRoom = () => {
 		if (id === userId) {
 			router.push(`?roomId=${roomId}`);
 		} else {
-			toast.error('This room is not created by you.But you can ask to join.');
+			toast('This room is not created by you.But you can ask to join.');
+			router.push(`?roomId=${roomId}`);
 		}
 	};
 
@@ -150,21 +152,9 @@ const ConferenceRoom = () => {
 		toast.warn(`User is Offline`);
 	}, []);
 
-	const convertTo24Hour = (isoString: Date) => {
-		const date = new Date(isoString); // Create a Date object from the ISO string
-		const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
-		const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
-
-		if (isoString) {
-			return `${hours}:${minutes}`;
-		} else {
-			return '';
-		}
-	};
-
 	useEffect(() => {
-		getRoomDetails();
-	}, [getRoomDetails]);
+		getAllRoomDetails();
+	}, [getAllRoomDetails]);
 
 	useEffect(() => {
 		socketOn('notification:userIsNotOnline', handleUserIsNotOnline);
@@ -230,152 +220,196 @@ const ConferenceRoom = () => {
 										{/* <TableHead className="text-right">Created</TableHead> */}
 									</TableRow>
 								</TableHeader>
-								<TableBody className="w-full">
-									{allScheduledRoomsDetails.map((room) => (
-										<Dialog key={room.id}>
-											<DialogTrigger asChild>
-												<TableRow className="text-sm">
-													<TableCell className="font-medium">
-														{room.id}
-													</TableCell>
-													<TableCell className="hidden sm:table-cell">
-														{room.type}
-													</TableCell>
-													<TableCell>{room.title}</TableCell>
-													<TableCell className="flex items-center gap-2">
-														<Avatar className="hidden sm:table-cell">
-															<AvatarImage src={room.createdBy.image_url} />
-															<AvatarFallback>
-																{room.createdBy.first_name}
-															</AvatarFallback>
-														</Avatar>
+								{allScheduledRoomsDetails.length === 0 ? (
+									<TableCaption>No Data Existed</TableCaption>
+								) : (
+									allScheduledRoomsDetails.map((room) => (
+										<TableBody key={room.id} className="w-full">
+											<Dialog>
+												<DialogTrigger asChild>
+													<TableRow className="text-sm">
+														<TableCell className="font-medium">
+															{room.id}
+														</TableCell>
+														<TableCell className="hidden sm:table-cell">
+															{room.type}
+														</TableCell>
+														<TableCell>{room.title}</TableCell>
+														<TableCell className="flex items-center gap-2">
+															<Avatar className="hidden sm:table-cell">
+																<AvatarImage src={room.createdBy.image_url} />
+																<AvatarFallback>
+																	{room.createdBy.first_name}
+																</AvatarFallback>
+															</Avatar>
 
-														{room.createdBy.first_name}
-													</TableCell>
-													<TableCell className="hidden sm:table-cell">
-														{convertTo24Hour(room.startTime!)}
-													</TableCell>
-													<TableCell className="hidden items-center sm:flex">
-														<Avatar>
-															<AvatarImage src={room.createdBy.image_url} />
-															<AvatarFallback>
-																{room.createdBy.first_name}
-															</AvatarFallback>
-														</Avatar>
-														<Avatar>
-															<AvatarImage src={room.createdBy.image_url} />
-															<AvatarFallback>
-																{room.createdBy.first_name}
-															</AvatarFallback>
-														</Avatar>
-														<Avatar>
-															<AvatarImage src={room.createdBy.image_url} />
-															<AvatarFallback>
-																{room.createdBy.first_name}
-															</AvatarFallback>
-														</Avatar>
-													</TableCell>
-												</TableRow>
-											</DialogTrigger>
-											<DialogContent className="sm:max-w-[425px]">
-												<DialogHeader>
-													<DialogTitle>Room Details</DialogTitle>
-													<DialogDescription>
-														Make changes to your profile here. Click save when
-														you`&rsquo;`re done.
-													</DialogDescription>
-												</DialogHeader>
-												<DialogClose asChild>
-													<Button
-														onClick={() =>
-															handleCallOpenMeeting({
-																roomId: room.id,
-																userId: room.createdBy.id,
-															})
-														}
-													>
-														Connect room
-													</Button>
-												</DialogClose>
-												<ScrollArea className="h-[50vh]">
-													<div className="grid grid-cols-1 gap-4 py-4">
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="id" className="">
-																Room Id
-															</Label>
-															<Input
-																id="id"
-																value={room.id}
-																className="col-span-3"
-															/>
-														</div>
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="title" className="">
-																Room Type
-															</Label>
-															<Input
-																id="title"
-																value={room.type}
-																className="col-span-3"
-															/>
-														</div>
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="title" className="">
-																Title
-															</Label>
-															<Input
-																id="title"
-																value={room.title}
-																className="col-span-3"
-															/>
-														</div>
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="createdBy" className="">
-																Created By
-															</Label>
-
-															<div className="flex items-center gap-3">
-																<Avatar>
-																	<AvatarImage src={room.createdBy.image_url} />
+															{room.createdBy.first_name}
+														</TableCell>
+														<TableCell className="hidden sm:table-cell">
+															<div className="flex flex-col gap-2">
+																<span>
+																	{
+																		convertISOTo12HourFormat(room.startTime!)
+																			.time
+																	}
+																</span>
+																<span>
+																	{
+																		convertISOTo12HourFormat(room.startTime!)
+																			.date
+																	}
+																</span>
+															</div>
+														</TableCell>
+														<TableCell className="hidden items-center sm:flex">
+															{room.participants.map((item) => (
+																<Avatar key={item.id}>
+																	<AvatarImage src={item.image_url} />
 																	<AvatarFallback>
-																		{room.createdBy.first_name}
+																		{item.first_name}
 																	</AvatarFallback>
 																</Avatar>
+															))}
+														</TableCell>
+													</TableRow>
+												</DialogTrigger>
+												<DialogContent className="sm:max-w-[425px]">
+													<DialogHeader>
+														<DialogTitle>Room Details</DialogTitle>
+														<DialogDescription>
+															Make changes to your profile here. Click save when
+															you`&rsquo;`re done.
+														</DialogDescription>
+													</DialogHeader>
+													<DialogClose asChild>
+														<Button
+															onClick={() =>
+																handleCallOpenMeeting({
+																	roomId: room.id,
+																	userId: room.createdBy.id,
+																})
+															}
+														>
+															Connect room
+														</Button>
+													</DialogClose>
+													<ScrollArea className="h-[50vh]">
+														<div className="grid grid-cols-1 gap-4 py-4">
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="id" className="">
+																	Room Id
+																</Label>
 																<Input
-																	id="createdBy"
-																	value={room.createdBy.first_name}
+																	id="id"
+																	value={room.id}
 																	className="col-span-3"
 																/>
 															</div>
-														</div>
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="startDate" className="">
-																Start Date
-															</Label>
-															<Input
-																id="startDate"
-																value={convertTo24Hour(room.startTime!)}
-																className="col-span-3"
-															/>
-														</div>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="title" className="">
+																	Room Type
+																</Label>
+																<Input
+																	id="title"
+																	value={room.type}
+																	className="col-span-3"
+																/>
+															</div>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="title" className="">
+																	Title
+																</Label>
+																<Input
+																	id="title"
+																	value={room.title}
+																	className="col-span-3"
+																/>
+															</div>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="createdBy" className="">
+																	Created By
+																</Label>
 
-														<div className="grid grid-cols-1 items-center gap-4">
-															<Label htmlFor="participants" className="">
-																Participants
-															</Label>
+																<div className="flex items-center gap-3">
+																	<Avatar>
+																		<AvatarImage
+																			src={room.createdBy.image_url}
+																		/>
+																		<AvatarFallback>
+																			{room.createdBy.first_name}
+																		</AvatarFallback>
+																	</Avatar>
+																	<Input
+																		id="createdBy"
+																		value={`${room.createdBy.first_name} ${room.createdBy.last_name}`}
+																		className="col-span-3"
+																	/>
+																</div>
+															</div>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="startDate" className="">
+																	Start time
+																</Label>
+																<Input
+																	id="startDate"
+																	value={
+																		convertISOTo12HourFormat(room.startTime!)
+																			.time
+																	}
+																	className="col-span-3"
+																/>
+															</div>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="startDate" className="">
+																	Start Date
+																</Label>
+																<Input
+																	id="startDate"
+																	value={
+																		convertISOTo12HourFormat(room.startTime!)
+																			.date
+																	}
+																	className="col-span-3"
+																/>
+															</div>
 
-															<Input
-																id="name"
-																value="Pedro Duarte"
-																className="col-span-3"
-															/>
+															<div className="grid grid-cols-1 items-center gap-4">
+																<Label htmlFor="participants" className="">
+																	Participants
+																</Label>
+
+																{room.participants.map((item) => (
+																	<div
+																		className="flex items-center gap-3"
+																		key={item.id}
+																	>
+																		<Avatar>
+																			<AvatarImage src={item.image_url} />
+																			<AvatarFallback>
+																				{item.first_name}
+																			</AvatarFallback>
+																		</Avatar>
+																		<Input
+																			id="startDate"
+																			value={`${item.first_name} ${item.last_name}`}
+																			className="col-span-3"
+																		/>
+																	</div>
+																))}
+
+																{/* <Input
+																	id="name"
+																	value="Pedro Duarte"
+																	className="col-span-3"
+																/> */}
+															</div>
 														</div>
-													</div>
-												</ScrollArea>
-											</DialogContent>
-										</Dialog>
-									))}
-								</TableBody>
+													</ScrollArea>
+												</DialogContent>
+											</Dialog>
+										</TableBody>
+									))
+								)}
 							</ScrollArea>
 						</Table>
 					</div>

@@ -1,3 +1,12 @@
+interface User {
+	createdAt: string;
+	email: string;
+	first_name: string;
+	id: string;
+	image_url: string;
+	last_name: string;
+	updatedAt: Date | null;
+}
 interface RoomDetails {
 	id: string;
 	type: $Enums.RoomType;
@@ -8,13 +17,8 @@ interface RoomDetails {
 	startTime: Date | null;
 	endTime: Date | null;
 	createdById: string;
-	createdBy: {
-		id: string;
-		image_url: string;
-		first_name: string;
-		last_name: string;
-	};
-	participantIds: string[];
+	createdBy: User;
+	participants: User[];
 	createdAt: Date | null;
 	updatedAt: Date | null;
 }

@@ -1,6 +1,8 @@
 import {
 	Home,
 	Laptop,
+	Plus,
+
 	// Phone
 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -101,7 +103,7 @@ const BottomNavigation = () => {
 		<div
 			className={`${roomState === 'meetingRoom' ? 'hidden' : 'fixed'} fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden`}
 		>
-			<div className="mx-auto grid h-full max-w-lg grid-cols-5 font-medium">
+			<div className="mx-auto grid h-full max-w-lg grid-cols-4 font-medium">
 				<Link
 					href={'/'}
 					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -140,7 +142,86 @@ const BottomNavigation = () => {
 						</span>
 					</button>
 				</Link> */}
-				<div className="flex items-center justify-center">
+				<Link
+					href={'/'}
+					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
+				>
+					<Dialog>
+						<DialogTrigger asChild>
+							<button
+								type="button"
+								className="inline-flex flex-col items-center justify-center"
+							>
+								<Plus
+									className={`mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500`}
+								/>
+								<span
+									className={`text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+								>
+									Start
+								</span>
+							</button>
+						</DialogTrigger>
+						<DialogContent className="sm:max-w-[425px]">
+							<DialogHeader>
+								<DialogTitle>Create a New Conference Room</DialogTitle>
+							</DialogHeader>
+							<div className="grid gap-4 py-4">
+								<DialogClose asChild>
+									<Button
+										variant={'outline'}
+										className="flex w-full gap-1"
+										onClick={() => handleInstantCreateCall()}
+									>
+										<Laptop />
+										Create a Instant Room
+									</Button>
+								</DialogClose>
+
+								<Separator />
+								<div className="flex items-center">
+									<Input
+										onChange={(event) => setRoomId(event.target.value)}
+										value={roomId}
+										className="w-full rounded-r-none"
+										placeholder="Enter Room Code "
+									/>
+									<DialogClose asChild>
+										<Button
+											onClick={() => handleEnterRoom()}
+											size={'sm'}
+											type="submit"
+											className="rounded-l-none"
+										>
+											Join
+										</Button>
+									</DialogClose>
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
+				</Link>
+				<Link
+					href={'/'}
+					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
+				>
+					<button
+						type="button"
+						className="inline-flex flex-col items-center justify-center"
+						onClick={() => setCurrentState('Conference')}
+					>
+						<Laptop
+							className={`${currentState === 'Conference' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+						/>
+						<span
+							className={` ${currentState === 'Conference' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+						>
+							Meeting
+						</span>
+					</button>
+				</Link>
+
+				{/* <div className="flex items-center justify-center">
 					<Dialog>
 						<DialogTrigger asChild>
 							<button
@@ -204,8 +285,9 @@ const BottomNavigation = () => {
 							</div>
 						</DialogContent>
 					</Dialog>
-				</div>
-				<Link
+				</div> */}
+
+				{/* <Link
 					href={'/'}
 					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
@@ -214,16 +296,17 @@ const BottomNavigation = () => {
 						className="inline-flex flex-col items-center justify-center"
 						onClick={() => setCurrentState('Conference')}
 					>
-						<Laptop
+						<Settings
 							className={`${currentState === 'Conference' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
 							className={` ${currentState === 'Conference' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
 						>
-							Meeting
+							Settings
 						</span>
 					</button>
-				</Link>
+				</Link> */}
+
 				<button
 					type="button"
 					className="group inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
