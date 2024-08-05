@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Rss, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs';
@@ -30,6 +30,12 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const ConferenceRoom = () => {
 	const { getToken, userId } = useAuth();
@@ -171,25 +177,25 @@ const ConferenceRoom = () => {
 				>
 					<div className="grid w-full grid-cols-3">
 						<div className="col-span-3 flex h-32 flex-col gap-2 space-y-1.5 p-3 md:col-span-2 md:p-6 2xl:col-span-1">
-							<div className="flex w-full items-center gap-2 md:gap-5">
+							<div className="grid w-full grid-cols-2 items-center gap-2 md:gap-5">
 								<Button
 									// variant={'outline'}
 									onClick={() => handleInstantCreateCall()}
-									className="flex w-1/2 gap-2"
+									className="flex w-full gap-2"
 								>
 									{' '}
 									<Plus />
 									Instant Room
 								</Button>
-								<Button className="flex w-1/2 gap-2">
+								{/* <Button className="w-full flex gap-2">
 									<Rss />
 									Schedule Room
-								</Button>
+								</Button> */}
 							</div>
 							<div className="flex gap-2 text-sm text-muted-foreground">
 								<Input
 									onChange={(event) => setRoomId(event.target.value)}
-									placeholder="Name, email"
+									placeholder="Enter Room Code"
 								/>
 								<Button
 									onClick={() => handleEnterRoom()}
@@ -227,7 +233,7 @@ const ConferenceRoom = () => {
 										<TableBody key={room.id} className="w-full">
 											<Dialog>
 												<DialogTrigger asChild>
-													<TableRow className="text-sm">
+													<TableRow className="border-b-3 border-black text-sm">
 														<TableCell className="font-medium">
 															{room.id}
 														</TableCell>
@@ -262,14 +268,23 @@ const ConferenceRoom = () => {
 															</div>
 														</TableCell>
 														<TableCell className="hidden items-center sm:flex">
-															{room.participants.map((item) => (
-																<Avatar key={item.id}>
-																	<AvatarImage src={item.image_url} />
-																	<AvatarFallback>
-																		{item.first_name}
-																	</AvatarFallback>
-																</Avatar>
-															))}
+															<TooltipProvider>
+																{room.participants.map((item) => (
+																	<Tooltip key={item.id}>
+																		<TooltipTrigger>
+																			<Avatar>
+																				<AvatarImage src={item.image_url} />
+																				<AvatarFallback>
+																					{item.first_name}
+																				</AvatarFallback>
+																			</Avatar>
+																		</TooltipTrigger>
+																		<TooltipContent>
+																			<p>{item.first_name}</p>
+																		</TooltipContent>
+																	</Tooltip>
+																))}
+															</TooltipProvider>
 														</TableCell>
 													</TableRow>
 												</DialogTrigger>

@@ -11,6 +11,7 @@ import useStreamStore from '@/store/useStreamStore';
 
 export default function CallPanel() {
 	const roomState = useRoomStore((state) => state.roomState);
+	const getRoomState = useRoomStore((state) => state.setRoomState);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
@@ -41,8 +42,9 @@ export default function CallPanel() {
 		getMediaStream();
 		return () => {
 			stopMediaStream();
+			getRoomState('waitingLobby');
 		};
-	}, [getMediaStream, stopMediaStream]);
+	}, [getMediaStream, getRoomState, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
