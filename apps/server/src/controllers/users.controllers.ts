@@ -242,7 +242,7 @@ export const sendFriendRequest = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
 		const { friendId } = request.body;
 
-		const user = request.auth?.userId;
+		const user = request.auth!.userId;
 		console.log('friendId=======>>>>>', friendId);
 
 		try {

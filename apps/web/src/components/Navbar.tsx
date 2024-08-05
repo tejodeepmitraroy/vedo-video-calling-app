@@ -241,7 +241,7 @@ const NavBar = () => {
 	}, [handleGetOnlineUser, socketOff, socketOn]);
 
 	return (
-		<header className="sticky top-0 z-10 flex h-[55px] items-center gap-1 px-4">
+		<header className="sticky top-0 z-10 flex h-[55px] items-center justify-center gap-1 px-4 md:justify-start">
 			<h1 className="text-lg font-semibold text-white md:text-2xl">
 				{roomState === 'meetingRoom' ? roomId! : currentState}
 			</h1>

@@ -34,7 +34,8 @@ const Home = () => {
 			<Sidebar />
 			<div className="flex flex-col">
 				<NavBar />
-				<main className="relative flex w-full flex-1 flex-col gap-4 px-2 pb-20 md:pb-2 lg:gap-6">
+				{/* <main className="relative flex h-full w-full flex-1 flex-col gap-4 px-2 pb-20 md:pb-2 lg:gap-6"> */}
+				<main className="relative flex h-full w-full flex-1 flex-col gap-4 px-2 md:pb-2 lg:gap-6">
 					<>
 						{currentState === 'Dashboard' && <Dashboard />}
 						{/* {currentState === 'Call' && <CallRoom />} */}

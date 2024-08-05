@@ -170,7 +170,7 @@ const ConferenceRoom = () => {
 	}, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
-		<div className="flex flex-1 rounded-lg bg-background shadow-sm">
+		<div className="flex rounded-lg bg-background shadow-sm md:flex-1">
 			<div className="flex w-full gap-2">
 				<div
 					className={`h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:rounded-lg`}

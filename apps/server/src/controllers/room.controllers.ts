@@ -8,20 +8,22 @@ import { AuthenticatedRequest } from '../types/apiRequest';
 
 export const createInstantRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const user = request.auth?.userId;
+		const userId = request.auth?.userId;
+
 		const shortId = nanoid(8);
 
-		console.log('User Id========>>', user);
+		console.log('User Id========>>', request.auth);
 
 		try {
 			const meetingDetails = await prisma.room.create({
 				data: {
 					id: shortId,
 					title: 'Instant Meeting',
+					description: `This is Instant Meeting. Created by ${userId} `,
 					type: 'INSTANT',
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-					createdById: user!,
-					hostById: user!,
+					createdById: userId!,
+					hostById: userId!,
 					startTime: new Date().toISOString(),
 				},
 				select: {
@@ -34,7 +36,7 @@ export const createInstantRoom = asyncHandler(
 				},
 			});
 
-			console.log('meetingDetails', meetingDetails);
+			// console.log('meetingDetails', meetingDetails);
 			return response.status(200).json(new ApiResponse(200, meetingDetails));
 		} catch (error) {
 			console.log(error);
@@ -140,7 +142,7 @@ export const getAllRooms = asyncHandler(
 					};
 				});
 
-				console.log('Meeting Data==========>', ModifyRoomDetails);
+				// console.log('Meeting Data==========>', ModifyRoomDetails);
 				return response
 					.status(200)
 					.json(new ApiResponse(200, ModifyRoomDetails));

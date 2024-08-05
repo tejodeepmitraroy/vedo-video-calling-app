@@ -66,11 +66,11 @@ const BottomNavigation = () => {
 			);
 
 			console.log(data.data);
-			const roomId = data.data.roomId;
-			// const userId = data.data.createdById;
 
-			router.replace(`?roomId=${roomId}`);
-			// router.refresh()
+			const response: RoomDetails = data.data;
+			const roomId = response.id;
+
+			router.push(`?roomId=${roomId}`);
 		} catch (error) {
 			console.log(error);
 		}
@@ -81,13 +81,22 @@ const BottomNavigation = () => {
 		console.log('Enter Room', roomId);
 		if (roomId) {
 			try {
-				const { data } = await axios<ApiResponse>(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+				const { data } = await toast.promise(
+					axios.post(
+						`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+						{},
+						{
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: `Bearer ${token}`,
+							},
+						}
+					),
+
 					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
+						pending: 'Finding Room',
+						success: 'Connecting👌',
+						error: `Error happend, We don't find the room 🤯`,
 					}
 				);
 

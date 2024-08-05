@@ -7,7 +7,7 @@ import ApiError from '../utils/ApiError';
 
 export const createACall = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.userId;
+		const userId = request.auth!.userId;
 		const { receiver } = request.body;
 		console.log(request.body);
 

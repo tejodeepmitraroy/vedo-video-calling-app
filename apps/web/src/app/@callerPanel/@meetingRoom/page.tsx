@@ -255,14 +255,14 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	}, [handleUserLeftTheRoom, socketOff, socketOn]);
 
 	return (
-		<div className="flex flex-1 flex-col rounded-lg bg-background bg-black shadow-sm">
-			<main className="relative h-full w-full">
+		<div className="relative mb-6 flex h-[85vh] w-full flex-col rounded-lg bg-background bg-black shadow-sm sm:h-auto sm:flex-1">
+			<main className="relative flex h-full w-full flex-col">
 				<div className="flex h-[92.5%] w-full items-center justify-center">
-					<div className="flex h-full w-full max-w-[85rem] items-center justify-center rounded-xl">
+					<div className="flex h-full w-full items-center justify-center rounded-xl md:max-w-[85rem]">
 						{remoteStream ? (
 							<>
 								<RemoteUserVideoPanel />
-								<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[15%] lg:w-[12%]">
+								<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 									<UserVideoPanel />
 								</div>
 							</>

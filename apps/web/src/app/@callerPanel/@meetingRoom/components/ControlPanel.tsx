@@ -152,7 +152,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</TooltipContent>
 					</Tooltip> */}
 
-					<DropdownMenu>
+					{/* <DropdownMenu>
 						<DropdownMenuTrigger
 						// className={`${isCameraOn ? 'bg-primary' : 'bg-destructive'} rounded-r-md p-2`}
 						>
@@ -177,7 +177,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 							<DropdownMenuItem>Adjust volume</DropdownMenuItem>
 							<DropdownMenuItem>Show information</DropdownMenuItem>
 						</DropdownMenuContent>
-					</DropdownMenu>
+					</DropdownMenu> */}
 					{/* <button
 					id="moreOptionsDropdownButton"
 					data-dropdown-toggle="moreOptionsDropdown"

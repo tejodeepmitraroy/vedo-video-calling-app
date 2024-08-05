@@ -63,7 +63,10 @@ export default function Dashboard() {
 			);
 
 			console.log(data.data);
-			const roomId = data.data.id;
+
+			const response: RoomDetails = data.data;
+			const roomId = response.id;
+
 			// const userId = data.data.createdById;
 
 			router.push(`?roomId=${roomId}`);
@@ -77,15 +80,34 @@ export default function Dashboard() {
 		console.log('Enter Room', roomId);
 		if (roomId) {
 			try {
-				const { data } = await axios<ApiResponse>(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+				const { data } = await toast.promise(
+					axios.post(
+						`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+						{},
+						{
+							headers: {
+								'Content-Type': 'application/json',
+								Authorization: `Bearer ${token}`,
+							},
+						}
+					),
+
 					{
-						headers: {
-							'Content-Type': 'application/json',
-							Authorization: `Bearer ${token}`,
-						},
+						pending: 'Finding Room',
+						success: 'Connecting👌',
+						error: `Error happend, We don't find the room 🤯`,
 					}
 				);
+
+				// const { data } = await axios<ApiResponse>(
+				// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+				// 	{
+				// 		headers: {
+				// 			'Content-Type': 'application/json',
+				// 			Authorization: `Bearer ${token}`,
+				// 		},
+				// 	}
+				// );
 
 				console.log(data);
 
@@ -139,8 +161,8 @@ export default function Dashboard() {
 	};
 
 	return (
-		<div className="flex flex-1 rounded-lg bg-background shadow-sm md:p-4">
-			<div className="grid w-full grid-flow-col grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 xl:grid-rows-3">
+		<div className="flex rounded-lg bg-background shadow-sm md:flex-1 md:p-4">
+			<div className="grid w-full grid-flow-col grid-cols-1 gap-8 md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-3">
 				<Card className="hidden h-fit flex-col bg-slate-200 md:flex">
 					<CardHeader>
 						<CardTitle>Quick Actions</CardTitle>
@@ -153,7 +175,7 @@ export default function Dashboard() {
 							className="flex w-full items-center justify-center gap-3 border bg-primary py-10 text-center text-base text-background shadow-sm hover:text-primary"
 						>
 							<Laptop />
-							Create a Instant Room
+							Create a Room
 						</Button>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
@@ -299,12 +321,12 @@ export default function Dashboard() {
 				)}
 
 				<Card className="row-span-3 flex-col overflow-y-auto bg-slate-100">
-					<CardHeader>
+					<CardHeader className="w-full p-4 pb-3 md:p-6">
 						<CardTitle>Recent Meetings</CardTitle>
 						<CardDescription>meeting & calls logs</CardDescription>
 					</CardHeader>
-					<CardContent className="w-full">
-						<ScrollArea className="h-[65vh] w-full rounded-md border bg-white p-4">
+					<CardContent className="w-full p-0 md:p-6 md:pt-0">
+						<ScrollArea className="h-[65vh] w-full rounded-md border bg-white p-4 md:h-[70vh]">
 							<div className="flex flex-col gap-3">
 								{allScheduledRoomsDetails ? (
 									allScheduledRoomsDetails.length === 0 ? (

@@ -247,14 +247,14 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="flex flex-1 flex-col rounded-lg bg-background p-4 shadow-sm md:flex-row">
-			<div className="relative flex h-full w-full flex-col items-center justify-center p-5 px-10 md:w-[50%]">
+		<div className="flex h-[80vh] flex-col rounded-lg bg-background p-4 shadow-sm sm:flex-row md:flex-1">
+			<div className="relative flex h-full w-full flex-col items-center justify-center sm:p-5 md:w-[50%] md:px-10">
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
 					<MediaControls />
 				</div>
 			</div>
-			<div className="flex h-full w-full items-center justify-center p-5 md:w-[50%] md:justify-start">
+			<div className="flex h-full w-full items-center justify-center md:w-[50%] md:justify-start md:p-5">
 				<Card className="w-full max-w-[400px] border border-dashed">
 					{roomDetails ? (
 						<>
