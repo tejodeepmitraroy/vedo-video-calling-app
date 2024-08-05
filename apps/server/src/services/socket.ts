@@ -18,7 +18,7 @@ class SocketService {
 		{
 			hostId: string;
 			hostSocketId: string;
-			participants: Set<unknown>;
+			participants: Set<string>;
 		}
 	>;
 

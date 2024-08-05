@@ -1,6 +1,7 @@
 'use client';
 import useRoomStore from '@/store/useRoomStore';
 import useScreenStateStore from '@/store/useScreenStateStore';
+import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 const OutsideLobby = () => {
@@ -9,12 +10,14 @@ const OutsideLobby = () => {
 		(state) => state.setCurrentScreen
 	);
 
+	const router = useRouter();
 	useEffect(() => {
 		setTimeout(() => {
 			setRoomState('waitingLobby');
 			setCurrentState('Dashboard');
+			router.push('/');
 		}, 2000);
-	}, [setCurrentState, setRoomState]);
+	}, [router, setCurrentState, setRoomState]);
 	return (
 		<div className="flex flex-1 rounded-lg bg-background p-4">
 			<div className="flex w-full flex-col items-center justify-center gap-5 rounded-lg p-5">

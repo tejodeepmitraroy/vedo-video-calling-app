@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io';
+import prisma from '../lib/prismaClient';
 // import prisma from '../lib/prismaClient';
 
 type hostSocketIdToRoomId = Map<string, string>;
@@ -16,7 +17,7 @@ type rooms = Map<
 	{
 		hostId: string;
 		hostSocketId: string;
-		participants: Set<unknown>;
+		participants: Set<string>;
 	}
 >;
 
@@ -41,7 +42,7 @@ export function roomConnections(
 		({ roomId, hostUser }: { roomId: string; hostUser: boolean }) => {
 			const usersInRoom = rooms.get(roomId)?.participants;
 			const PreviouslyJoin = usersInRoom?.has(
-				socketIdToUserMap.get(socket.id)?.userId
+				socketIdToUserMap.get(socket.id)!.userId
 			);
 
 			console.log(hostUser, PreviouslyJoin);
@@ -140,51 +141,51 @@ export function roomConnections(
 
 			// console.log('Current socket ID--->', socket.id);
 
-			// if (!rooms[roomId]) {
-			// 	rooms[roomId] = [];
-			// }
-
-			if (!rooms.get(roomId) && hostUser) {
+			if (!rooms.has(roomId) && hostUser) {
 				hostSocketIdToRoomId.set(socket.id, roomId);
-				// const hostUserId = socketIdToUserIdMap.get(socket.id);
 				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
 
 				const roomDetails = {
 					hostId: hostUserId!,
 					hostSocketId: socket.id,
-					participants: new Set(),
+					participants: new Set<string>(),
 				};
 				console.log('Host User socket Id is add');
 				rooms.set(roomId, roomDetails);
 			}
 
-			// if (hostUser) {
+			if (rooms.has(roomId) && hostUser) {
+				console.log('Participents=========>', rooms.get(roomId));
 
-			// 	hostSocketIdToRoomId.set(socket.id, roomId);
-			// 	const roomDetails = rooms.get(roomId);
-			// 	console.log('Host User socket Id is add');
-			// }
+				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
+				const roomDetails = {
+					hostId: hostUserId!,
+					hostSocketId: socket.id,
+					participants: rooms.get(roomId)!.participants,
+				};
+				rooms.set(roomId, roomDetails);
+			}
 
 			socket.join(roomId);
 
-			const roomInUsers = rooms.get(roomId)?.participants;
-			roomInUsers?.add(socketIdToUserMap.get(socket.id)?.userId);
+			const roomInUsers = rooms.get(roomId)!.participants;
+			roomInUsers.add(socketIdToUserMap.get(socket.id)!.userId);
 
-			// const meeting = await prisma.participantsInRoom.upsert({
-			// 	where: {
-			// 		user_id_room_id: {
-			// 			room_id: roomId,
-			// 			user_id: socketIdToUserMap.get(socket.id)!.userId,
-			// 		},
-			// 	},
-			// 	update: {},
-			// 	create: {
-			// 		room_id: roomId,
-			// 		user_id: socketIdToUserMap.get(socket.id)!.userId,
-			// 	},
-			// });
+			const meeting = await prisma.participantsInRoom.upsert({
+				where: {
+					user_id_room_id: {
+						room_id: roomId,
+						user_id: socketIdToUserMap.get(socket.id)!.userId,
+					},
+				},
+				update: {},
+				create: {
+					room_id: roomId,
+					user_id: socketIdToUserMap.get(socket.id)!.userId,
+				},
+			});
 
-			// console.log('MEETING DETails=========>', meeting);
+			console.log('MEETING DETails=========>', meeting);
 
 			console.log('USER ENTERED AND ROOM DETAILS+============>>>>', rooms);
 
@@ -218,47 +219,56 @@ export function roomConnections(
 		}) => {
 			console.log('Host accepted', hostUserSocketId);
 
-			io.to(hostUserSocketId).emit('event:sendAnswerHost', {
+			// io.to(hostUserSocketId).emit('event:sendAnswerHost', {
+			// 	answer,
+			// });
+			socket.broadcast.emit('event:sendAnswerHost', {
 				answer,
 			});
 
-			console.log('Client Final anser send to Host', answer);
+			console.log('Client Final answer send to Host', answer);
 		}
 	);
 
 	socket.on(
 		'event:sendIceCandidate',
 		({
-			remoteSocketId,
 			iceCandidate,
 		}: {
 			remoteSocketId: string;
 			iceCandidate: RTCPeerConnection;
 		}) => {
-			socket
-				.to(remoteSocketId)
-				.emit('event:sendIceCandidate', { iceCandidate });
+			socket.broadcast.emit('event:sendIceCandidate', { iceCandidate });
 		}
 	);
 
 	socket.on(
 		'event:callEnd',
 		({ roomId }: { roomId: string; userId: string }) => {
-			socket.broadcast.emit('notification:userLeftTheRoom', {
+			const roomDetails = rooms.get(roomId);
+			const roomParticipants = roomDetails?.participants;
+
+			if (roomDetails?.hostSocketId === socket.id) {
+				roomDetails.hostId = '';
+				roomDetails.hostSocketId = '';
+				roomParticipants?.delete(socketIdToUserMap.get(socket.id)!.userId);
+			}
+			if (roomParticipants?.size === 1) {
+				rooms.delete(roomId);
+			}
+
+			socket.leave(roomId);
+			socket.to(roomId).emit('notification:userLeftTheRoom', {
 				userId: socketIdToUserMap.get(socket.id)?.userId,
 			});
-			socket.leave(roomId);
-			console.log('Leaving before hostSocketIdToRoomId', hostSocketIdToRoomId);
-			hostSocketIdToRoomId.delete(socket.id);
-			console.log(' Leaving after hostSocketIdToRoomId', hostSocketIdToRoomId);
+			console.log('Leaving after Room Details', roomDetails);
 		}
 	);
 
 	socket.on('event:endRoom', ({ roomId }: { roomId: string }) => {
 		const roomDetails = rooms.get(roomId);
 		if (roomDetails?.hostSocketId === socket.id) {
-			socket.broadcast.emit('event:removeEveryoneFromRoom');
-			socket.emit('event:removeEveryoneFromRoom');
+			io.to(roomId).emit('event:removeEveryoneFromRoom');
 			rooms.delete(roomId);
 			io.socketsLeave(roomId);
 		}
@@ -266,18 +276,25 @@ export function roomConnections(
 
 	socket.on('disconnecting', () => {
 		const roomId = Array.from(socket.rooms)[1];
-		// const roomInUsers = rooms.get(roomId);
-		// roomInUsers?.delete(socket.id);
 
-		// const userId = socketIdToUserIdMap.get(socket.id);
-		const userId = socketIdToUserMap.get(socket.id)?.userId;
-		console.log('userId--->', userId);
+		const roomDetails = rooms.get(roomId);
+		const roomParticipants = roomDetails?.participants;
 
-		io.to(roomId).emit('notification:userLeftTheRoom', { userId });
+		if (roomDetails?.hostSocketId === socket.id) {
+			roomDetails.hostId = '';
+			roomDetails.hostSocketId = '';
+			roomParticipants?.delete(socketIdToUserMap.get(socket.id)!.userId);
+		}
 
-		// socket.rooms.forEach((item) => {
-		//   console.log('Socket Rooms---->', item);
-		// });
+		if (roomParticipants?.size === 1) {
+			rooms.delete(roomId);
+		}
+		socket.leave(roomId);
+		console.log('Leaving after Room Details', roomDetails);
+
+		socket.to(roomId).emit('notification:userLeftTheRoom', {
+			userId: socketIdToUserMap.get(socket.id)?.userId,
+		});
 
 		console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);
 	});

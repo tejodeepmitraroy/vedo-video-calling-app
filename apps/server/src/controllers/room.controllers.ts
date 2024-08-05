@@ -8,20 +8,22 @@ import { AuthenticatedRequest } from '../types/apiRequest';
 
 export const createInstantRoom = asyncHandler(
 	async (request: AuthenticatedRequest, response: Response) => {
-		const user = request.auth?.userId;
+		const userId = request.auth?.userId;
+
 		const shortId = nanoid(8);
 
-		console.log('User Id========>>', user);
+		console.log('User Id========>>', request.auth);
 
 		try {
 			const meetingDetails = await prisma.room.create({
 				data: {
 					id: shortId,
 					title: 'Instant Meeting',
+					description: `This is Instant Meeting. Created by ${userId} `,
 					type: 'INSTANT',
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-					createdById: user!,
-					hostById: user!,
+					createdById: userId!,
+					hostById: userId!,
 					startTime: new Date().toISOString(),
 				},
 				select: {
@@ -34,7 +36,7 @@ export const createInstantRoom = asyncHandler(
 				},
 			});
 
-			console.log('meetingDetails', meetingDetails);
+			// console.log('meetingDetails', meetingDetails);
 			return response.status(200).json(new ApiResponse(200, meetingDetails));
 		} catch (error) {
 			console.log(error);
@@ -87,7 +89,18 @@ export const getAllRooms = asyncHandler(
 				const rooms = await prisma.room.findMany({
 					where: {
 						type: 'INSTANT',
-						createdById: userId!,
+						OR: [
+							{
+								createdById: userId!,
+							},
+							{
+								participants: {
+									some: {
+										user_id: userId,
+									},
+								},
+							},
+						],
 					},
 					select: {
 						id: true,
@@ -99,15 +112,40 @@ export const getAllRooms = asyncHandler(
 								id: true,
 								image_url: true,
 								first_name: true,
+								last_name: true,
 							},
 						},
 						description: true,
 						startTime: true,
 						createdById: true,
 						createdAt: true,
+						participants: {
+							select: {
+								user: true,
+							},
+						},
 					},
 				});
-				return response.status(200).json(new ApiResponse(200, rooms));
+
+				const ModifyRoomDetails = rooms.map((room) => {
+					return {
+						id: room.id,
+						type: room.type,
+						url: room.url,
+						title: room.title,
+						createdBy: room.createdBy,
+						description: room.description,
+						startTime: room.startTime,
+						createdById: room.createdById,
+						createdAt: room.createdAt,
+						participants: room.participants.map((item) => item.user),
+					};
+				});
+
+				// console.log('Meeting Data==========>', ModifyRoomDetails);
+				return response
+					.status(200)
+					.json(new ApiResponse(200, ModifyRoomDetails));
 			} catch (error) {
 				return response
 					.status(400)

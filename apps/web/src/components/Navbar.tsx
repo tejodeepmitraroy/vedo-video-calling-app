@@ -6,12 +6,13 @@ import { Button } from './ui/button';
 import { toast } from 'react-toastify';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { Phone, PhoneOff } from 'lucide-react';
+import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
 
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useRoomStore from '@/store/useRoomStore';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 const NavBar = () => {
 	const { userId } = useAuth();
@@ -241,10 +242,24 @@ const NavBar = () => {
 	}, [handleGetOnlineUser, socketOff, socketOn]);
 
 	return (
-		<header className="sticky top-0 z-10 flex h-[55px] items-center gap-1 px-4">
+		<header className="sticky top-0 z-10 flex h-[55px] items-center justify-between gap-1 px-4">
 			<h1 className="text-lg font-semibold text-white md:text-2xl">
 				{roomState === 'meetingRoom' ? roomId! : currentState}
 			</h1>
+			<div className="flex items-center gap-2 pr-10">
+				<Link href={'https://x.com/tezomon_dev'}>
+					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
+						<Twitter size={20} className="text-black" fill={'black'} />
+					</div>
+				</Link>
+				<Link
+					href={'https://github.com/tejodeepmitraroy/vedo-video-calling-app'}
+				>
+					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
+						<Github size={20} className=" " />
+					</div>
+				</Link>
+			</div>
 		</header>
 	);
 };

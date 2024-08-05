@@ -5,33 +5,33 @@ import {
 	Home,
 	Laptop,
 	//   Phone,
-	Settings,
+	// Settings,
 	Video,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import UserProfile from './UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from './ui/dialog';
+// import {
+// 	Dialog,
+// 	DialogContent,
+// 	DialogDescription,
+// 	DialogFooter,
+// 	DialogHeader,
+// 	DialogTitle,
+// 	DialogTrigger,
+// } from './ui/dialog';
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from './ui/select';
-import useDeviceStore from '@/store/useDeviceStore';
+// import {
+// 	Select,
+// 	SelectContent,
+// 	SelectItem,
+// 	SelectTrigger,
+// 	SelectValue,
+// } from './ui/select';
+// import useDeviceStore from '@/store/useDeviceStore';
 
-import { Label } from './ui/label';
+// import { Label } from './ui/label';
 import Link from 'next/link';
 
 const Sidebar = () => {
@@ -40,15 +40,15 @@ const Sidebar = () => {
 	);
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const onLineStatus = useGlobalStore((state) => state.onLineStatus);
-	const mediaDevices = useDeviceStore((state) => state.mediaDevices);
-	const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
-	const setSelectedMicrophone = useDeviceStore(
-		(state) => state.setSelectedMicrophone
-	);
-	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-	const selectedMicrophone = useDeviceStore(
-		(state) => state.selectedMicrophone
-	);
+	// const mediaDevices = useDeviceStore((state) => state.mediaDevices);
+	// const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
+	// const setSelectedMicrophone = useDeviceStore(
+	// 	(state) => state.setSelectedMicrophone
+	// );
+	// const selectedCamera = useDeviceStore((state) => state.selectedCamera);
+	// const selectedMicrophone = useDeviceStore(
+	// 	(state) => state.selectedMicrophone
+	// );
 
 	return (
 		<aside className="inset-y fixed left-0 z-20 hidden h-full w-[60px] flex-col md:flex">
@@ -123,7 +123,7 @@ const Sidebar = () => {
 			</nav>
 
 			<nav className="mb-6 mt-auto flex flex-col items-center gap-1">
-				<Dialog>
+				{/* <Dialog>
 					<DialogTrigger asChild>
 						<Button
 							variant="ghost"
@@ -192,7 +192,7 @@ const Sidebar = () => {
 							<Button type="submit">Save changes</Button>
 						</DialogFooter>
 					</DialogContent>
-				</Dialog>
+				</Dialog> */}
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
