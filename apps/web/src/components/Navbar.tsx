@@ -242,21 +242,21 @@ const NavBar = () => {
 	}, [handleGetOnlineUser, socketOff, socketOn]);
 
 	return (
-		<header className="sticky top-0 z-10 flex h-[55px] items-center justify-between gap-1 px-4">
-			<h1 className="text-lg font-semibold text-white md:text-2xl">
+		<header className="relative flex h-[45px] items-center justify-between gap-1 bg-neutral-100 px-4 md:h-[50px]">
+			<h1 className="text-lg font-semibold text-primary md:text-2xl">
 				{roomState === 'meetingRoom' ? roomId! : currentState}
 			</h1>
 			<div className="flex items-center gap-2 pr-10">
 				<Link href={'https://x.com/tezomon_dev'}>
-					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
-						<Twitter size={20} className="text-black" fill={'black'} />
+					<div className="rounded-full border border-black bg-slate-100 p-1.5">
+						<Twitter size={15} className="text-black" fill={'black'} />
 					</div>
 				</Link>
 				<Link
 					href={'https://github.com/tejodeepmitraroy/vedo-video-calling-app'}
 				>
-					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
-						<Github size={20} className=" " />
+					<div className="rounded-full border border-black bg-slate-100 p-1.5">
+						<Github size={15} className=" " />
 					</div>
 				</Link>
 			</div>

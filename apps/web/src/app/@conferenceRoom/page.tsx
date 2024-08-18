@@ -30,12 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { AnimatedTooltip } from '@/components/ui/animated-tooltip';
 
 const ConferenceRoom = () => {
 	const { getToken, userId } = useAuth();
@@ -170,105 +165,120 @@ const ConferenceRoom = () => {
 	}, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
-		<div className="flex rounded-lg bg-background shadow-sm md:flex-1">
-			<div className="flex w-full gap-2">
-				<div
-					className={`h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:rounded-lg`}
-				>
-					<div className="grid w-full grid-cols-3">
-						<div className="col-span-3 flex h-32 flex-col gap-2 space-y-1.5 p-3 md:col-span-2 md:p-6 2xl:col-span-1">
-							<div className="grid w-full grid-cols-2 items-center gap-2 md:gap-5">
-								<Button
-									// variant={'outline'}
-									onClick={() => handleInstantCreateCall()}
-									className="flex w-full gap-2"
-								>
-									{' '}
-									<Plus />
-									Instant Room
-								</Button>
-								{/* <Button className="w-full flex gap-2">
+		<ScrollArea className="flex h-full w-full md:flex-1">
+			<div className="flex rounded-lg bg-background shadow-sm">
+				<div className="flex w-full gap-2">
+					<div
+						className={`mx-auto h-full w-full max-w-7xl rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:rounded-lg`}
+					>
+						<div className="grid w-full grid-cols-3">
+							<div className="col-span-3 flex h-32 flex-col gap-2 space-y-1.5 p-3 md:col-span-2 md:p-6 2xl:col-span-1">
+								<div className="grid w-full grid-cols-2 items-center gap-2 md:gap-5">
+									<Button
+										// variant={'outline'}
+										onClick={() => handleInstantCreateCall()}
+										className="flex w-full gap-2"
+									>
+										{' '}
+										<Plus />
+										Instant Room
+									</Button>
+									{/* <Button className="w-full flex gap-2">
 									<Rss />
 									Schedule Room
 								</Button> */}
-							</div>
-							<div className="flex gap-2 text-sm text-muted-foreground">
-								<Input
-									onChange={(event) => setRoomId(event.target.value)}
-									placeholder="Enter Room Code"
-								/>
-								<Button
-									onClick={() => handleEnterRoom()}
-									className="flex gap-2"
-								>
-									<Search />
-									Join
-								</Button>
+								</div>
+								<div className="flex gap-2 text-sm text-muted-foreground">
+									<Input
+										onChange={(event) => setRoomId(event.target.value)}
+										placeholder="Enter Room Code"
+									/>
+									<Button
+										onClick={() => handleEnterRoom()}
+										className="flex gap-2"
+									>
+										<Search />
+										Join
+									</Button>
+								</div>
 							</div>
 						</div>
-					</div>
 
-					<div className="w-full pt-0 md:p-5">
-						<Table className="">
-							<ScrollArea className="h-[60vh] w-full rounded-md bg-white p-0 md:h-[70vh] md:p-4">
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-[100px]">id</TableHead>
-										<TableHead className="hidden sm:table-cell">type</TableHead>
-										<TableHead>Title</TableHead>
-										<TableHead>createdBy</TableHead>
-										<TableHead className="hidden sm:table-cell">
-											Start Date
-										</TableHead>
-										<TableHead className="hidden sm:table-cell">
-											Participants
-										</TableHead>
-										{/* <TableHead className="text-right">Created</TableHead> */}
-									</TableRow>
-								</TableHeader>
-								{allScheduledRoomsDetails.length === 0 ? (
-									<TableCaption>No Data Existed</TableCaption>
-								) : (
-									allScheduledRoomsDetails.map((room) => (
-										<TableBody key={room.id} className="w-full">
-											<Dialog>
-												<DialogTrigger asChild>
-													<TableRow className="border-b-3 border-black text-sm">
-														<TableCell className="font-medium">
-															{room.id}
-														</TableCell>
-														<TableCell className="hidden sm:table-cell">
-															{room.type}
-														</TableCell>
-														<TableCell>{room.title}</TableCell>
-														<TableCell className="flex items-center gap-2">
-															<Avatar className="hidden sm:table-cell">
-																<AvatarImage src={room.createdBy.image_url} />
-																<AvatarFallback>
-																	{room.createdBy.first_name}
-																</AvatarFallback>
-															</Avatar>
+						<div className="w-full pt-0 md:p-5">
+							<Table className="">
+								<ScrollArea className="h-[60vh] w-full rounded-md bg-white p-0 md:h-[70vh] md:p-4">
+									<TableHeader>
+										<TableRow>
+											<TableHead className="w-[100px]">id</TableHead>
+											<TableHead className="hidden sm:table-cell">
+												type
+											</TableHead>
+											<TableHead>Title</TableHead>
+											<TableHead>createdBy</TableHead>
+											<TableHead className="hidden sm:table-cell">
+												Start Date
+											</TableHead>
+											<TableHead className="hidden sm:table-cell">
+												Participants
+											</TableHead>
+											{/* <TableHead className="text-right">Created</TableHead> */}
+										</TableRow>
+									</TableHeader>
+									{allScheduledRoomsDetails.length === 0 ? (
+										<TableCaption>No Data Existed</TableCaption>
+									) : (
+										allScheduledRoomsDetails.map((room) => (
+											<TableBody key={room.id} className="w-full">
+												<Dialog>
+													<DialogTrigger asChild>
+														<TableRow className="border-b-3 border-black text-sm">
+															<TableCell className="font-medium">
+																{room.id}
+															</TableCell>
+															<TableCell className="hidden sm:table-cell">
+																{room.type}
+															</TableCell>
+															<TableCell>{room.title}</TableCell>
+															<TableCell className="flex items-center gap-2">
+																<Avatar className="hidden sm:table-cell">
+																	<AvatarImage src={room.createdBy.image_url} />
+																	<AvatarFallback>
+																		{room.createdBy.first_name}
+																	</AvatarFallback>
+																</Avatar>
 
-															{room.createdBy.first_name}
-														</TableCell>
-														<TableCell className="hidden sm:table-cell">
-															<div className="flex flex-col gap-2">
-																<span>
-																	{
-																		convertISOTo12HourFormat(room.startTime!)
-																			.time
-																	}
-																</span>
-																<span>
-																	{
-																		convertISOTo12HourFormat(room.startTime!)
-																			.date
-																	}
-																</span>
-															</div>
-														</TableCell>
-														<TableCell className="hidden items-center sm:flex">
-															<TooltipProvider>
+																{room.createdBy.first_name}
+															</TableCell>
+															<TableCell className="hidden sm:table-cell">
+																<div className="flex flex-col gap-2">
+																	<span>
+																		{
+																			convertISOTo12HourFormat(room.startTime!)
+																				.time
+																		}
+																	</span>
+																	<span>
+																		{
+																			convertISOTo12HourFormat(room.startTime!)
+																				.date
+																		}
+																	</span>
+																</div>
+															</TableCell>
+															<TableCell className="hidden items-center sm:flex">
+																<AnimatedTooltip
+																	items={room.participants.map(
+																		(item, index) => {
+																			return {
+																				id: index,
+																				name: item.first_name,
+																				image: item.image_url,
+																				designation: item.email,
+																			};
+																		}
+																	)}
+																/>
+																{/* <TooltipProvider>
 																{room.participants.map((item) => (
 																	<Tooltip key={item.id}>
 																		<TooltipTrigger>
@@ -284,152 +294,146 @@ const ConferenceRoom = () => {
 																		</TooltipContent>
 																	</Tooltip>
 																))}
-															</TooltipProvider>
-														</TableCell>
-													</TableRow>
-												</DialogTrigger>
-												<DialogContent className="sm:max-w-[425px]">
-													<DialogHeader>
-														<DialogTitle>Room Details</DialogTitle>
-														<DialogDescription>
-															Make changes to your profile here. Click save when
-															you`&rsquo;`re done.
-														</DialogDescription>
-													</DialogHeader>
-													<DialogClose asChild>
-														<Button
-															onClick={() =>
-																handleCallOpenMeeting({
-																	roomId: room.id,
-																	userId: room.createdBy.id,
-																})
-															}
-														>
-															Connect room
-														</Button>
-													</DialogClose>
-													<ScrollArea className="h-[50vh]">
-														<div className="grid grid-cols-1 gap-4 py-4">
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="id" className="">
-																	Room Id
-																</Label>
-																<Input
-																	id="id"
-																	value={room.id}
-																	className="col-span-3"
-																/>
-															</div>
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="title" className="">
-																	Room Type
-																</Label>
-																<Input
-																	id="title"
-																	value={room.type}
-																	className="col-span-3"
-																/>
-															</div>
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="title" className="">
-																	Title
-																</Label>
-																<Input
-																	id="title"
-																	value={room.title}
-																	className="col-span-3"
-																/>
-															</div>
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="createdBy" className="">
-																	Created By
-																</Label>
-
-																<div className="flex items-center gap-3">
-																	<Avatar>
-																		<AvatarImage
-																			src={room.createdBy.image_url}
-																		/>
-																		<AvatarFallback>
-																			{room.createdBy.first_name}
-																		</AvatarFallback>
-																	</Avatar>
+															</TooltipProvider> */}
+															</TableCell>
+														</TableRow>
+													</DialogTrigger>
+													<DialogContent className="sm:max-w-[425px]">
+														<DialogHeader>
+															<DialogTitle>Room Details</DialogTitle>
+															<DialogDescription>
+																Make changes to your profile here. Click save
+																when you`&rsquo;`re done.
+															</DialogDescription>
+														</DialogHeader>
+														<DialogClose asChild>
+															<Button
+																onClick={() =>
+																	handleCallOpenMeeting({
+																		roomId: room.id,
+																		userId: room.createdBy.id,
+																	})
+																}
+															>
+																Connect room
+															</Button>
+														</DialogClose>
+														<ScrollArea className="h-[50vh]">
+															<div className="grid grid-cols-1 gap-4 py-4">
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="id" className="">
+																		Room Id
+																	</Label>
 																	<Input
-																		id="createdBy"
-																		value={`${room.createdBy.first_name} ${room.createdBy.last_name}`}
+																		id="id"
+																		value={room.id}
 																		className="col-span-3"
 																	/>
 																</div>
-															</div>
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="startDate" className="">
-																	Start time
-																</Label>
-																<Input
-																	id="startDate"
-																	value={
-																		convertISOTo12HourFormat(room.startTime!)
-																			.time
-																	}
-																	className="col-span-3"
-																/>
-															</div>
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="startDate" className="">
-																	Start Date
-																</Label>
-																<Input
-																	id="startDate"
-																	value={
-																		convertISOTo12HourFormat(room.startTime!)
-																			.date
-																	}
-																	className="col-span-3"
-																/>
-															</div>
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="title" className="">
+																		Room Type
+																	</Label>
+																	<Input
+																		id="title"
+																		value={room.type}
+																		className="col-span-3"
+																	/>
+																</div>
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="title" className="">
+																		Title
+																	</Label>
+																	<Input
+																		id="title"
+																		value={room.title}
+																		className="col-span-3"
+																	/>
+																</div>
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="createdBy" className="">
+																		Created By
+																	</Label>
 
-															<div className="grid grid-cols-1 items-center gap-4">
-																<Label htmlFor="participants" className="">
-																	Participants
-																</Label>
-
-																{room.participants.map((item) => (
-																	<div
-																		className="flex items-center gap-3"
-																		key={item.id}
-																	>
+																	<div className="flex items-center gap-3">
 																		<Avatar>
-																			<AvatarImage src={item.image_url} />
+																			<AvatarImage
+																				src={room.createdBy.image_url}
+																			/>
 																			<AvatarFallback>
-																				{item.first_name}
+																				{room.createdBy.first_name}
 																			</AvatarFallback>
 																		</Avatar>
 																		<Input
-																			id="startDate"
-																			value={`${item.first_name} ${item.last_name}`}
+																			id="createdBy"
+																			value={`${room.createdBy.first_name} ${room.createdBy.last_name}`}
 																			className="col-span-3"
 																		/>
 																	</div>
-																))}
+																</div>
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="startDate" className="">
+																		Start time
+																	</Label>
+																	<Input
+																		id="startDate"
+																		value={
+																			convertISOTo12HourFormat(room.startTime!)
+																				.time
+																		}
+																		className="col-span-3"
+																	/>
+																</div>
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="startDate" className="">
+																		Start Date
+																	</Label>
+																	<Input
+																		id="startDate"
+																		value={
+																			convertISOTo12HourFormat(room.startTime!)
+																				.date
+																		}
+																		className="col-span-3"
+																	/>
+																</div>
 
-																{/* <Input
-																	id="name"
-																	value="Pedro Duarte"
-																	className="col-span-3"
-																/> */}
+																<div className="grid grid-cols-1 items-center gap-4">
+																	<Label htmlFor="participants" className="">
+																		Participants
+																	</Label>
+
+																	{room.participants.map((item) => (
+																		<div
+																			className="flex items-center gap-3"
+																			key={item.id}
+																		>
+																			<Avatar>
+																				<AvatarImage src={item.image_url} />
+																				<AvatarFallback>
+																					{item.first_name}
+																				</AvatarFallback>
+																			</Avatar>
+																			<Input
+																				id="startDate"
+																				value={`${item.first_name} ${item.last_name}`}
+																				className="col-span-3"
+																			/>
+																		</div>
+																	))}
+																</div>
 															</div>
-														</div>
-													</ScrollArea>
-												</DialogContent>
-											</Dialog>
-										</TableBody>
-									))
-								)}
-							</ScrollArea>
-						</Table>
-					</div>
+														</ScrollArea>
+													</DialogContent>
+												</Dialog>
+											</TableBody>
+										))
+									)}
+								</ScrollArea>
+							</Table>
+						</div>
 
-					{/* <div className="w-full pt-0 md:p-5">
+						{/* <div className="w-full pt-0 md:p-5">
 								<ScrollArea className="h-[25rem] w-full rounded-md border bg-white p-0 md:h-[42rem] md:p-4">
 								<div className="flex h-fit flex-col gap-3 p-2">
 								{allScheduledRoomsDetails ? (
@@ -575,9 +579,10 @@ const ConferenceRoom = () => {
 							</div>
 						</ScrollArea>
 					</div> */}
+					</div>
 				</div>
 			</div>
-		</div>
+		</ScrollArea>
 	);
 };
 
