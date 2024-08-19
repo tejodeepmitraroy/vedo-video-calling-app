@@ -161,8 +161,8 @@ export default function Dashboard() {
 	};
 
 	return (
-		<ScrollArea className="flex h-full w-full md:flex-1">
-			<div className="mx-auto grid h-full w-full max-w-7xl grid-flow-col grid-cols-1 gap-5 overflow-y-auto p-4 md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-2">
+		<ScrollArea className="flex h-full w-full px-4 md:flex-1">
+			<div className="mx-auto my-4 grid h-full w-full max-w-7xl grid-flow-col grid-cols-1 gap-5 overflow-y-auto md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-2">
 				<Card className="hidden flex-col bg-slate-200 md:flex">
 					<CardHeader>
 						<CardTitle>Quick Actions</CardTitle>
