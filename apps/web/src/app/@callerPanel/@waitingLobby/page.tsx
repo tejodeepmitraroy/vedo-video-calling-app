@@ -23,7 +23,7 @@ import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useScreenStateStore from '@/store/useScreenStateStore';
-import { ScrollArea } from '@/components/ui/scroll-area';
+// import { ScrollArea } from '@/components/ui/scroll-area';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -197,6 +197,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const handleEnterRoom = useCallback(() => {
 		// setRoomState('meetingRoom');
 		setCurrentScreen('Meeting Room');
+		// console.log(participants);
 	}, [setCurrentScreen]);
 
 	/////// All socket Notification Function are Define Here
@@ -253,7 +254,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<ScrollArea className="flex h-full w-full flex-col p-4 px-4 sm:flex-row md:flex-1">
+		<div className="flex h-full w-full flex-col p-4 sm:flex-row">
 			<div className="relative flex h-full w-full flex-col items-center justify-center sm:p-5 md:w-[50%] md:px-10">
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
@@ -314,7 +315,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 					)}
 				</Card>
 			</div>
-		</ScrollArea>
+		</div>
 	);
 };
 

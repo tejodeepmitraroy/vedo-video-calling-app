@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 import UserProfile from '@/components/UserProfile';
 import { useUser } from '@clerk/nextjs';
 import NavBar from '@/components/Navbar';
-import useRoomStore from '@/store/useRoomStore';
+// import useRoomStore from '@/store/useRoomStore';
 import WaitingLobby from './@callerPanel/@waitingLobby/page';
 import MeetingRoom from './@callerPanel/@meetingRoom/page';
 import ConferenceRoom from './@conferenceRoom/page';
@@ -42,7 +42,7 @@ const screens = [
 ];
 
 const Home = () => {
-	const roomState = useRoomStore((state) => state.roomState);
+	// const roomState = useRoomStore((state) => state.roomState);
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
@@ -50,7 +50,7 @@ const Home = () => {
 	const searchParams = useSearchParams();
 	const roomId = searchParams.get('roomId');
 	const { user } = useUser();
-	const getRoomState = useRoomStore((state) => state.setRoomState);
+	// const getRoomState = useRoomStore((state) => state.setRoomState);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
@@ -82,9 +82,9 @@ const Home = () => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
 			getMediaStream();
 		} else {
-			stopMediaStream();
+			// stopMediaStream();
 		}
-	}, [currentScreen, getMediaStream, getRoomState, stopMediaStream]);
+	}, [currentScreen, getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,13 +94,11 @@ const Home = () => {
 		} else {
 			setCurrentScreen('Dashboard');
 		}
-	}, [getMediaStream, roomId, setCurrentScreen]);
+	}, [roomId, setCurrentScreen]);
 
 	console.log('Master Component');
 
 	const [open, setOpen] = useState(false);
-
-	console.log(roomState);
 
 	return (
 		<>

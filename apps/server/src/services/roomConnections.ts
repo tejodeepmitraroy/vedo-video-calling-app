@@ -10,6 +10,7 @@ type socketIdToUserMap = Map<
 		fullName: string;
 		imageUrl: string;
 		emailAddress: string;
+		host: boolean;
 	}
 >;
 type rooms = Map<
@@ -157,6 +158,10 @@ export function roomConnections(
 			if (rooms.has(roomId) && hostUser) {
 				console.log('Participents=========>', rooms.get(roomId));
 
+				const updateUser = socketIdToUserMap.get(socket.id)!;
+
+				socketIdToUserMap.set(socket.id, { ...updateUser, host: true });
+
 				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
 				const roomDetails = {
 					hostId: hostUserId!,
@@ -188,6 +193,14 @@ export function roomConnections(
 			console.log('MEETING DETails=========>', meeting);
 
 			console.log('USER ENTERED AND ROOM DETAILS+============>>>>', rooms);
+
+			// const participants: any[] = [];
+
+			// rooms.get(roomId)?.participants.forEach((socketId,) => {
+			// 	console.log('participants===>', socketIdToUserMap.get(socketId)!);
+			// 	participants.push(socketIdToUserMap.get(socketId)!);
+
+			// });
 
 			socket.emit('event:enterRoom');
 

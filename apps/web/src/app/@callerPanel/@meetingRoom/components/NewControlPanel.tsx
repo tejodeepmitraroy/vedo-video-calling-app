@@ -21,7 +21,7 @@ import useScreenStateStore from '@/store/useScreenStateStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
-import { Mic, Phone, Video, MicOff, VideoOff, Users, Info } from 'lucide-react';
+import { Mic, Phone, Video, MicOff, VideoOff } from 'lucide-react';
 // import { useRouter } from 'next/navigation';
 import React, { useCallback } from 'react';
 
@@ -286,7 +286,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 					<div className="tooltip-arrow" data-popper-arrow></div>
 				</div>
 			</div>
-			<div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
+			{/* <div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 				<Tooltip>
 					<TooltipTrigger>
 						<Button
@@ -316,7 +316,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 					<TooltipContent>
 						<p>Adjust volume</p>
 					</TooltipContent>
-				</Tooltip> */}
+				</Tooltip> 
 				<Tooltip>
 					<TooltipTrigger>
 						<Button
@@ -332,7 +332,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 						<p>Show information</p>
 					</TooltipContent>
 				</Tooltip>
-			</div>
+			</div> */}
 		</div>
 	);
 };

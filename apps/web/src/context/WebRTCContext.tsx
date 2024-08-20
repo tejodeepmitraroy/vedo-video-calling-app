@@ -38,6 +38,7 @@ interface IWebRTCContext {
 	setRemoteDescription: (answer: RTCSessionDescriptionInit) => void;
 	connectionStatus: () => string | undefined;
 	disconnectPeer: () => void;
+	resetRemotePeer: () => void;
 }
 
 const WebRTCContext = createContext<IWebRTCContext | null>(null);
@@ -208,6 +209,13 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const resetRemotePeer = () => {
+		if (peer.current) {
+			peer.current.close();
+			remoteStream.current = null;
+		}
+	};
+
 	return (
 		<WebRTCContext.Provider
 			value={{
@@ -221,6 +229,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				setRemoteDescription,
 				connectionStatus,
 				disconnectPeer,
+				resetRemotePeer,
 			}}
 		>
 			{children}

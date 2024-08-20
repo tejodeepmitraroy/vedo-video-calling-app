@@ -325,8 +325,8 @@ export default function Dashboard() {
 						<CardTitle>Recent Meetings</CardTitle>
 						<CardDescription>meeting & calls logs</CardDescription>
 					</CardHeader>
-					<CardContent className="w-full border p-0 md:p-6 md:pt-0">
-						<ScrollArea className="h-[65vh] w-full rounded-md border bg-white p-4 md:h-[70vh]">
+					<CardContent className="w-full p-0 md:p-6 md:pt-0">
+						<ScrollArea className="h-[65vh] w-full rounded-md bg-white p-4 md:h-[70vh]">
 							<div className="flex flex-col gap-3">
 								{allScheduledRoomsDetails ? (
 									allScheduledRoomsDetails.length === 0 ? (

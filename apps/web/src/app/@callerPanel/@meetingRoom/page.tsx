@@ -15,10 +15,10 @@ import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 
 import useRoomStore from '@/store/useRoomStore';
 import NewControlPanel from './components/NewControlPanel';
-import { X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// import { X } from 'lucide-react';
+// import { Input } from '@/components/ui/input';
+// import { Separator } from '@/components/ui/separator';
+// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
@@ -37,9 +37,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		setRemoteDescription,
 		connectionStatus,
 		disconnectPeer,
+		resetRemotePeer,
 	} = useWebRTC();
 
-	// const remoteStream = webRTC.getRemoteStream();
 	const remoteStream = getRemoteStream();
 
 	console.log('Remote Users Stream--------->', remoteStream);
@@ -59,9 +59,11 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			} else {
 				setRemoteSocketId(null);
 				toast(`${id} Left the Room`);
+
+				resetRemotePeer();
 			}
 		},
-		[setRemoteSocketId, userId]
+		[resetRemotePeer, setRemoteSocketId, userId]
 	);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,12 +268,12 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		// <main className="relative  flex h-full w-full flex-col border border-red-600">
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			{/* <div className="flex h-[92.5%] w-full items-center justify-center"> */}
-			<div className="flex h-full w-full justify-between gap-4 border border-red-500 px-4 pb-20 pt-4">
-				<div className="flex w-full items-center justify-center border md:max-w-[90rem]">
+			<div className="flex h-full w-full justify-between gap-4 p-4 md:pb-20">
+				<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
 					{remoteStream ? (
 						<>
 							<RemoteUserVideoPanel />
-							<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+							<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 								<UserVideoPanel />
 							</div>
 						</>
@@ -280,7 +282,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 					)}
 					{/* <ScreenSharePanel />  */}
 				</div>
-				<div className="flex h-full w-96 flex-col space-y-2 rounded-md bg-background p-4">
+				{/* <div className="flex h-full w-96 flex-col space-y-2 rounded-md bg-background p-4">
 					<div className="flex w-full items-center justify-between">
 						People
 						<Button variant={'ghost'} size={'sm'}>
@@ -303,7 +305,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> */}
 			</div>
 
 			{/* <ControlPanel roomId={roomId} /> */}
