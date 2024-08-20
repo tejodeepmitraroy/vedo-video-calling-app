@@ -3,11 +3,12 @@ import React, { useCallback, useEffect } from 'react';
 import useRoomStore from '@/store/useRoomStore';
 import OutsideLobby from './@outsideLobby/page';
 import WaitingLobby from './@waitingLobby/page';
-import MeetingRoom from './@meetingRoom/page';
+// import MeetingRoom from './@meetingRoom/page';
 import { useSearchParams } from 'next/navigation';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
+import MeetingRoom from './@meetingRoom/page';
 
 export default function CallPanel() {
 	const roomState = useRoomStore((state) => state.roomState);

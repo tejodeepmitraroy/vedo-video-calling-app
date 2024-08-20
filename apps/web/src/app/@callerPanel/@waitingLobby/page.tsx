@@ -15,13 +15,15 @@ import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
 import useStreamStore from '@/store/useStreamStore';
-import useRoomStore from '@/store/useRoomStore';
+// import useRoomStore from '@/store/useRoomStore';
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@callerPanel/@waitingLobby/components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import useScreenStateStore from '@/store/useScreenStateStore';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -33,10 +35,13 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const { getToken, userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
-	const setRoomState = useRoomStore((state) => state.setRoomState);
 	const router = useRouter();
 	const { createOffer, setRemoteDescription, getAnswer } = useWebRTC();
 	const [canJoin, setCanJoin] = useState<boolean>();
+
+	const setCurrentScreen = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
 
 	console.log('Waiting Component mounted++++++++++');
 
@@ -190,8 +195,9 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	);
 
 	const handleEnterRoom = useCallback(() => {
-		setRoomState('meetingRoom');
-	}, [setRoomState]);
+		// setRoomState('meetingRoom');
+		setCurrentScreen('Meeting Room');
+	}, [setCurrentScreen]);
 
 	/////// All socket Notification Function are Define Here
 	const roomEnterPermissionDenied = useCallback(() => {
@@ -247,7 +253,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="flex h-[80vh] flex-col rounded-lg bg-background p-4 shadow-sm sm:flex-row md:flex-1">
+		<ScrollArea className="flex h-full w-full flex-col p-4 px-4 sm:flex-row md:flex-1">
 			<div className="relative flex h-full w-full flex-col items-center justify-center sm:p-5 md:w-[50%] md:px-10">
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
@@ -308,7 +314,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 					)}
 				</Card>
 			</div>
-		</div>
+		</ScrollArea>
 	);
 };
 

@@ -3,16 +3,22 @@ import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@clerk/nextjs';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
 import useStreamStore from '@/store/useStreamStore';
 
-import ControlPanel from './components/ControlPanel';
+// import ControlPanel from './components/ControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 
 import useRoomStore from '@/store/useRoomStore';
+import NewControlPanel from './components/NewControlPanel';
+import { X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const localStream = useRoomStore((state) => state.localStream);
@@ -52,7 +58,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				toast.success(`You Left the Room`);
 			} else {
 				setRemoteSocketId(null);
-				toast.info(`${id} Left the Room`);
+				toast(`${id} Left the Room`);
 			}
 		},
 		[setRemoteSocketId, userId]
@@ -139,18 +145,18 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 							Rejected
 						</Button>
 					</div>
-				</div>,
-				{
-					onClose: () => roomEnterPermissionDenied(socketId),
-					position: 'top-center',
-					autoClose: false,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					theme: 'light',
-				}
+				</div>
+				// {
+				// 	// onClose: () => roomEnterPermissionDenied(socketId),
+				// 	position: 'top-center',
+				// 	autoClose: false,
+				// 	hideProgressBar: false,
+				// 	closeOnClick: true,
+				// 	pauseOnHover: true,
+				// 	draggable: true,
+				// 	progress: undefined,
+				// 	theme: 'light',
+				// }
 			);
 		},
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
@@ -255,29 +261,60 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	}, [handleUserLeftTheRoom, socketOff, socketOn]);
 
 	return (
-		<div className="relative mb-6 flex h-[85vh] w-full flex-col rounded-lg bg-background bg-black shadow-sm sm:h-auto sm:flex-1">
-			<main className="relative flex h-full w-full flex-col">
-				<div className="flex h-[92.5%] w-full items-center justify-center">
-					<div className="flex h-full w-full items-center justify-center rounded-xl md:max-w-[85rem]">
-						{remoteStream ? (
-							<>
-								<RemoteUserVideoPanel />
-								<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
-									<UserVideoPanel />
-								</div>
-							</>
-						) : (
-							<UserVideoPanel />
-						)}
-						{/* <ScreenSharePanel /> */}
+		// <div className="relative mb-6 flex h-[85vh] w-full flex-col bg-background bg-black sm:h-auto sm:flex-1">
+		// <div className="relative flex h-screen w-full flex-col border border-black bg-background sm:flex-1">
+		// <main className="relative  flex h-full w-full flex-col border border-red-600">
+		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
+			{/* <div className="flex h-[92.5%] w-full items-center justify-center"> */}
+			<div className="flex h-full w-full justify-between gap-4 border border-red-500 px-4 pb-20 pt-4">
+				<div className="flex w-full items-center justify-center border md:max-w-[90rem]">
+					{remoteStream ? (
+						<>
+							<RemoteUserVideoPanel />
+							<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize rounded-xl border border-white sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+								<UserVideoPanel />
+							</div>
+						</>
+					) : (
+						<UserVideoPanel />
+					)}
+					{/* <ScreenSharePanel />  */}
+				</div>
+				<div className="flex h-full w-96 flex-col space-y-2 rounded-md bg-background p-4">
+					<div className="flex w-full items-center justify-between">
+						People
+						<Button variant={'ghost'} size={'sm'}>
+							<X />
+						</Button>
+					</div>
+					<div className="flex w-full flex-col">
+						<Input placeholder="Search For People" />
+					</div>
+					<div className="flex w-full flex-col space-y-1 pt-7">
+						<span className="text-sm text-gray-500">In Meeting</span>
+						<div className="w-full rounded-lg border border-black p-4 text-sm">
+							<span>Contributors</span>
+							<Separator />
+							<div className="w-full border border-black p-2">
+								<Avatar className="h-8 w-8">
+									<AvatarImage src="https://github.com/shadcn.png" />
+									<AvatarFallback>CN</AvatarFallback>
+								</Avatar>
+							</div>
+						</div>
 					</div>
 				</div>
+			</div>
 
-				<div className="h-[7.5%] w-full">
-					<ControlPanel roomId={roomId} />
-				</div>
-			</main>
-		</div>
+			{/* <ControlPanel roomId={roomId} /> */}
+
+			<NewControlPanel roomId={roomId} />
+
+			{/* <div className="h-[7.5%] w-full">
+				<ControlPanel roomId={roomId} />
+			</div> */}
+		</main>
+		// </div>
 	);
 };
 

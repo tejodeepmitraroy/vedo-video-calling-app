@@ -9,7 +9,7 @@ const UserVideoPanel = () => {
 	const localStream = useStreamStore((state) => state.localStream);
 
 	return (
-		<div className="relative z-20 flex aspect-[16/9] h-full w-full">
+		<div className="relative z-20 flex aspect-[16/9] w-full">
 			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-black">
 				<ReactPlayer
 					url={localStream!}

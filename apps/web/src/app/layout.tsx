@@ -3,10 +3,11 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+// import { ToastContainer } from 'react-toastify';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WebRTCProvider } from '@/context/WebRTCContext';
 import { neobrutalism } from '@clerk/themes';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
@@ -33,7 +34,7 @@ export default function RootLayout({
 					<WebRTCProvider>
 						<body>
 							<TooltipProvider>
-								<ToastContainer
+								{/* <ToastContainer
 									position="top-center"
 									limit={2}
 									autoClose={2000}
@@ -45,7 +46,31 @@ export default function RootLayout({
 									draggable
 									pauseOnHover={false}
 									theme="light"
+								/> */}
+								<Toaster
+									position="top-center"
+									reverseOrder={false}
+									gutter={8}
+									toastOptions={{
+										// Define default options
+										className: '',
+										duration: 5000,
+										style: {
+											background: '#363636',
+											color: '#fff',
+										},
+
+										// Default options for specific types
+										// success: {
+										// 	duration: 3000,
+										// 	theme: {
+										// 		primary: 'green',
+										// 		secondary: 'black',
+										// 	},
+										// },
+									}}
 								/>
+
 								{children}
 							</TooltipProvider>
 						</body>

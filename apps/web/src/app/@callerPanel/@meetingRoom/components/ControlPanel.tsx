@@ -17,12 +17,13 @@ import {
 import { useSocket } from '@/context/SocketContext';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
-import useRoomStore from '@/store/useRoomStore';
+// import useRoomStore from '@/store/useRoomStore';
+import useScreenStateStore from '@/store/useScreenStateStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
 import { Mic, Phone, Video, MicOff, VideoOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import React, { useCallback } from 'react';
 
 export interface Device {
@@ -37,12 +38,16 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
-	const setRoomState = useRoomStore((state) => state.setRoomState);
+	// const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
 	const { disconnectPeer } = useWebRTC();
-	const router = useRouter();
+	// const router = useRouter();
+
+	const setCurrentScreen = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
 
 	// console.log('selected Camera------>', selectedCamera);
 	// console.log('selected Microphone------>', selectedMicrophone);
@@ -62,9 +67,10 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 		});
 
 		disconnectPeer();
-		router.push('/');
-		setRoomState('outSideLobby');
-	}, [disconnectPeer, roomId, router, setRoomState, socketEmit]);
+		// router.push('/');
+		// setRoomState('outSideLobby');
+		setCurrentScreen('OutSide Lobby');
+	}, [disconnectPeer, roomId, setCurrentScreen, socketEmit]);
 
 	const handleEndRoom = useCallback(() => {
 		socketEmit('event:endRoom', { roomId });

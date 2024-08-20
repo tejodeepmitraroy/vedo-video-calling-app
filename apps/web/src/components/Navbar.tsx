@@ -3,7 +3,8 @@ import { useSocket } from '@/context/SocketContext';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import React, { useCallback, useEffect } from 'react';
 import { Button } from './ui/button';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
@@ -49,13 +50,14 @@ const NavBar = () => {
 		if (socket) {
 			if (socket.connected) {
 				toast.success('Connected');
+
 				setOnLineStatus(true);
 			} else {
 				toast.error('Not Connected');
 				setOnLineStatus(false);
 			}
 		} else {
-			toast.info('Connecting with server');
+			toast.loading('Connecting with server');
 		}
 	}, [setOnLineStatus, socket]);
 
@@ -151,18 +153,18 @@ const NavBar = () => {
 							<PhoneOff />
 						</Button>
 					</div>
-				</div>,
-				{
-					// onClose: () => roomEnterPermissionDenied(socketId),
-					position: 'top-center',
-					autoClose: false,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					theme: 'light',
-				}
+				</div>
+				// {
+				// 	// onClose: () => roomEnterPermissionDenied(socketId),
+				// 	position: 'top-center',
+				// 	autoClose: false,
+				// 	hideProgressBar: false,
+				// 	closeOnClick: true,
+				// 	pauseOnHover: true,
+				// 	draggable: true,
+				// 	progress: undefined,
+				// 	theme: 'light',
+				// }
 			);
 		},
 		[callAccepted, callRejected]
