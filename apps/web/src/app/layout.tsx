@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
-import 'react-toastify/dist/ReactToastify.css';
-// import { ToastContainer } from 'react-toastify';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WebRTCProvider } from '@/context/WebRTCContext';
 import { neobrutalism } from '@clerk/themes';
@@ -34,19 +32,6 @@ export default function RootLayout({
 					<WebRTCProvider>
 						<body>
 							<TooltipProvider>
-								{/* <ToastContainer
-									position="top-center"
-									limit={2}
-									autoClose={2000}
-									hideProgressBar={false}
-									newestOnTop={false}
-									closeOnClick
-									rtl={false}
-									pauseOnFocusLoss={false}
-									draggable
-									pauseOnHover={false}
-									theme="light"
-								/> */}
 								<Toaster
 									position="top-center"
 									reverseOrder={false}
@@ -59,15 +44,6 @@ export default function RootLayout({
 											background: '#363636',
 											color: '#fff',
 										},
-
-										// Default options for specific types
-										// success: {
-										// 	duration: 3000,
-										// 	theme: {
-										// 		primary: 'green',
-										// 		secondary: 'black',
-										// 	},
-										// },
 									}}
 								/>
 

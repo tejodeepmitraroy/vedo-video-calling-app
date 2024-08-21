@@ -16,14 +16,21 @@ import {
 import { useSocket } from '@/context/SocketContext';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
-// import useRoomStore from '@/store/useRoomStore';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
-import { Mic, Phone, Video, MicOff, VideoOff } from 'lucide-react';
-// import { useRouter } from 'next/navigation';
+import {
+	Mic,
+	Phone,
+	Video,
+	MicOff,
+	VideoOff,
+	EllipsisVertical,
+	Share2,
+} from 'lucide-react';
 import React, { useCallback } from 'react';
+import { RWebShare } from 'react-web-share';
 
 export interface Device {
 	deviceId: string;
@@ -37,12 +44,10 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
-	// const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
 	const { disconnectPeer } = useWebRTC();
-	// const router = useRouter();
 
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
@@ -66,8 +71,6 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 		});
 
 		disconnectPeer();
-		// router.push('/');
-		// setRoomState('outSideLobby');
 		setCurrentScreen('OutSide Lobby');
 	}, [disconnectPeer, roomId, setCurrentScreen, socketEmit]);
 
@@ -80,109 +83,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 			<div className="hidden items-center justify-center gap-3 text-white dark:text-gray-400 md:flex">
 				{roomId}
 			</div>
-			{/* <div className=" mb-4 flex items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
-				<Tooltip>
-					<TooltipTrigger>
-						<Button
-							variant={isCameraOn ? 'default' : 'destructive'}
-							onClick={() => toggleCamera()}
-							data-tooltip-target="tooltip-microphone"
-							type="button"
-							className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-						>
-							{isCameraOn ? (
-								<Video className="h-7 w-7" />
-							) : (
-								<VideoOff className="h-7 w-7" />
-							)}
-							<span className="sr-only">Mute microphone</span>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>
-						<p>Camera On/Off</p>
-					</TooltipContent>
-				</Tooltip>
 
-				<Tooltip>
-					<TooltipTrigger>
-						<Button
-							data-tooltip-target="tooltip-camera"
-							variant={isMicrophoneOn ? 'default' : 'destructive'}
-							onClick={() => toggleMicrophone()}
-							type="button"
-							className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-						>
-							{isMicrophoneOn ? (
-								<Mic className="h-6 w-7" />
-							) : (
-								<MicOff className="h-7 w-7" />
-							)}
-							<span className="sr-only">Hide camera</span>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>
-						<p>Microphone On/Off</p>
-					</TooltipContent>
-				</Tooltip>
-				{roomDetails?.createdById === userId ? (
-					<Tooltip>
-						<TooltipTrigger>
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant={'destructive'}
-										data-tooltip-target="tooltip-microphone"
-										type="button"
-										className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-									>
-										<Phone className="h-6 w-7" />
-										<span className="sr-only">Leave</span>
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent>
-									<DropdownMenuLabel>As a Host</DropdownMenuLabel>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem onClick={() => handleLeaveRoom()}>
-										Leave Room
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => handleEndRoom()}>
-										End Room
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Leave Room</p>
-						</TooltipContent>
-					</Tooltip>
-				) : (
-					<Tooltip>
-						<TooltipTrigger>
-							<Button
-								variant={'destructive'}
-								data-tooltip-target="tooltip-microphone"
-								type="button"
-								onClick={() => handleLeaveRoom()}
-								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-							>
-								<Phone className="h-6 w-7" />
-								<span className="sr-only">Leave</span>
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Leave Room</p>
-						</TooltipContent>
-					</Tooltip>
-				)}
-				<div
-					id="tooltip-microphone"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-				>
-					Call Disconnect
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
-			</div> */}
 			<div className="mx-auto mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 				<Tooltip>
 					<TooltipTrigger>
@@ -239,7 +140,6 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 										className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
 									>
 										<Phone className="h-6 w-7" />
-										<span className="sr-only">Leave</span>
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent>
@@ -277,14 +177,43 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 						</TooltipContent>
 					</Tooltip>
 				)}
-				<div
-					id="tooltip-microphone"
-					role="tooltip"
-					className="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-				>
-					Call Disconnect
-					<div className="tooltip-arrow" data-popper-arrow></div>
-				</div>
+
+				<Tooltip>
+					<TooltipTrigger>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									data-tooltip-target="tooltip-microphone"
+									type="button"
+									className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+								>
+									<EllipsisVertical className="h-6 w-7" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent>
+								<DropdownMenuLabel>Options</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+
+								<RWebShare
+									data={{
+										text: 'Share',
+										url: window.location.href,
+										title: 'roomUrl',
+									}}
+									onClick={() => console.log('roomUrl shared successfully!')}
+								>
+									<DropdownMenuItem className="w-full gap-1.5 text-sm">
+										<Share2 className="size-3.5" />
+										Share
+									</DropdownMenuItem>
+								</RWebShare>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>Options</p>
+					</TooltipContent>
+				</Tooltip>
 			</div>
 			{/* <div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 				<Tooltip>

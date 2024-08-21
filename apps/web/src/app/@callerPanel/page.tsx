@@ -1,25 +1,16 @@
 'use client';
 import React, { useCallback, useEffect } from 'react';
-import useRoomStore from '@/store/useRoomStore';
-import OutsideLobby from './@outsideLobby/page';
-import WaitingLobby from './@waitingLobby/page';
-// import MeetingRoom from './@meetingRoom/page';
-import { useSearchParams } from 'next/navigation';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
-import MeetingRoom from './@meetingRoom/page';
 
 export default function CallPanel() {
-	const roomState = useRoomStore((state) => state.roomState);
-	const getRoomState = useRoomStore((state) => state.setRoomState);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
-	const searchParams = useSearchParams();
-	const roomId = searchParams.get('roomId');
+
 	const { getUserMedia, disconnectPeer } = useWebRTC();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,18 +34,11 @@ export default function CallPanel() {
 		getMediaStream();
 		return () => {
 			stopMediaStream();
-			getRoomState('waitingLobby');
 		};
-	}, [getMediaStream, getRoomState, stopMediaStream]);
+	}, [getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	console.log('Caller Panel mounted++++++++++++++++++');
-	return (
-		<>
-			{roomState === 'waitingLobby' && <WaitingLobby roomId={roomId!} />}
-			{roomState === 'meetingRoom' && <MeetingRoom roomId={roomId!} />}
-			{roomState === 'outSideLobby' && <OutsideLobby />}
-		</>
-	);
+	return <></>;
 }

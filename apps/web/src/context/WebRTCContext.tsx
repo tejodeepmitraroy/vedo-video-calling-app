@@ -212,7 +212,20 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	const resetRemotePeer = () => {
 		if (peer.current) {
 			peer.current.close();
-			remoteStream.current = null;
+			// remoteStream.current = null;
+
+			const configuration = {
+				iceServers: [
+					{
+						urls: [
+							'stun:stun.l.google.com:19302',
+							'stun:global.stun.twilio.com:3478',
+						],
+					},
+				],
+			};
+
+			peer.current = new RTCPeerConnection(configuration);
 		}
 	};
 

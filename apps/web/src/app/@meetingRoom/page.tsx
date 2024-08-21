@@ -3,31 +3,21 @@ import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@clerk/nextjs';
-// import { toast } from 'react-toastify';
 import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
 import useStreamStore from '@/store/useStreamStore';
-
-// import ControlPanel from './components/ControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-
-import useRoomStore from '@/store/useRoomStore';
 import NewControlPanel from './components/NewControlPanel';
-// import { X } from 'lucide-react';
-// import { Input } from '@/components/ui/input';
-// import { Separator } from '@/components/ui/separator';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import useScreenStateStore from '@/store/useScreenStateStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	// const localStream = useRoomStore((state) => state.localStream);
-	// const localScreenStream = useRoomStore((state) => state.localScreenStream);
-	// const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
-	// const [remoteStream, setRemoteStream] = useState<MediaStream>();
+	const setCurrentScreen = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
-	const setRoomState = useRoomStore((state) => state.setRoomState);
 	const peerOffer = useStreamStore((state) => state.peerOffer);
 	const {
 		peer,
@@ -75,23 +65,20 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 			console.log(` Client's client------->`, offer);
 
-			// const answer = await webRTC.getAnswer(offer);
 			const answer = await getAnswer(offer);
 
 			console.log(` HOST created answer----->`, answer);
 
 			console.log(` HOST's offer-------->`, peerOffer);
 
-			// const hostOffer = await webRTC.createOffer();
 			const hostOffer = await createOffer();
 			setRemoteSocketId(socketId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				socketId,
 				answer,
-				// hostOffer: peerOffer,
+
 				hostOffer: hostOffer,
 			});
-			// handleCallUser(socketId);
 		},
 		[createOffer, getAnswer, peerOffer, setRemoteSocketId, socketEmit]
 	);
@@ -117,7 +104,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			socketId: string;
 			offer: RTCSessionDescriptionInit;
 		}) => {
-			toast(
+			toast((t) => (
 				<div className="w-full">
 					<div className="flex">
 						<div className="flex w-[20%] items-center justify-center">
@@ -135,31 +122,26 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 						<Button
 							size={'sm'}
 							variant={'default'}
-							onClick={() => roomEnterPermissionAccepted(socketId, offer)}
+							onClick={() => {
+								toast.dismiss(t.id);
+								roomEnterPermissionAccepted(socketId, offer);
+							}}
 						>
 							Accept
 						</Button>
 						<Button
 							size={'sm'}
 							variant={'default'}
-							onClick={() => roomEnterPermissionDenied(socketId)}
+							onClick={() => {
+								toast.dismiss(t.id);
+								roomEnterPermissionDenied(socketId);
+							}}
 						>
 							Rejected
 						</Button>
 					</div>
 				</div>
-				// {
-				// 	// onClose: () => roomEnterPermissionDenied(socketId),
-				// 	position: 'top-center',
-				// 	autoClose: false,
-				// 	hideProgressBar: false,
-				// 	closeOnClick: true,
-				// 	pauseOnHover: true,
-				// 	draggable: true,
-				// 	progress: undefined,
-				// 	theme: 'light',
-				// }
-			);
+			));
 		},
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
@@ -168,7 +150,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
 			console.log('Final Negotiation is completed', answer);
 
-			// await webRTC.setRemoteDescription(answer);
 			setRemoteDescription(answer);
 		},
 		[setRemoteDescription]
@@ -177,8 +158,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const handleRemoveEveryoneFromRoom = useCallback(async () => {
 		toast.success(`Host End the Room`);
 		disconnectPeer();
-		setRoomState('outSideLobby');
-	}, [disconnectPeer, setRoomState]);
+		setCurrentScreen('OutSide Lobby');
+	}, [disconnectPeer, setCurrentScreen]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -202,7 +183,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		peer?.addEventListener('icecandidate', handleSendIceCandidate);
 
 		return () => {
-			// webRTC.peer?.removeEventListener('icecandidate', handleSendIceCandidate);
 			peer?.removeEventListener('icecandidate', handleSendIceCandidate);
 		};
 	}, [handleSendIceCandidate, peer]);
@@ -214,7 +194,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 					console.log(
 						'=========================Get Ice Candidate=================='
 					);
-					// await webRTC.peer?.addIceCandidate(iceCandidate);
+
 					await peer?.addIceCandidate(iceCandidate);
 				} catch (e) {
 					console.error('Error adding received ice candidate', e);
@@ -263,12 +243,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	}, [handleUserLeftTheRoom, socketOff, socketOn]);
 
 	return (
-		// <div className="relative mb-6 flex h-[85vh] w-full flex-col bg-background bg-black sm:h-auto sm:flex-1">
-		// <div className="relative flex h-screen w-full flex-col border border-black bg-background sm:flex-1">
-		// <main className="relative  flex h-full w-full flex-col border border-red-600">
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
-			{/* <div className="flex h-[92.5%] w-full items-center justify-center"> */}
-			<div className="flex h-full w-full justify-between gap-4 p-4 md:pb-20">
+			<div className="flex h-full w-full justify-between gap-4 p-4 pb-20 sm:pb-4 md:pb-20">
 				<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
 					{remoteStream ? (
 						<>
@@ -282,41 +258,10 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 					)}
 					{/* <ScreenSharePanel />  */}
 				</div>
-				{/* <div className="flex h-full w-96 flex-col space-y-2 rounded-md bg-background p-4">
-					<div className="flex w-full items-center justify-between">
-						People
-						<Button variant={'ghost'} size={'sm'}>
-							<X />
-						</Button>
-					</div>
-					<div className="flex w-full flex-col">
-						<Input placeholder="Search For People" />
-					</div>
-					<div className="flex w-full flex-col space-y-1 pt-7">
-						<span className="text-sm text-gray-500">In Meeting</span>
-						<div className="w-full rounded-lg border border-black p-4 text-sm">
-							<span>Contributors</span>
-							<Separator />
-							<div className="w-full border border-black p-2">
-								<Avatar className="h-8 w-8">
-									<AvatarImage src="https://github.com/shadcn.png" />
-									<AvatarFallback>CN</AvatarFallback>
-								</Avatar>
-							</div>
-						</div>
-					</div>
-				</div> */}
 			</div>
 
-			{/* <ControlPanel roomId={roomId} /> */}
-
 			<NewControlPanel roomId={roomId} />
-
-			{/* <div className="h-[7.5%] w-full">
-				<ControlPanel roomId={roomId} />
-			</div> */}
 		</main>
-		// </div>
 	);
 };
 

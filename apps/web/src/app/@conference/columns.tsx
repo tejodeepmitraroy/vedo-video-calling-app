@@ -9,11 +9,11 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 import { ColumnDef } from '@tanstack/react-table';
+import { Play } from 'lucide-react';
 
 interface roomsColumns {
 	id: string;
@@ -23,6 +23,10 @@ interface roomsColumns {
 	createdBy: User;
 	participants: User[];
 }
+
+const handleCallOpenMeeting = (roomId: string) => {
+	window.location.replace(`?roomId=${roomId}`);
+};
 
 export const columns: ColumnDef<roomsColumns>[] = [
 	{
@@ -48,13 +52,34 @@ export const columns: ColumnDef<roomsColumns>[] = [
 		enableHiding: false,
 	},
 	{
+		id: 'actions',
+		enableHiding: false,
+		header: 'Action',
+		cell: ({ row }) => {
+			const roomId: string = row.getValue('id');
+
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="ghost" className="h-8 w-8 p-0">
+							<Play className="h-4 w-4" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuLabel>Room Actions</DropdownMenuLabel>
+						<DropdownMenuItem onClick={() => handleCallOpenMeeting(roomId)}>
+							Rejoin
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
+		},
+	},
+	{
 		accessorKey: 'id',
 		header: 'Room Id',
 	},
-	// {
-	// 	accessorKey: 'type',
-	// 	header: 'Status',
-	// },
+
 	{
 		accessorKey: 'title',
 		header: 'Title',
@@ -85,7 +110,6 @@ export const columns: ColumnDef<roomsColumns>[] = [
 			console.log('Column Date=========>', startTime);
 			return (
 				<div className="flex flex-col gap-2">
-					{/* <span>{convertISOTo12HourFormat(startTime!).time}</span> */}
 					<span>{convertISOTo12HourFormat(startTime!).date}</span>
 				</div>
 			);
@@ -109,35 +133,6 @@ export const columns: ColumnDef<roomsColumns>[] = [
 						})}
 					/>
 				</div>
-			);
-		},
-	},
-	{
-		id: 'actions',
-		enableHiding: false,
-		cell: ({ row }) => {
-			const payment = row.original;
-
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only">Open menu</span>
-							{/* <DotsHorizontalIcon className="h-4 w-4" /> */}
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem
-							onClick={() => navigator.clipboard.writeText(payment.id)}
-						>
-							Copy payment ID
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem>View customer</DropdownMenuItem>
-						<DropdownMenuItem>View payment details</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
 			);
 		},
 	},

@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 interface DataTableProps<TData, TValue> {
@@ -56,31 +56,40 @@ export function DataTable<TData, TValue>({
 	//////////////////////////////////////////////////////////////////////////////////////////
 	const handleEnterRoom = async () => {
 		const token = await getToken();
-		console.log('Enter Room', roomId);
+		// console.log('Enter Room', roomId);
 		if (roomId) {
-			try {
-				const { data } = await axios<ApiResponse>(
+			toast.promise(
+				axios<ApiResponse>(
 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
+
 					{
 						headers: {
 							'Content-Type': 'application/json',
 							Authorization: `Bearer ${token}`,
 						},
 					}
-				);
+				),
 
-				console.log(data);
+				{
+					loading: 'Finding Room',
 
-				router.push(`?roomId=${roomId}`);
-			} catch (error) {
-				console.log(error);
-			}
+					success: (data) => {
+						// console.log('Rescponce Data=======>', data.data.data);
+						if (data.data.data) {
+							router.push(`?roomId=${roomId}`);
+							return 'Connecting👌';
+						} else {
+							return `We don't find the room 😭`;
+						}
+					},
+					error: `Error happend, We don't find the room 🤯`,
+				}
+			);
 		}
 	};
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
-		console.log('Token---->', token);
 
 		try {
 			const { data } = await toast.promise(
@@ -96,7 +105,7 @@ export function DataTable<TData, TValue>({
 				),
 
 				{
-					pending: 'Wait to create a new Room',
+					loading: 'Wait to create a new Room',
 					success: 'New Room Created👌',
 					error: 'Error happend, New Room Creation rejected 🤯',
 				}
@@ -104,7 +113,6 @@ export function DataTable<TData, TValue>({
 
 			console.log(data.data);
 			const roomId = data.data.id;
-			// const userId = data.data.createdById;
 
 			router.push(`?roomId=${roomId}`);
 		} catch (error) {

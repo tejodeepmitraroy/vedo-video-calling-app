@@ -15,15 +15,14 @@ import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
 import useStreamStore from '@/store/useStreamStore';
-// import useRoomStore from '@/store/useRoomStore';
+
 import dynamic from 'next/dynamic';
-import UserVideoPanel from '@/app/@callerPanel/@waitingLobby/components/UserVideoPanel';
+import UserVideoPanel from '@/app/@waitingLobby/components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useScreenStateStore from '@/store/useScreenStateStore';
-// import { ScrollArea } from '@/components/ui/scroll-area';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -86,18 +85,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	useEffect(() => {
 		getRoomDetails();
 	}, [getRoomDetails]);
-
-	///////////////////////////////////////////////////////////////////////////////////////////
-
-	// const createOffer = useCallback(async () => {
-	// 	const offer = await webRTC.createOffer();
-	// 	console.log('Created Offer =======================>', offer);
-	// 	setPeerOffer(offer);
-	// }, [setPeerOffer]);
-
-	// useEffect(() => {
-	// 	createOffer();
-	// }, [createOffer]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -195,9 +182,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	);
 
 	const handleEnterRoom = useCallback(() => {
-		// setRoomState('meetingRoom');
 		setCurrentScreen('Meeting Room');
-		// console.log(participants);
 	}, [setCurrentScreen]);
 
 	/////// All socket Notification Function are Define Here

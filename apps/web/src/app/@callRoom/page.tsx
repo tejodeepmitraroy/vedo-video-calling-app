@@ -46,7 +46,7 @@ const CallRoom = () => {
 		useState<FriendListResponse | null>(null);
 	const setModifiedFriendList = useGlobalStore((state) => state.setFriendList);
 
-	const { socketOn, socketEmit, socketOff } = useSocket();
+	const { socketEmit } = useSocket();
 	const [userName, setUserName] = useState<string | undefined>();
 
 	console.log('Call Component++++++++++++');
@@ -186,22 +186,11 @@ const CallRoom = () => {
 		socketEmit('callUser', { to: userId, userName: user?.fullName });
 	};
 
-	const handleUserIsNotOnline = useCallback(() => {
-		toast.warn(`User is Offline`);
-	}, []);
-
 	/////////////////////////////////////////////////////////////////////////
 
 	useEffect(() => {
 		getFriendList();
 	}, [getFriendList]);
-
-	useEffect(() => {
-		socketOn('notification:userIsNotOnline', handleUserIsNotOnline);
-		return () => {
-			socketOff('notification:userIsNotOnline', handleUserIsNotOnline);
-		};
-	}, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
 		<div className="flex flex-1 rounded-lg bg-background shadow-sm">

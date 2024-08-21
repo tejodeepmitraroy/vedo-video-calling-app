@@ -1,10 +1,7 @@
 'use client';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import React, { useCallback, useEffect, useState } from 'react';
-// import Sidebar from '@/components/Sidebar';
-
 import Dashboard from './@dashboard/page';
-// import ConferenceRoom from './@conferenceRoom/page';
 import { useSearchParams } from 'next/navigation';
 import {
 	Sidebar,
@@ -14,19 +11,29 @@ import {
 } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Laptop, HomeIcon } from 'lucide-react';
+import { Laptop, HomeIcon, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UserProfile from '@/components/UserProfile';
 import { useUser } from '@clerk/nextjs';
 import NavBar from '@/components/Navbar';
-// import useRoomStore from '@/store/useRoomStore';
-import WaitingLobby from './@callerPanel/@waitingLobby/page';
-import MeetingRoom from './@callerPanel/@meetingRoom/page';
-import ConferenceRoom from './@conferenceRoom/page';
-import OutsideLobby from './@callerPanel/@outsideLobby/page';
+import WaitingLobby from './@waitingLobby/page';
+import MeetingRoom from './@meetingRoom/page';
+import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useWebRTC } from '@/context/WebRTCContext';
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import Conference from './@conference/page';
 
 const screens = [
 	{
@@ -42,7 +49,6 @@ const screens = [
 ];
 
 const Home = () => {
-	// const roomState = useRoomStore((state) => state.roomState);
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
@@ -50,15 +56,12 @@ const Home = () => {
 	const searchParams = useSearchParams();
 	const roomId = searchParams.get('roomId');
 	const { user } = useUser();
-	// const getRoomState = useRoomStore((state) => state.setRoomState);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
-
 	const { getUserMedia, disconnectPeer } = useWebRTC();
-
 	console.log('Room==========>', roomId);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,11 +106,6 @@ const Home = () => {
 	return (
 		<>
 			<div
-				// className={cn(
-				// 	// 'mx-auto flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 dark:border-neutral-700 dark:bg-neutral-800 md:flex-row',
-				// 	` ${currentScreen === 'Waiting Lobby' ? 'hidden bg-blue-700' : ''} mx-auto flex w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row`,
-				// 	`h-screen` // for your use case, use `h-screen` instead of `h-[60vh]`
-				// )}
 				className={
 					` ${currentScreen === 'Meeting Room' ? 'hidden bg-blue-700' : ''} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
 				}
@@ -142,13 +140,35 @@ const Home = () => {
 					<div className="h-full w-full">
 						{currentScreen === 'Dashboard' && <Dashboard />}
 						{/* {currentState === 'Call' && <CallRoom />} */}
-						{currentScreen === 'Conference' && <ConferenceRoom />}
+						{currentScreen === 'Conference' && <Conference />}
 						{currentScreen === 'Waiting Lobby' && (
 							<WaitingLobby roomId={roomId!} />
 						)}
 						{currentScreen === 'OutSide Lobby' && <OutsideLobby />}
 					</div>
 				</div>
+
+				<Drawer>
+					<DrawerTrigger asChild>
+						<Button className="absolute bottom-2 left-1/2 md:hidden">
+							<Plus />
+						</Button>
+					</DrawerTrigger>
+					<DrawerContent>
+						<DrawerHeader>
+							<DrawerTitle>Are you absolutely sure?</DrawerTitle>
+							<DrawerDescription>
+								This action cannot be undone.
+							</DrawerDescription>
+						</DrawerHeader>
+						<DrawerFooter>
+							<Button>Submit</Button>
+							<DrawerClose>
+								<Button variant="outline">Cancel</Button>
+							</DrawerClose>
+						</DrawerFooter>
+					</DrawerContent>
+				</Drawer>
 			</div>
 			{currentScreen === 'Meeting Room' && <MeetingRoom roomId={roomId!} />}
 		</>

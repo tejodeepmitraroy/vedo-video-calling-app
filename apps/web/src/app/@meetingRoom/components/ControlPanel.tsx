@@ -17,13 +17,12 @@ import {
 import { useSocket } from '@/context/SocketContext';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useGlobalStore from '@/store/useGlobalStore';
-// import useRoomStore from '@/store/useRoomStore';
+
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
 import { Mic, Phone, Video, MicOff, VideoOff } from 'lucide-react';
-// import { useRouter } from 'next/navigation';
 import React, { useCallback } from 'react';
 
 export interface Device {
@@ -38,12 +37,10 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
-	// const setRoomState = useRoomStore((state) => state.setRoomState);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
 	const { disconnectPeer } = useWebRTC();
-	// const router = useRouter();
 
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
@@ -75,19 +72,6 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const handleEndRoom = useCallback(() => {
 		socketEmit('event:endRoom', { roomId });
 	}, [roomId, socketEmit]);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	// const convertTo24Hour = (isoString: Date) => {
-	// 	const date = new Date(isoString); // Create a Date object from the ISO string
-	// 	const hours = date.getHours().toString().padStart(2, '0'); // Extract hours and pad with '0' if necessary
-	// 	const minutes = date.getMinutes().toString().padStart(2, '0'); // Extract minutes and pad with '0' if necessary
-
-	// 	if (isoString) {
-	// 		return `${hours}:${minutes}`;
-	// 	} else {
-	// 		return '';
-	// 	}
-	// };
 
 	return (
 		// <div className="bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 rounded-b-lg border border-t border-gray-200 bg-white px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">

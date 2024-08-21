@@ -8,11 +8,8 @@ import toast from 'react-hot-toast';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
-
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
-import useRoomStore from '@/store/useRoomStore';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 const NavBar = () => {
@@ -20,14 +17,11 @@ const NavBar = () => {
 	const { user } = useUser();
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
-	const roomState = useRoomStore((state) => state.roomState);
-
 	const { socket, socketOn, socketOff, socketEmit } = useSocket();
 	const setMediaDevices = useDeviceStore((state) => state.setMediaDevices);
 
 	const { getAllMediaDevices } = useWebRTC();
-	const searchParams = useSearchParams();
-	const roomId = searchParams.get('roomId');
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get All Media Devices When Component Render
@@ -154,17 +148,6 @@ const NavBar = () => {
 						</Button>
 					</div>
 				</div>
-				// {
-				// 	// onClose: () => roomEnterPermissionDenied(socketId),
-				// 	position: 'top-center',
-				// 	autoClose: false,
-				// 	hideProgressBar: false,
-				// 	closeOnClick: true,
-				// 	pauseOnHover: true,
-				// 	draggable: true,
-				// 	progress: undefined,
-				// 	theme: 'light',
-				// }
 			);
 		},
 		[callAccepted, callRejected]
@@ -243,10 +226,22 @@ const NavBar = () => {
 		};
 	}, [handleGetOnlineUser, socketOff, socketOn]);
 
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	const handleUserIsNotOnline = useCallback(() => {
+		toast.error(`User is Offline`);
+	}, []);
+
+	useEffect(() => {
+		socketOn('notification:userIsNotOnline', handleUserIsNotOnline);
+		return () => {
+			socketOff('notification:userIsNotOnline', handleUserIsNotOnline);
+		};
+	}, [handleUserIsNotOnline, socketOff, socketOn]);
+
 	return (
 		<header className="relative flex h-[45px] items-center justify-between gap-1 bg-neutral-100 px-4 md:h-[50px]">
 			<h1 className="text-lg font-semibold text-primary md:text-2xl">
-				{roomState === 'meetingRoom' ? roomId! : currentState}
+				{currentState}
 			</h1>
 			<div className="flex items-center gap-2 pr-10">
 				<Link href={'https://x.com/tezomon_dev'}>
