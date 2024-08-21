@@ -4,8 +4,8 @@
     "display": "standalone",
     "scope": "/",
     "start_url": "/",
-    "name": "VEDO - Video Calling App",
-    "short_name": "VEDO",
+    "name": "V.E.D.O",
+    "short_name": "V.E.D.O",
     "icons": [
         {
             "src": "/icon-192x192.png",

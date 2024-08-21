@@ -107,7 +107,7 @@ export const columns: ColumnDef<roomsColumns>[] = [
 		header: 'Start Date',
 		cell: ({ row }) => {
 			const startTime: Date = row.getValue('startTime');
-			console.log('Column Date=========>', startTime);
+
 			return (
 				<div className="flex flex-col gap-2">
 					<span>{convertISOTo12HourFormat(startTime!).date}</span>

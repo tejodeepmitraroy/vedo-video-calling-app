@@ -204,14 +204,13 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		if (peer.current) {
 			peer.current.close();
 			localStream.current?.getTracks().forEach((track) => track.stop());
-			localStream.current = null;
-			remoteStream.current = null;
 		}
 	};
 
 	const resetRemotePeer = () => {
 		if (peer.current) {
 			peer.current.close();
+			localStream.current?.getTracks().forEach((track) => track.stop());
 			// remoteStream.current = null;
 
 			const configuration = {

@@ -270,10 +270,10 @@ export function roomConnections(
 				rooms.delete(roomId);
 			}
 
-			socket.leave(roomId);
-			socket.to(roomId).emit('notification:userLeftTheRoom', {
+			io.to(roomId).emit('notification:userLeftTheRoom', {
 				userId: socketIdToUserMap.get(socket.id)?.userId,
 			});
+			socket.leave(roomId);
 			console.log('Leaving after Room Details', roomDetails);
 		}
 	);

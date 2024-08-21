@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { WebRTCProvider } from '@/context/WebRTCContext';
-import { neobrutalism } from '@clerk/themes';
+
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -24,9 +24,9 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<ClerkProvider
-				appearance={{
-					baseTheme: neobrutalism,
-				}}
+			// appearance={{
+			// 	baseTheme: neobrutalism,
+			// }}
 			>
 				<SocketProvider>
 					<WebRTCProvider>
@@ -37,8 +37,6 @@ export default function RootLayout({
 									reverseOrder={false}
 									gutter={8}
 									toastOptions={{
-										// Define default options
-										className: '',
 										duration: 5000,
 										style: {
 											background: '#363636',
@@ -46,7 +44,6 @@ export default function RootLayout({
 										},
 									}}
 								/>
-
 								{children}
 							</TooltipProvider>
 						</body>

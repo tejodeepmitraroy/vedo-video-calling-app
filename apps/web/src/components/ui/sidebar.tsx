@@ -229,25 +229,31 @@ export const SidebarButton = ({
 	);
 	const { open, animate } = useSidebar();
 	return (
-		<button
-			className={cn(
-				`${currentState === screen.screen ? 'bg-primary text-white' : 'text-neutral-700'} group/sidebar flex items-center justify-start gap-2 rounded-lg px-2 py-2`,
-				className
-			)}
-			{...props}
-			onClick={() => setCurrentState(screen.screen)}
-		>
-			{screen.icon}
-
-			<motion.span
-				animate={{
-					display: animate ? (open ? 'inline-block' : 'none') : 'inline-block',
-					opacity: animate ? (open ? 1 : 0) : 1,
-				}}
-				className="!m-0 inline-block whitespace-pre !p-0 text-base transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200"
+		<Link href={'/'} className="w-full">
+			<button
+				className={cn(
+					`${currentState === screen.screen ? 'bg-primary text-white' : 'text-neutral-700'} group/sidebar flex w-full items-center justify-start gap-2 rounded-lg px-2 py-2`,
+					className
+				)}
+				{...props}
+				onClick={() => setCurrentState(screen.screen)}
 			>
-				{screen.label}
-			</motion.span>
-		</button>
+				{screen.icon}
+
+				<motion.span
+					animate={{
+						display: animate
+							? open
+								? 'inline-block'
+								: 'none'
+							: 'inline-block',
+						opacity: animate ? (open ? 1 : 0) : 1,
+					}}
+					className="!m-0 inline-block whitespace-pre !p-0 text-base transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200"
+				>
+					{screen.label}
+				</motion.span>
+			</button>
+		</Link>
 	);
 };

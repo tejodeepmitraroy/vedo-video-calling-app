@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Laptop, HomeIcon, Plus } from 'lucide-react';
+import { Laptop, HomeIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UserProfile from '@/components/UserProfile';
 import { useUser } from '@clerk/nextjs';
@@ -22,18 +22,10 @@ import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useWebRTC } from '@/context/WebRTCContext';
-import {
-	Drawer,
-	DrawerClose,
-	DrawerContent,
-	DrawerDescription,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerTrigger,
-} from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
+
 import Conference from './@conference/page';
+import BottomNavigation from '@/components/BottomNavigation';
+// import { ScrollArea } from '@/components/ui/scroll-area';
 
 const screens = [
 	{
@@ -62,7 +54,6 @@ const Home = () => {
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const { getUserMedia, disconnectPeer } = useWebRTC();
-	console.log('Room==========>', roomId);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -85,6 +76,7 @@ const Home = () => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
 			getMediaStream();
 		} else {
+			console.log('currentScreen===============>', currentScreen);
 			// stopMediaStream();
 		}
 	}, [currentScreen, getMediaStream, stopMediaStream]);
@@ -107,7 +99,7 @@ const Home = () => {
 		<>
 			<div
 				className={
-					` ${currentScreen === 'Meeting Room' ? 'hidden bg-blue-700' : ''} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
+					` ${currentScreen === 'Meeting Room' ? 'hidden' : ''} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
 				}
 			>
 				<Sidebar open={open} setOpen={setOpen}>
@@ -135,40 +127,21 @@ const Home = () => {
 					</SidebarBody>
 				</Sidebar>
 
-				<div className="h-full w-full bg-background pb-[55px]">
+				<div className="h-full w-full bg-background md:pb-[50px]">
 					<NavBar />
-					<div className="h-full w-full">
-						{currentScreen === 'Dashboard' && <Dashboard />}
-						{/* {currentState === 'Call' && <CallRoom />} */}
-						{currentScreen === 'Conference' && <Conference />}
-						{currentScreen === 'Waiting Lobby' && (
-							<WaitingLobby roomId={roomId!} />
-						)}
-						{currentScreen === 'OutSide Lobby' && <OutsideLobby />}
+					<div className="flex h-full w-full flex-col justify-between">
+						<div className="flex h-full w-full">
+							{currentScreen === 'Dashboard' && <Dashboard />}
+							{/* {currentState === 'Call' && <CallRoom />} */}
+							{currentScreen === 'Conference' && <Conference />}
+							{currentScreen === 'Waiting Lobby' && (
+								<WaitingLobby roomId={roomId!} />
+							)}
+							{currentScreen === 'OutSide Lobby' && <OutsideLobby />}
+						</div>
+						<BottomNavigation />
 					</div>
 				</div>
-
-				<Drawer>
-					<DrawerTrigger asChild>
-						<Button className="absolute bottom-2 left-1/2 md:hidden">
-							<Plus />
-						</Button>
-					</DrawerTrigger>
-					<DrawerContent>
-						<DrawerHeader>
-							<DrawerTitle>Are you absolutely sure?</DrawerTitle>
-							<DrawerDescription>
-								This action cannot be undone.
-							</DrawerDescription>
-						</DrawerHeader>
-						<DrawerFooter>
-							<Button>Submit</Button>
-							<DrawerClose>
-								<Button variant="outline">Cancel</Button>
-							</DrawerClose>
-						</DrawerFooter>
-					</DrawerContent>
-				</Drawer>
 			</div>
 			{currentScreen === 'Meeting Room' && <MeetingRoom roomId={roomId!} />}
 		</>

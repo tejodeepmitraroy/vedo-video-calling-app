@@ -11,6 +11,7 @@ import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
 import Link from 'next/link';
+import useStreamStore from '@/store/useStreamStore';
 
 const NavBar = () => {
 	const { userId } = useAuth();
@@ -19,8 +20,60 @@ const NavBar = () => {
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
 	const { socket, socketOn, socketOff, socketEmit } = useSocket();
 	const setMediaDevices = useDeviceStore((state) => state.setMediaDevices);
+	const setCurrentScreen = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
+	const setLocalStream = useStreamStore((state) => state.setLocalStream);
+	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 
-	const { getAllMediaDevices } = useWebRTC();
+	const { getAllMediaDevices, disconnectPeer, resetRemotePeer } = useWebRTC();
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const handleUserLeftTheRoom = useCallback(
+		({ userId: id }: { userId: string }) => {
+			if (id === userId) {
+				toast.success(`You Left the Room`);
+				setLocalStream(null);
+				disconnectPeer();
+				setCurrentScreen('OutSide Lobby');
+			} else {
+				setRemoteSocketId(null);
+				toast(`${id} Left the Room`);
+				resetRemotePeer();
+			}
+		},
+		[
+			disconnectPeer,
+			resetRemotePeer,
+			setCurrentScreen,
+			setLocalStream,
+			setRemoteSocketId,
+			userId,
+		]
+	);
+
+	const handleRemoveEveryoneFromRoom = useCallback(async () => {
+		toast.success(`Host End the Room`);
+		disconnectPeer();
+		setCurrentScreen('OutSide Lobby');
+	}, [disconnectPeer, setCurrentScreen]);
+
+	//All Notifications Event state here
+	useEffect(() => {
+		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
+		socketOn('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
+
+		return () => {
+			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
+			socketOff('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
+		};
+	}, [
+		handleRemoveEveryoneFromRoom,
+		handleUserLeftTheRoom,
+		socketOff,
+		socketOn,
+	]);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,6 +97,7 @@ const NavBar = () => {
 		if (socket) {
 			if (socket.connected) {
 				toast.success('Connected');
+				toast.dismiss();
 
 				setOnLineStatus(true);
 			} else {
@@ -208,6 +262,7 @@ const NavBar = () => {
 
 	useEffect(() => {
 		if (user) {
+			toast.loading('Connecting with server');
 			socketEmit('connectWithUser', {
 				userId: user.id,
 				fullName: user.fullName,
@@ -239,8 +294,8 @@ const NavBar = () => {
 	}, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
-		<header className="relative flex h-[45px] items-center justify-between gap-1 bg-neutral-100 px-4 md:h-[50px]">
-			<h1 className="text-lg font-semibold text-primary md:text-2xl">
+		<header className="relative hidden h-[50px] items-center justify-between gap-1 bg-neutral-100 px-4 md:flex md:h-[50px]">
+			<h1 className="text-xl font-semibold text-primary md:text-2xl">
 				{currentState}
 			</h1>
 			<div className="flex items-center gap-2 pr-10">

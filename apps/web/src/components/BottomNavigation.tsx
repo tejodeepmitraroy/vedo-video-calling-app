@@ -1,10 +1,4 @@
-import {
-	Home,
-	Laptop,
-	Plus,
-
-	// Phone
-} from 'lucide-react';
+import { Home, Laptop, Plus } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import UserProfile from './UserProfile';
@@ -13,7 +7,7 @@ import useGlobalStore from '@/store/useGlobalStore';
 import { Input } from './ui/input';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import {
 	Dialog,
@@ -25,7 +19,7 @@ import {
 } from './ui/dialog';
 
 import { Separator } from './ui/separator';
-import useRoomStore from '@/store/useRoomStore';
+
 import Link from 'next/link';
 
 const BottomNavigation = () => {
@@ -34,7 +28,6 @@ const BottomNavigation = () => {
 		(state) => state.setCurrentScreen
 	);
 	const currentState = useScreenStateStore((state) => state.currentScreen);
-	const roomState = useRoomStore((state) => state.roomState);
 
 	const { getToken } = useAuth();
 	const router = useRouter();
@@ -43,12 +36,41 @@ const BottomNavigation = () => {
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
-		console.log('Token---->', token);
 
-		try {
+		const { data } = await toast.promise(
+			axios.post(
+				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			),
+
+			{
+				loading: 'Wait to create a new Room',
+				success: 'New Room Created👌',
+				error: 'Error happend, New Room Creation rejected 🤯',
+			}
+		);
+
+		// console.log(data.data);
+
+		const response: RoomDetails = data.data;
+		const roomId = response.id;
+
+		router.push(`?roomId=${roomId}`);
+	};
+
+	const handleEnterRoom = async () => {
+		const token = await getToken();
+		console.log('Enter Room', roomId);
+		if (roomId) {
 			const { data } = await toast.promise(
 				axios.post(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
 					{},
 					{
 						headers: {
@@ -59,58 +81,21 @@ const BottomNavigation = () => {
 				),
 
 				{
-					pending: 'Wait to create a new Room',
-					success: 'New Room Created👌',
-					error: 'Error happend, New Room Creation rejected 🤯',
+					loading: 'Finding Room',
+					success: 'Connecting👌',
+					error: `Error happend, We don't find the room 🤯`,
 				}
 			);
 
-			console.log(data.data);
-
-			const response: RoomDetails = data.data;
-			const roomId = response.id;
+			console.log(data);
 
 			router.push(`?roomId=${roomId}`);
-		} catch (error) {
-			console.log(error);
 		}
 	};
 
-	const handleEnterRoom = async () => {
-		const token = await getToken();
-		console.log('Enter Room', roomId);
-		if (roomId) {
-			try {
-				const { data } = await toast.promise(
-					axios.post(
-						`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
-						{},
-						{
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: `Bearer ${token}`,
-							},
-						}
-					),
-
-					{
-						pending: 'Finding Room',
-						success: 'Connecting👌',
-						error: `Error happend, We don't find the room 🤯`,
-					}
-				);
-
-				console.log(data);
-
-				router.push(`?roomId=${roomId}`);
-			} catch (error) {
-				console.log(error);
-			}
-		}
-	};
 	return (
 		<div
-			className={`${roomState === 'meetingRoom' ? 'hidden' : 'fixed'} fixed bottom-0 left-0 z-50 h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden`}
+			className={`h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden`}
 		>
 			<div className="mx-auto grid h-full max-w-lg grid-cols-4 font-medium">
 				<Link

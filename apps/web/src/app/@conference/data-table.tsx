@@ -35,17 +35,23 @@ export function DataTable<TData, TValue>({
 	data,
 }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = useState({});
+	const [pagination, setPagination] = useState({
+		pageIndex: 0, //initial page index
+		pageSize: 6, //default page size
+	});
 	const table = useReactTable({
 		data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		onRowSelectionChange: setRowSelection,
 		getPaginationRowModel: getPaginationRowModel(),
+		onPaginationChange: setPagination, //update the pagination state when internal APIs mutate the pagination state
 		state: {
 			// sorting,
 			// columnFilters,
 			// columnVisibility,
 			rowSelection,
+			pagination,
 		},
 	});
 
@@ -123,7 +129,7 @@ export function DataTable<TData, TValue>({
 	return (
 		<div className="">
 			<div className="flex w-full items-center pb-4">
-				<div className="flex w-full gap-4">
+				<div className="hidden w-full gap-4 md:flex">
 					<div className="flex gap-2 text-sm text-muted-foreground">
 						<Input
 							onChange={(event) => setRoomId(event.target.value)}

@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
-import { useAuth } from '@clerk/nextjs';
 import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
@@ -10,14 +9,11 @@ import useStreamStore from '@/store/useStreamStore';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 import NewControlPanel from './components/NewControlPanel';
-import useScreenStateStore from '@/store/useScreenStateStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	const setCurrentScreen = useScreenStateStore(
-		(state) => state.setCurrentScreen
-	);
 	const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
+
 	const peerOffer = useStreamStore((state) => state.peerOffer);
 	const {
 		peer,
@@ -26,8 +22,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		getAnswer,
 		setRemoteDescription,
 		connectionStatus,
-		disconnectPeer,
-		resetRemotePeer,
 	} = useWebRTC();
 
 	const remoteStream = getRemoteStream();
@@ -36,25 +30,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	console.log('Remote socket ID------>>>>>', remoteSocketId);
 
-	const { userId } = useAuth();
-
 	const { socketOn, socketEmit, socketOff } = useSocket();
 
 	console.log('Meeting Component mounted++++++++++');
-
-	const handleUserLeftTheRoom = useCallback(
-		({ userId: id }: { userId: string }) => {
-			if (id === userId) {
-				toast.success(`You Left the Room`);
-			} else {
-				setRemoteSocketId(null);
-				toast(`${id} Left the Room`);
-
-				resetRemotePeer();
-			}
-		},
-		[resetRemotePeer, setRemoteSocketId, userId]
-	);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -155,12 +133,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[setRemoteDescription]
 	);
 
-	const handleRemoveEveryoneFromRoom = useCallback(async () => {
-		toast.success(`Host End the Room`);
-		disconnectPeer();
-		setCurrentScreen('OutSide Lobby');
-	}, [disconnectPeer, setCurrentScreen]);
-
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleSendIceCandidate = useCallback(
@@ -218,29 +190,12 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	useEffect(() => {
 		socketOn('event:userWantToEnter', userWantToEnter);
 		socketOn('event:sendAnswerHost', handleSendAnswerHost);
-		socketOn('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
 
 		return () => {
 			socketOff('event:userWantToEnter', userWantToEnter);
 			socketOff('event:sendAnswerHost', handleSendAnswerHost);
-			socketOff('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
 		};
-	}, [
-		handleRemoveEveryoneFromRoom,
-		handleSendAnswerHost,
-		socketOff,
-		socketOn,
-		userWantToEnter,
-	]);
-
-	//All Notifications Event state here
-	useEffect(() => {
-		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
-
-		return () => {
-			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
-		};
-	}, [handleUserLeftTheRoom, socketOff, socketOn]);
+	}, [handleSendAnswerHost, socketOff, socketOn, userWantToEnter]);
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
