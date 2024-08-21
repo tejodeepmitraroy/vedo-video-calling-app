@@ -10,6 +10,7 @@ class SocketService {
 			fullName: string;
 			imageUrl: string;
 			emailAddress: string;
+			host: boolean;
 		}
 	>;
 	private hostSocketIdToRoomId: Map<string, string>;
@@ -62,6 +63,7 @@ class SocketService {
 						fullName,
 						imageUrl,
 						emailAddress,
+						host: false,
 					});
 
 					socket.broadcast.emit('getOnlineUsers', {

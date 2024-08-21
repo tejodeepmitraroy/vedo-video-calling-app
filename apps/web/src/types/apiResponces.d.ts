@@ -9,12 +9,12 @@ interface User {
 }
 interface RoomDetails {
 	id: string;
-	type: $Enums.RoomType;
+	type: string;
 	roomId: string;
 	url: string;
 	title: string;
 	description: string | null;
-	startTime: Date | null;
+	startTime: Date;
 	endTime: Date | null;
 	createdById: string;
 	createdBy: User;

@@ -24,7 +24,7 @@ import { Laptop, Phone } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
@@ -40,12 +40,41 @@ export default function Dashboard() {
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
-		// console.log('Token---->', token);
 
-		try {
+		const { data } = await toast.promise(
+			axios.post(
+				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+				}
+			),
+
+			{
+				loading: 'Wait to create a new Room',
+				success: 'New Room Created👌',
+				error: 'Error happend, New Room Creation rejected 🤯',
+			}
+		);
+
+		// console.log(data.data);
+
+		const response: RoomDetails = data.data;
+		const roomId = response.id;
+
+		router.push(`?roomId=${roomId}`);
+	};
+
+	const handleEnterRoom = async () => {
+		const token = await getToken();
+		console.log('Enter Room', roomId);
+		if (roomId) {
 			const { data } = await toast.promise(
 				axios.post(
-					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
+					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
 					{},
 					{
 						headers: {
@@ -56,72 +85,20 @@ export default function Dashboard() {
 				),
 
 				{
-					pending: 'Wait to create a new Room',
-					success: 'New Room Created👌',
-					error: 'Error happend, New Room Creation rejected 🤯',
+					loading: 'Finding Room',
+					success: 'Connecting👌',
+					error: `Error happend, We don't find the room 🤯`,
 				}
 			);
 
-			console.log(data.data);
-
-			const response: RoomDetails = data.data;
-			const roomId = response.id;
-
-			// const userId = data.data.createdById;
+			console.log(data);
 
 			router.push(`?roomId=${roomId}`);
-		} catch (error) {
-			console.log(error);
-		}
-	};
-
-	const handleEnterRoom = async () => {
-		const token = await getToken();
-		console.log('Enter Room', roomId);
-		if (roomId) {
-			try {
-				const { data } = await toast.promise(
-					axios.post(
-						`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
-						{},
-						{
-							headers: {
-								'Content-Type': 'application/json',
-								Authorization: `Bearer ${token}`,
-							},
-						}
-					),
-
-					{
-						pending: 'Finding Room',
-						success: 'Connecting👌',
-						error: `Error happend, We don't find the room 🤯`,
-					}
-				);
-
-				// const { data } = await axios<ApiResponse>(
-				// 	`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
-				// 	{
-				// 		headers: {
-				// 			'Content-Type': 'application/json',
-				// 			Authorization: `Bearer ${token}`,
-				// 		},
-				// 	}
-				// );
-
-				console.log(data);
-
-				router.push(`?roomId=${roomId}`);
-			} catch (error) {
-				console.log(error);
-			}
 		}
 	};
 
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
-		// console.log('Token---->', token);
-
 		try {
 			const { data } = await axios<ApiResponse>(
 				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
@@ -161,9 +138,9 @@ export default function Dashboard() {
 	};
 
 	return (
-		<div className="flex rounded-lg bg-background shadow-sm md:flex-1 md:p-4">
-			<div className="grid w-full grid-flow-col grid-cols-1 gap-8 md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-3">
-				<Card className="hidden h-fit flex-col bg-slate-200 md:flex">
+		<ScrollArea className="flex h-full w-full px-4 md:flex-1">
+			<div className="mx-auto my-4 grid h-full w-full max-w-7xl grid-flow-col grid-cols-1 gap-5 overflow-y-auto md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-2">
+				<Card className="hidden flex-col bg-slate-200 md:flex">
 					<CardHeader>
 						<CardTitle>Quick Actions</CardTitle>
 						<CardDescription>Plan a meeting & start a call</CardDescription>
@@ -326,7 +303,7 @@ export default function Dashboard() {
 						<CardDescription>meeting & calls logs</CardDescription>
 					</CardHeader>
 					<CardContent className="w-full p-0 md:p-6 md:pt-0">
-						<ScrollArea className="h-[65vh] w-full rounded-md border bg-white p-4 md:h-[70vh]">
+						<ScrollArea className="h-[65vh] w-full rounded-md bg-white p-4 md:h-[70vh]">
 							<div className="flex flex-col gap-3">
 								{allScheduledRoomsDetails ? (
 									allScheduledRoomsDetails.length === 0 ? (
@@ -491,6 +468,6 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 			</div>
-		</div>
+		</ScrollArea>
 	);
 }

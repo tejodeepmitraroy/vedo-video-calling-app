@@ -1,3 +1,5 @@
+import nextPwa from 'next-pwa';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
@@ -10,12 +12,13 @@ const nextConfig = {
 	},
 	reactStrictMode: false,
 	typescript: {
-		// !! WARN !!
-		// Dangerously allow production builds to successfully complete even if
-		// your project has type errors.
-		// !! WARN !!
 		ignoreBuildErrors: true,
 	},
+	...nextPwa({
+		dest: 'public',
+		register: true,
+		skipWaiting: true,
+	}),
 };
 
 export default nextConfig;

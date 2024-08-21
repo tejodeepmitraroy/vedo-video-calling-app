@@ -12,26 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import UserProfile from './UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
-// import {
-// 	Dialog,
-// 	DialogContent,
-// 	DialogDescription,
-// 	DialogFooter,
-// 	DialogHeader,
-// 	DialogTitle,
-// 	DialogTrigger,
-// } from './ui/dialog';
 
-// import {
-// 	Select,
-// 	SelectContent,
-// 	SelectItem,
-// 	SelectTrigger,
-// 	SelectValue,
-// } from './ui/select';
-// import useDeviceStore from '@/store/useDeviceStore';
-
-// import { Label } from './ui/label';
 import Link from 'next/link';
 
 const Sidebar = () => {

@@ -3,15 +3,13 @@ import { useSocket } from '@/context/SocketContext';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import React, { useCallback, useEffect } from 'react';
 import { Button } from './ui/button';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
-
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
-import useRoomStore from '@/store/useRoomStore';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 const NavBar = () => {
@@ -19,14 +17,11 @@ const NavBar = () => {
 	const { user } = useUser();
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
-	const roomState = useRoomStore((state) => state.roomState);
-
 	const { socket, socketOn, socketOff, socketEmit } = useSocket();
 	const setMediaDevices = useDeviceStore((state) => state.setMediaDevices);
 
 	const { getAllMediaDevices } = useWebRTC();
-	const searchParams = useSearchParams();
-	const roomId = searchParams.get('roomId');
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get All Media Devices When Component Render
@@ -49,13 +44,14 @@ const NavBar = () => {
 		if (socket) {
 			if (socket.connected) {
 				toast.success('Connected');
+
 				setOnLineStatus(true);
 			} else {
 				toast.error('Not Connected');
 				setOnLineStatus(false);
 			}
 		} else {
-			toast.info('Connecting with server');
+			toast.loading('Connecting with server');
 		}
 	}, [setOnLineStatus, socket]);
 
@@ -151,18 +147,7 @@ const NavBar = () => {
 							<PhoneOff />
 						</Button>
 					</div>
-				</div>,
-				{
-					// onClose: () => roomEnterPermissionDenied(socketId),
-					position: 'top-center',
-					autoClose: false,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					progress: undefined,
-					theme: 'light',
-				}
+				</div>
 			);
 		},
 		[callAccepted, callRejected]
@@ -241,22 +226,34 @@ const NavBar = () => {
 		};
 	}, [handleGetOnlineUser, socketOff, socketOn]);
 
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	const handleUserIsNotOnline = useCallback(() => {
+		toast.error(`User is Offline`);
+	}, []);
+
+	useEffect(() => {
+		socketOn('notification:userIsNotOnline', handleUserIsNotOnline);
+		return () => {
+			socketOff('notification:userIsNotOnline', handleUserIsNotOnline);
+		};
+	}, [handleUserIsNotOnline, socketOff, socketOn]);
+
 	return (
-		<header className="sticky top-0 z-10 flex h-[55px] items-center justify-between gap-1 px-4">
-			<h1 className="text-lg font-semibold text-white md:text-2xl">
-				{roomState === 'meetingRoom' ? roomId! : currentState}
+		<header className="relative flex h-[45px] items-center justify-between gap-1 bg-neutral-100 px-4 md:h-[50px]">
+			<h1 className="text-lg font-semibold text-primary md:text-2xl">
+				{currentState}
 			</h1>
 			<div className="flex items-center gap-2 pr-10">
 				<Link href={'https://x.com/tezomon_dev'}>
-					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
-						<Twitter size={20} className="text-black" fill={'black'} />
+					<div className="rounded-full border border-black bg-slate-100 p-1.5">
+						<Twitter size={15} className="text-black" fill={'black'} />
 					</div>
 				</Link>
 				<Link
 					href={'https://github.com/tejodeepmitraroy/vedo-video-calling-app'}
 				>
-					<div className="fa rounded-full border-2 border-black bg-slate-100 p-1.5">
-						<Github size={20} className=" " />
+					<div className="rounded-full border border-black bg-slate-100 p-1.5">
+						<Github size={15} className=" " />
 					</div>
 				</Link>
 			</div>
