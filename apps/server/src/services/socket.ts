@@ -1,11 +1,13 @@
 import { Server } from 'socket.io';
-import { roomConnections } from './roomConnections';
+// import { roomConnections } from './roomConnections';
+import { roomConnections2 } from './roomConnections2';
 class SocketService {
 	_io: Server;
 	private userIdToSocketIdMap: Map<string, string>;
 	private socketIdToUserMap: Map<
 		string,
 		{
+			socketId: string;
 			userId: string;
 			fullName: string;
 			imageUrl: string;
@@ -19,7 +21,18 @@ class SocketService {
 		{
 			hostId: string;
 			hostSocketId: string;
-			participants: Set<string>;
+			// participants: Set<string>;
+			participants: Map<
+				string,
+				{
+					socketId: string;
+					userId: string;
+					fullName: string;
+					imageUrl: string;
+					emailAddress: string;
+					host: boolean;
+				}
+			>;
 		}
 	>;
 
@@ -59,6 +72,7 @@ class SocketService {
 				}) => {
 					this.userIdToSocketIdMap.set(userId, socket.id);
 					this.socketIdToUserMap.set(socket.id, {
+						socketId: socket.id,
 						userId,
 						fullName,
 						imageUrl,
@@ -81,6 +95,7 @@ class SocketService {
 			const getOnlineUsers = () => {
 				const AllUsers = this.socketIdToUserMap.values();
 				const valuesArray = Array.from(AllUsers);
+
 				// console.log('Online UserSs', valuesArray);
 				// console.log('Online UserSs2213', this.socketIdToUserMap);
 				return valuesArray;
@@ -88,7 +103,7 @@ class SocketService {
 
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			roomConnections(
+			roomConnections2(
 				socket,
 				io,
 				this.rooms,

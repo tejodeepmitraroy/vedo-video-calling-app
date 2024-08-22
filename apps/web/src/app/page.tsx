@@ -21,11 +21,10 @@ import MeetingRoom from './@meetingRoom/page';
 import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
-import { useWebRTC } from '@/context/WebRTCContext';
-
 import Conference from './@conference/page';
 import BottomNavigation from '@/components/BottomNavigation';
-// import { ScrollArea } from '@/components/ui/scroll-area';
+import { useWebRTC2 } from '@/context/WebRTCContext2';
+// import useParticipantsStore from '@/store/useParticipantsStore';
 
 const screens = [
 	{
@@ -53,7 +52,8 @@ const Home = () => {
 		(state) => state.selectedMicrophone
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
-	const { getUserMedia, disconnectPeer } = useWebRTC();
+	const { getUserMedia, disconnectPeer } = useWebRTC2();
+	// const onlineUsers = useParticipantsStore((state) => state.onlineUsers);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +63,6 @@ const Home = () => {
 			camera: selectedCamera,
 			microphone: selectedMicrophone,
 		});
-		console.log('Media Stream in Waiting room ------------->>>', mediaStream);
 		setLocalStream(mediaStream!);
 	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
 
@@ -76,7 +75,7 @@ const Home = () => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
 			getMediaStream();
 		} else {
-			console.log('currentScreen===============>', currentScreen);
+			// console.log('currentScreen===============>', currentScreen);
 			// stopMediaStream();
 		}
 	}, [currentScreen, getMediaStream, stopMediaStream]);
@@ -91,9 +90,13 @@ const Home = () => {
 		}
 	}, [roomId, setCurrentScreen]);
 
-	console.log('Master Component');
+	// console.log('Master Component');
 
 	const [open, setOpen] = useState(false);
+
+	// useEffect(() => {
+	// 	console.log('Online User=======>', onlineUsers);
+	// }, [onlineUsers]);
 
 	return (
 		<>

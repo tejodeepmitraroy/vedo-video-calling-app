@@ -9,9 +9,11 @@ import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
 import useDeviceStore from '@/store/useDeviceStore';
-import { useWebRTC } from '@/context/WebRTCContext';
+// import { useWebRTC } from '@/context/WebRTCContext';
 import Link from 'next/link';
 import useStreamStore from '@/store/useStreamStore';
+import { useWebRTC2 } from '@/context/WebRTCContext2';
+import useParticipantsStore from '@/store/useParticipantsStore';
 
 const NavBar = () => {
 	const { userId } = useAuth();
@@ -25,8 +27,9 @@ const NavBar = () => {
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
+	const setOnlineUsers = useParticipantsStore((state) => state.setOnlineUsers);
 
-	const { getAllMediaDevices, disconnectPeer, resetRemotePeer } = useWebRTC();
+	const { getAllMediaDevices, disconnectPeer, resetRemotePeer } = useWebRTC2();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -81,7 +84,7 @@ const NavBar = () => {
 	const getDevices = useCallback(async () => {
 		const device = await getAllMediaDevices();
 		setMediaDevices(device);
-		console.log('Devices=========>', device);
+		// console.log('Devices=========>', device);
 	}, [getAllMediaDevices, setMediaDevices]);
 
 	useEffect(() => {
@@ -116,7 +119,7 @@ const NavBar = () => {
 	/////////////////////////////////////////////////////
 	const handleInformAllNewUserAdded = useCallback(
 		({ userId: id, username }: { userId: string; username: string }) => {
-			console.log('Notiof', { userId, username });
+			// console.log('Notiof', { userId, username });
 
 			if (id === userId) {
 				toast.success(`suceesfully joined`);
@@ -246,17 +249,21 @@ const NavBar = () => {
 			users,
 		}: {
 			users: {
+				socketId: string;
 				userId: string;
 				fullName: string;
 				imageUrl: string;
 				emailAddress: string;
+				host: boolean;
 			}[];
 		}) => {
-			console.log('Get Online User Details========>', {
-				users,
-			});
+			setOnlineUsers(users);
+
+			// console.log('Get Online User Details========>', {
+			// 	users,
+			// });
 		},
-		[]
+		[setOnlineUsers]
 	);
 	///////////////////////////////////////////////////////////////////////////////////
 

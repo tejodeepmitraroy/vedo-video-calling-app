@@ -3,9 +3,10 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { SocketProvider } from '@/context/SocketContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { WebRTCProvider } from '@/context/WebRTCContext';
+// import { WebRTCProvider } from '@/context/WebRTCContext';
 
 import { Toaster } from 'react-hot-toast';
+import { WebRTCProvider2 } from '@/context/WebRTCContext2';
 
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
@@ -29,7 +30,7 @@ export default function RootLayout({
 			// }}
 			>
 				<SocketProvider>
-					<WebRTCProvider>
+					<WebRTCProvider2>
 						<body>
 							<TooltipProvider>
 								<Toaster
@@ -47,7 +48,7 @@ export default function RootLayout({
 								{children}
 							</TooltipProvider>
 						</body>
-					</WebRTCProvider>
+					</WebRTCProvider2>
 				</SocketProvider>
 			</ClerkProvider>
 		</html>

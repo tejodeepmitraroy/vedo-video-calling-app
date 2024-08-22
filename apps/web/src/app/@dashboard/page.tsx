@@ -36,7 +36,7 @@ export default function Dashboard() {
 
 	const { user } = useUser();
 
-	console.log('Dashboard Component++++++++++++');
+	// console.log('Dashboard Component++++++++++++');
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
@@ -60,8 +60,6 @@ export default function Dashboard() {
 			}
 		);
 
-		// console.log(data.data);
-
 		const response: RoomDetails = data.data;
 		const roomId = response.id;
 
@@ -72,7 +70,7 @@ export default function Dashboard() {
 		const token = await getToken();
 		console.log('Enter Room', roomId);
 		if (roomId) {
-			const { data } = await toast.promise(
+			await toast.promise(
 				axios.post(
 					`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
 					{},
@@ -91,8 +89,6 @@ export default function Dashboard() {
 				}
 			);
 
-			console.log(data);
-
 			router.push(`?roomId=${roomId}`);
 		}
 	};
@@ -109,8 +105,6 @@ export default function Dashboard() {
 					},
 				}
 			);
-
-			console.log(data);
 
 			setAllScheduledRoomsDetails(data.data);
 		} catch (error) {

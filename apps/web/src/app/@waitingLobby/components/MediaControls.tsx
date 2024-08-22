@@ -16,14 +16,13 @@ const MediaControls = () => {
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
 
-	console.log(
-		'camera--->',
-		isCameraOn,
-		'Mic--->',
-		isMicrophoneOn
-		// 'Stream-------->',
-		// isScreenSharing
-	);
+	// console.log(
+	// 	'camera--->',
+	// 	 isCameraOn,
+	// 	 'Mic--->',
+	// 	 isMicrophoneOn
+
+	// );
 
 	return (
 		<div className="absolute bottom-0 left-0 right-0 z-20 flex h-20 w-full items-center justify-center bg-transparent">
