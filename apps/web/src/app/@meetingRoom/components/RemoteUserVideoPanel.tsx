@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface RemoteUserVideoPanelProps {
@@ -12,6 +12,14 @@ const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
 	// const remoteStream = getRemoteStream();
 
 	console.log('REMOTE STREAM ====>', stream);
+
+	const videoRef = useRef<HTMLVideoElement>(null);
+
+	useEffect(() => {
+		if (videoRef.current) {
+			videoRef.current.srcObject = stream;
+		}
+	}, [stream]);
 
 	return (
 		<div className="relative z-20 flex h-full w-full">

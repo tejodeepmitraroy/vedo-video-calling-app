@@ -5,43 +5,36 @@ import { useSocket } from '@/context/SocketContext';
 import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
-import useStreamStore from '@/store/useStreamStore';
+// import useStreamStore from '@/store/useStreamStore';
 import NewControlPanel from './components/NewControlPanel';
 import { useWebRTC2 } from '@/context/WebRTCContext2';
-
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-import useParticipantsStore from '@/store/useParticipantsStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	// const remoteSocketId = useStreamStore((state) => state.remoteSocketId);
-	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
+	// const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const peerConnections = useMemo(
 		() => new Map<string, RTCPeerConnection>(),
 		[]
 	);
-	// const [peers, setPeers] = useState<MediaStream[]>([]);
-	const onlineUsers = useParticipantsStore((state) => state.onlineUsers);
 
 	const {
 		peerStreams,
-
 		createOffer,
 		createAnswer,
-
-		// connectionStatus,
+		connectionStatus,
 		createPeerConnection,
 	} = useWebRTC2();
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
 
-	// console.log('Meeting Component mounted++++++++++');
+	console.log('Meeting Component mounted++++++++++');
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 
 	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
 		async (socketId: string) => {
-			console.log(socketId);
+			// console.log(socketId);
 
 			// console.log(` Client's client------->`, offer);
 
@@ -50,7 +43,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			// console.log(` HOST's offer-------->`, peerOffer);
 
 			// const hostOffer = await createOffer();
-			setRemoteSocketId(socketId);
+			// setRemoteSocketId(socketId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				socketId,
 				// answer,
@@ -58,7 +51,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				// hostOffer: hostOffer,
 			});
 		},
-		[setRemoteSocketId, socketEmit]
+		[socketEmit]
 	);
 
 	const roomEnterPermissionDenied = useCallback(
@@ -68,7 +61,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[socketEmit]
 	);
 
-	// console.log('Connection Status========>', connectionStatus());
+	console.log('Connection Status========>', connectionStatus());
 
 	const userWantToEnter = useCallback(
 		async ({
@@ -123,10 +116,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
 
-	useEffect(() => {
-		console.log('onlineUsers===================================>', onlineUsers);
-	}, [onlineUsers]);
-
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleParticipantsInRoom = useCallback(
@@ -153,6 +142,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 		return () => {
 			socketOff('event:new-user-connected', handleParticipantsInRoom);
+			socketOff('event:user-disconnected', handleParticipantsInRoom);
 		};
 	}, [handleParticipantsInRoom, socketOff, socketOn]);
 
@@ -308,42 +298,20 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	console.log(
 		'PEERS IN MEETING ROOM=================>>>>>',
-		Object.keys(peerStreams)
+		Object.values(peerStreams)
 	);
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			<div className="flex h-full w-full justify-between gap-4 p-4 pb-20 sm:pb-4 md:pb-20">
 				<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
-					{/* {remoteStream ? (
-						<> */}
-					{Object.keys(peerStreams).map((peer, index) => (
-						<RemoteUserVideoPanel key={index} stream={peer} />
-						// <ReactPlayer
-						// 	key={index}
-						// 	url={peer!}
-						// 	playing
-						// 	style={{
-						// 		position: 'relative',
-						// 		top: '0',
-						// 		left: '0',
-						// 		width: '100%',
-						// 		height: '100%',
-						// 		objectFit: 'contain',
-						// 	}}
-						// 	muted={true}
-						// 	width={'100%'}
-						// 	height={'100%'}
-						// />
+					{Object.values(peerStreams).map((stream, index) => (
+						<RemoteUserVideoPanel key={index} stream={stream} />
 					))}
+
 					<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 						<UserVideoPanel />
 					</div>
-					{/* </>
-					) : (
-						<UserVideoPanel /> */}
-					{/* )} */}
-					{/* <ScreenSharePanel />  */}
 				</div>
 			</div>
 

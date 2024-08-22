@@ -24,7 +24,6 @@ import useStreamStore from '@/store/useStreamStore';
 import Conference from './@conference/page';
 import BottomNavigation from '@/components/BottomNavigation';
 import { useWebRTC2 } from '@/context/WebRTCContext2';
-// import useParticipantsStore from '@/store/useParticipantsStore';
 
 const screens = [
 	{
@@ -53,7 +52,6 @@ const Home = () => {
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const { getUserMedia, disconnectPeer } = useWebRTC2();
-	// const onlineUsers = useParticipantsStore((state) => state.onlineUsers);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +73,8 @@ const Home = () => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
 			getMediaStream();
 		} else {
-			// console.log('currentScreen===============>', currentScreen);
-			// stopMediaStream();
+			console.log('currentScreen===============>', currentScreen);
+			stopMediaStream();
 		}
 	}, [currentScreen, getMediaStream, stopMediaStream]);
 
@@ -85,18 +83,15 @@ const Home = () => {
 	useEffect(() => {
 		if (roomId) {
 			setCurrentScreen('Waiting Lobby');
+			// getMediaStream();
 		} else {
 			setCurrentScreen('Dashboard');
 		}
-	}, [roomId, setCurrentScreen]);
+	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
 
-	// console.log('Master Component');
+	console.log('Master Component');
 
 	const [open, setOpen] = useState(false);
-
-	// useEffect(() => {
-	// 	console.log('Online User=======>', onlineUsers);
-	// }, [onlineUsers]);
 
 	return (
 		<>
@@ -135,7 +130,6 @@ const Home = () => {
 					<div className="flex h-full w-full flex-col justify-between">
 						<div className="flex h-full w-full">
 							{currentScreen === 'Dashboard' && <Dashboard />}
-							{/* {currentState === 'Call' && <CallRoom />} */}
 							{currentScreen === 'Conference' && <Conference />}
 							{currentScreen === 'Waiting Lobby' && (
 								<WaitingLobby roomId={roomId!} />

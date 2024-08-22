@@ -88,7 +88,7 @@ export function roomConnections2(
 			console.log(rooms);
 
 			if (rooms.get(roomId)) {
-				if (rooms.get(roomId)?.participants.size === 2) {
+				if (rooms.get(roomId)?.participants.size === 4) {
 					io.to(socket.id).emit('notification:roomLimitFull');
 				} else {
 					// const hostSocketId = KeyByValue(hostSocketIdToRoomId, roomId);
@@ -159,7 +159,7 @@ export function roomConnections2(
 				const roomDetails = {
 					hostId: hostUserId!,
 					hostSocketId: socket.id,
-					// participants: new Set<string>(),
+
 					participants: new Map<
 						string,
 						{
@@ -195,7 +195,7 @@ export function roomConnections2(
 			socket.join(roomId);
 
 			const roomInUsers = rooms.get(roomId)!.participants;
-			// roomInUsers.add(socketIdToUserMap.get(socket.id)!.userId);
+
 			roomInUsers.set(socket.id, socketIdToUserMap.get(socket.id)!);
 
 			const meeting = await prisma.participantsInRoom.upsert({
@@ -239,8 +239,10 @@ export function roomConnections2(
 				participants: participantsArray,
 			});
 
-			io.to(roomId).emit('user-connected', {
-				userSocketId: socket.id,
+			participantsArray.map((item) => {
+				io.to(roomId).emit('user-connected', {
+					userSocketId: item.socketId,
+				});
 			});
 
 			console.log('User Joined in Room', {

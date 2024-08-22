@@ -36,7 +36,7 @@ export default function Dashboard() {
 
 	const { user } = useUser();
 
-	// console.log('Dashboard Component++++++++++++');
+	console.log('Dashboard Component++++++++++++');
 
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
@@ -177,8 +177,6 @@ export default function Dashboard() {
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
-
-						{/* <ScheduleCallForm /> */}
 					</CardContent>
 				</Card>
 

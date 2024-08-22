@@ -42,7 +42,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		(state) => state.setCurrentScreen
 	);
 
-	// console.log('Waiting Component mounted++++++++++');
+	console.log('Waiting Component mounted++++++++++');
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	const getRoomDetails = useCallback(async () => {
@@ -131,12 +131,12 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	//// All socket Event Function are Define Here
 	const joinRoom = useCallback(
 		async ({
-			answer: hostAnswer,
-			hostOffer,
+			// answer: hostAnswer,
+			// hostOffer,
 			hostUserSocketId,
 		}: {
-			answer: RTCSessionDescriptionInit;
-			hostOffer: RTCSessionDescriptionInit;
+			// answer: RTCSessionDescriptionInit;
+			// hostOffer: RTCSessionDescriptionInit;
 			hostUserSocketId: string;
 		}) => {
 			// console.log('Second Socket User Joined', hostUserSocketId);
@@ -154,8 +154,8 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 					hostUser: false,
 				});
 			}
-			console.log('Host Offer ------------>', hostOffer);
-			console.log('Host answer Added', hostAnswer);
+			// console.log('Host Offer ------------>', hostOffer);
+			// console.log('Host answer Added', hostAnswer);
 
 			// await webRTC.setRemoteDescription(hostAnswer);
 			// setRemoteDescription(hostAnswer);

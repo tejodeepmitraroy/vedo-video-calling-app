@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import Link, { LinkProps } from 'next/link';
 import React, { useState, createContext, useContext } from 'react';
 import { motion } from 'framer-motion';
-// import { IconMenu2, IconX } from '@tabler/icons-react';
 import useScreenStateStore from '@/store/useScreenStateStore';
 
 interface Links {
@@ -161,24 +160,6 @@ export const DesktopSidebar = ({
 // 		</>
 // 	);
 // };
-export const MobileSidebar = ({
-	// className,
-	children,
-	...props
-}: React.ComponentProps<'div'>) => {
-	return (
-		<>
-			<div
-				className={cn(
-					'absolute flex h-10 w-full flex-row items-center justify-between bg-neutral-100 px-4 py-4 dark:bg-neutral-800 md:hidden'
-				)}
-				{...props}
-			>
-				{children}
-			</div>
-		</>
-	);
-};
 
 export const SidebarLink = ({
 	link,

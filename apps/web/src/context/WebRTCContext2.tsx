@@ -10,8 +10,11 @@ import {
 } from 'react';
 import { useSocket } from './SocketContext';
 
+type PeerStreams = {
+	[userId: string]: MediaStream;
+};
 interface IWebRTCContext {
-	peerStreams: any;
+	peerStreams: PeerStreams;
 	getAllMediaDevices: () => Promise<
 		| {
 				cameras: MediaDeviceInfo[];
@@ -65,7 +68,7 @@ export const useWebRTC2 = () => {
 
 export const WebRTCProvider2 = ({ children }: { children: ReactNode }) => {
 	// const [peers, setPeers] = useState<MediaStream[]>([]);
-	const [peerStreams, setPeerStreams] = useState({});
+	const [peerStreams, setPeerStreams] = useState<PeerStreams>({});
 
 	const peer = useRef<RTCPeerConnection | null>(null);
 	const localStream = useRef<MediaStream | null>(null);
@@ -188,19 +191,19 @@ export const WebRTCProvider2 = ({ children }: { children: ReactNode }) => {
 				});
 
 				peerConnection.addEventListener('track', (event) => {
-					console.log('event.streams[0]==========>', event.streams[0]);
+					// console.log('event.streams[0]==========>', event.streams[0]);
 
 					// setPeers([...peers,peerConnections.  [userId]: event.streams[0]]);
 					setPeerStreams((prevStreams) => ({
 						...prevStreams,
 						[userSocketId]: event.streams[0],
 					}));
-					console.log('peers Stream==========>', peerStreams);
+					// console.log('peers Stream==========>', peerStreams);
 				});
 
 				return peerConnection;
 			},
-			[peerStreams, socketEmit]
+			[socketEmit]
 		);
 
 	const createOffer: IWebRTCContext['createOffer'] = async (peerConnection) => {
