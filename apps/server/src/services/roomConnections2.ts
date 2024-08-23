@@ -13,14 +13,7 @@ type socketIdToUserMap = Map<
 		host: boolean;
 	}
 >;
-// type rooms = Map<
-// 	string,
-// 	{
-// 		hostId: string;
-// 		hostSocketId: string;
-// 		participants: Set<string>;
-// 	}
-// >;
+
 type rooms = Map<
 	string,
 	{
@@ -39,15 +32,6 @@ type rooms = Map<
 		>;
 	}
 >;
-
-// const KeyByValue = (map: Map<string, string>, KeyValue: string) => {
-// 	let result: string | undefined;
-// 	console.log('KeyByValue', map);
-// 	map.forEach((value, key) => {
-// 		result = value === KeyValue ? key : result;
-// 	});
-// 	return result;
-// };
 
 export function roomConnections2(
 	socket: Socket,
@@ -145,13 +129,6 @@ export function roomConnections2(
 	socket.on(
 		'event:joinRoom',
 		async ({ roomId, hostUser }: { roomId: string; hostUser: boolean }) => {
-			// console.log('Room Id', roomId);
-			// console.log('userId', socketIdToUserMap.get(socket.id)?.userId);
-			// console.log('hostUser', hostUser);
-			// console.log('username', socketIdToUserMap.get(socket.id)?.fullName);
-
-			// console.log('Current socket ID--->', socket.id);
-
 			if (!rooms.has(roomId) && hostUser) {
 				hostSocketIdToRoomId.set(socket.id, roomId);
 				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
@@ -239,11 +216,15 @@ export function roomConnections2(
 				participants: participantsArray,
 			});
 
-			participantsArray.map((item) => {
-				io.to(roomId).emit('user-connected', {
-					userSocketId: item.socketId,
-				});
+			io.to(roomId).emit('user-connected', {
+				userSocketId: socket.id,
 			});
+
+			// participantsArray.map((item) => {
+			// 	io.to(roomId).emit('user-connected', {
+			// 		userSocketId: item.socketId,
+			// 	});
+			// });
 
 			console.log('User Joined in Room', {
 				userId: socketIdToUserMap.get(socket.id)?.userId,
@@ -317,10 +298,13 @@ export function roomConnections2(
 		({
 			iceCandidate,
 		}: {
-			remoteSocketId: string;
+			userSocketId: string;
 			iceCandidate: RTCPeerConnection;
 		}) => {
-			socket.broadcast.emit('event:sendIceCandidate', { iceCandidate });
+			socket.broadcast.emit('event:addIceCandidate', {
+				iceCandidate,
+				socketId: socket.id,
+			});
 		}
 	);
 

@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useSocket } from '@/context/SocketContext';
 import toast from 'react-hot-toast';
@@ -12,17 +12,20 @@ import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
-	const peerConnections = useMemo(
-		() => new Map<string, RTCPeerConnection>(),
-		[]
-	);
+	// const peerConnections = useMemo(
+	// 	() => new Map<string, RTCPeerConnection>(),
+	// 	[]
+	// );
 
 	const {
 		peerStreams,
+		peerConnections,
 		createOffer,
 		createAnswer,
 		connectionStatus,
-		createPeerConnection,
+		setRemoteDescription,
+		addIceCandidate,
+		// createPeerConnection,
 	} = useWebRTC2();
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
@@ -34,21 +37,8 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
 		async (socketId: string) => {
-			// console.log(socketId);
-
-			// console.log(` Client's client------->`, offer);
-
-			// console.log(` HOST created answer----->`, answer);
-
-			// console.log(` HOST's offer-------->`, peerOffer);
-
-			// const hostOffer = await createOffer();
-			// setRemoteSocketId(socketId);
 			socketEmit('event:roomEnterPermissionAccepted', {
 				socketId,
-				// answer,
-
-				// hostOffer: hostOffer,
 			});
 		},
 		[socketEmit]
@@ -150,45 +140,10 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	const handleCreatePeerConnection = useCallback(
 		async ({ userSocketId }: { userSocketId: string }) => {
-			const peerConnection = createPeerConnection(userSocketId);
-
-			peerConnections.set(userSocketId, peerConnection);
-
-			const offer = await createOffer(peerConnection);
-
-			// peerConnection.ontrack = (event) => {
-			// 	console.log('event.streams[0]==========>', event.streams[0]);
-
-			// 	setPeers((prevPeers) => [...prevPeers, event.streams[0]]);
-			// };
-
-			socketEmit('event:sendOffer', { offer, userSocketId });
+			createOffer({ userSocketId });
 		},
-		[createOffer, createPeerConnection, peerConnections, socketEmit]
+		[createOffer]
 	);
-
-	// useEffect(() => {
-
-	// 	peerConnections.forEach((value) => {
-
-	// 		console.log('This is PEER Connections==========>', value);
-	// 		value.addEventListener("track", (event) => {
-	// 			console.log('event.streams[0]==========>', event.streams[0]);
-
-	// 			// setPeers( [...peers, event.streams[0]]);
-	// 		})
-	// 	});
-
-	// 	return () => {
-	// 		peerConnections.forEach((value) => {
-	// 			value.removeEventListener('track', (event) => {
-	// 				console.log('event.streams[0]==========>', event.streams[0]);
-
-	// 				setPeers([...peers, event.streams[0]]);
-	// 			});
-	// 		});
-	// 	};
-	// }, [peerConnections, peers]);
 
 	const handleGetOffer = useCallback(
 		async ({
@@ -198,17 +153,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			offer: RTCSessionDescriptionInit;
 			socketId: string;
 		}) => {
-			const peerConnection = createPeerConnection(socketId);
-			peerConnections.set(socketId, peerConnection);
-
-			console.log('New Peer Connection===>', peerConnections, socketId);
-
-			const answer = await createAnswer({ peerConnection, offer });
-
-			socketEmit('event:sendAnswer', { answer, socketId });
-			// handleCreatePeerConnection({ userSocketId:socketId });
+			createAnswer({ offer, userSocketId: socketId });
 		},
-		[createAnswer, createPeerConnection, peerConnections, socketEmit]
+		[createAnswer]
 	);
 
 	const handleGetAnswer = useCallback(
@@ -219,15 +166,12 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			answer: RTCSessionDescriptionInit;
 			userSocketId: string;
 		}) => {
-			const peerConnection = peerConnections.get(userSocketId);
-
-			console.log('New Peer Connection===>', peerConnection, userSocketId);
-			console.log('New User Send Answer====>', answer);
-			await peerConnection?.setRemoteDescription(
-				new RTCSessionDescription(answer)
-			);
+			setRemoteDescription({
+				answer,
+				userSocketId,
+			});
 		},
-		[peerConnections]
+		[setRemoteDescription]
 	);
 
 	const handleAddIceCandidate = useCallback(
@@ -238,40 +182,25 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			iceCandidate: any;
 			socketId: string;
 		}) => {
-			const peerConnection = peerConnections.get(socketId);
-			if (iceCandidate) {
-				try {
-					console.log(
-						'=========================Get Ice Candidate=================='
-						// iceCandidate
-					);
-
-					await peerConnection?.addIceCandidate(iceCandidate);
-
-					// peerConnection?.addEventListener('track', (event) => {
-					// 		console.log('event.streams[0]==========>', event.streams[0]);
-
-					// 		setPeers([...peers, event.streams[0]]);
-					// 	});
-				} catch (error) {
-					console.error('Error adding received ice candidate', error);
-				}
-			}
+			addIceCandidate({
+				iceCandidate,
+				socketId,
+			});
 		},
-		[peerConnections]
+		[addIceCandidate]
 	);
 
 	useEffect(() => {
 		socketOn('user-connected', handleCreatePeerConnection);
 		socketOn('offer', handleGetOffer);
 		socketOn('answer', handleGetAnswer);
-		socketOn('event:sendIceCandidate', handleAddIceCandidate);
+		socketOn('event:addIceCandidate', handleAddIceCandidate);
 
 		return () => {
 			socketOff('user-connected', handleCreatePeerConnection);
 			socketOff('offer', handleGetOffer);
 			socketOff('answer', handleGetAnswer);
-			socketOff('event:sendIceCandidate', handleAddIceCandidate);
+			socketOff('event:addIceCandidate', handleAddIceCandidate);
 		};
 	}, [
 		handleAddIceCandidate,
@@ -288,31 +217,33 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	useEffect(() => {
 		socketOn('event:userWantToEnter', userWantToEnter);
-		// socketOn('event:sendAnswerHost', handleSendAnswerHost);
-
 		return () => {
 			socketOff('event:userWantToEnter', userWantToEnter);
-			// socketOff('event:sendAnswerHost', handleSendAnswerHost);
 		};
 	}, [socketOff, socketOn, userWantToEnter]);
 
-	console.log(
-		'PEERS IN MEETING ROOM=================>>>>>',
-		Object.values(peerStreams)
-	);
+	useEffect(() => {
+		console.log('PEERS IN MEETING ROOM=================>>>>>', peerConnections);
+	}, [peerConnections]);
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			<div className="flex h-full w-full justify-between gap-4 p-4 pb-20 sm:pb-4 md:pb-20">
-				<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
-					{Object.values(peerStreams).map((stream, index) => (
-						<RemoteUserVideoPanel key={index} stream={stream} />
-					))}
-
-					<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+				{Object.values(peerStreams).length === 0 ? (
+					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
 						<UserVideoPanel />
 					</div>
-				</div>
+				) : (
+					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
+						{Object.values(peerStreams).map((stream, index) => (
+							<RemoteUserVideoPanel key={index} stream={stream} />
+						))}
+
+						<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+							<UserVideoPanel />
+						</div>
+					</div>
+				)}
 			</div>
 
 			<NewControlPanel roomId={roomId} />

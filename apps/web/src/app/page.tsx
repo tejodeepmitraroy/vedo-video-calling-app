@@ -1,6 +1,6 @@
 'use client';
 import useScreenStateStore from '@/store/useScreenStateStore';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Dashboard from './@dashboard/page';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -91,7 +91,7 @@ const Home = () => {
 
 	console.log('Master Component');
 
-	const [open, setOpen] = useState(false);
+	// const [open, setOpen] = useState(false);
 
 	return (
 		<>
@@ -100,7 +100,7 @@ const Home = () => {
 					` ${currentScreen === 'Meeting Room' ? 'hidden' : ''} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
 				}
 			>
-				<Sidebar open={open} setOpen={setOpen}>
+				<Sidebar open={true} animate={true}>
 					<SidebarBody className="justify-between gap-10">
 						<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
 							<>
