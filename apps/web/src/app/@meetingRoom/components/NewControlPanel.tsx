@@ -14,9 +14,9 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useSocket } from '@/context/SocketContext';
-import { useWebRTC } from '@/context/WebRTCContext';
+
 import useGlobalStore from '@/store/useGlobalStore';
-import useScreenStateStore from '@/store/useScreenStateStore';
+
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
@@ -47,11 +47,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
-	const { disconnectPeer } = useWebRTC();
-
-	const setCurrentScreen = useScreenStateStore(
-		(state) => state.setCurrentScreen
-	);
+	// const { disconnectPeer } = useWebRTC();
 
 	// console.log('selected Camera------>', selectedCamera);
 	// console.log('selected Microphone------>', selectedMicrophone);
@@ -69,10 +65,7 @@ const NewControlPanel = ({ roomId }: { roomId: string }) => {
 		socketEmit('event:callEnd', {
 			roomId,
 		});
-
-		disconnectPeer();
-		setCurrentScreen('OutSide Lobby');
-	}, [disconnectPeer, roomId, setCurrentScreen, socketEmit]);
+	}, [roomId, socketEmit]);
 
 	const handleEndRoom = useCallback(() => {
 		socketEmit('event:endRoom', { roomId });

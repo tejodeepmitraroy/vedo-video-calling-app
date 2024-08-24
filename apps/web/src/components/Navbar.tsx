@@ -9,8 +9,11 @@ import useGlobalStore from '@/store/useGlobalStore';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Github, Phone, PhoneOff, Twitter } from 'lucide-react';
 import useDeviceStore from '@/store/useDeviceStore';
-import { useWebRTC } from '@/context/WebRTCContext';
+// import { useWebRTC } from '@/context/WebRTCContext';
 import Link from 'next/link';
+import useStreamStore from '@/store/useStreamStore';
+import { useWebRTC } from '@/context/WebRTCContext';
+import useParticipantsStore from '@/store/useParticipantsStore';
 
 const NavBar = () => {
 	const { userId } = useAuth();
@@ -19,8 +22,66 @@ const NavBar = () => {
 	const setOnLineStatus = useGlobalStore((state) => state.setOnLineStatus);
 	const { socket, socketOn, socketOff, socketEmit } = useSocket();
 	const setMediaDevices = useDeviceStore((state) => state.setMediaDevices);
+	const setCurrentScreen = useScreenStateStore(
+		(state) => state.setCurrentScreen
+	);
+	const setLocalStream = useStreamStore((state) => state.setLocalStream);
+	const setOnlineUsers = useParticipantsStore((state) => state.setOnlineUsers);
+	// const participants = useParticipantsStore((state)=>state.participants)
+	const removeParticipant = useParticipantsStore(
+		(state) => state.removeParticipant
+	);
 
-	const { getAllMediaDevices } = useWebRTC();
+	const { getAllMediaDevices, disconnectPeer, resetRemotePeers } = useWebRTC();
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const handleUserLeftTheRoom = useCallback(
+		({ user }: { user: RoomUser }) => {
+			if (user.userId === userId) {
+				toast.success(`You Left the Room`);
+				setLocalStream(null);
+				// disconnectPeer({ user });
+				setCurrentScreen('OutSide Lobby');
+			} else {
+				removeParticipant(user);
+				disconnectPeer({ user });
+				toast(`${user.fullName} Left the Room`);
+
+				resetRemotePeers();
+			}
+		},
+		[
+			disconnectPeer,
+			removeParticipant,
+			resetRemotePeers,
+			setCurrentScreen,
+			setLocalStream,
+			userId,
+		]
+	);
+
+	const handleRemoveEveryoneFromRoom = useCallback(async () => {
+		toast(`Host End the Room`);
+		resetRemotePeers();
+		setCurrentScreen('OutSide Lobby');
+	}, [resetRemotePeers, setCurrentScreen]);
+
+	//All Notifications Event state here
+	useEffect(() => {
+		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
+		socketOn('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
+
+		return () => {
+			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
+			socketOff('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
+		};
+	}, [
+		handleRemoveEveryoneFromRoom,
+		handleUserLeftTheRoom,
+		socketOff,
+		socketOn,
+	]);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +89,7 @@ const NavBar = () => {
 	const getDevices = useCallback(async () => {
 		const device = await getAllMediaDevices();
 		setMediaDevices(device);
-		console.log('Devices=========>', device);
+		// console.log('Devices=========>', device);
 	}, [getAllMediaDevices, setMediaDevices]);
 
 	useEffect(() => {
@@ -44,6 +105,7 @@ const NavBar = () => {
 		if (socket) {
 			if (socket.connected) {
 				toast.success('Connected');
+				toast.dismiss();
 
 				setOnLineStatus(true);
 			} else {
@@ -62,8 +124,6 @@ const NavBar = () => {
 	/////////////////////////////////////////////////////
 	const handleInformAllNewUserAdded = useCallback(
 		({ userId: id, username }: { userId: string; username: string }) => {
-			console.log('Notiof', { userId, username });
-
 			if (id === userId) {
 				toast.success(`suceesfully joined`);
 			} else {
@@ -192,22 +252,27 @@ const NavBar = () => {
 			users,
 		}: {
 			users: {
+				socketId: string;
 				userId: string;
 				fullName: string;
 				imageUrl: string;
 				emailAddress: string;
+				host: boolean;
 			}[];
 		}) => {
-			console.log('Get Online User Details========>', {
-				users,
-			});
+			setOnlineUsers(users);
+
+			// console.log('Get Online User Details========>', {
+			// 	users,
+			// });
 		},
-		[]
+		[setOnlineUsers]
 	);
 	///////////////////////////////////////////////////////////////////////////////////
 
 	useEffect(() => {
 		if (user) {
+			toast.loading('Connecting with server');
 			socketEmit('connectWithUser', {
 				userId: user.id,
 				fullName: user.fullName,
@@ -239,8 +304,8 @@ const NavBar = () => {
 	}, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
-		<header className="relative flex h-[45px] items-center justify-between gap-1 bg-neutral-100 px-4 md:h-[50px]">
-			<h1 className="text-lg font-semibold text-primary md:text-2xl">
+		<header className="relative hidden h-[50px] items-center justify-between gap-1 bg-neutral-100 px-4 md:flex md:h-[50px]">
+			<h1 className="text-xl font-semibold text-primary md:text-2xl">
 				{currentState}
 			</h1>
 			<div className="flex items-center gap-2 pr-10">

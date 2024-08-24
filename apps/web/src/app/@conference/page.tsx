@@ -1,10 +1,10 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs';
 import { DataTable } from './data-table';
 import { columns } from './columns';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Conference = () => {
 	const { getToken } = useAuth();
@@ -40,11 +40,18 @@ const Conference = () => {
 	}, [getAllRoomDetails]);
 
 	return (
-		<ScrollArea className="flex h-full w-full px-4 md:flex-1">
-			<div className="m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
-				<DataTable columns={columns} data={allScheduledRoomsDetails} />
+		<>
+			<ScrollArea className="hidden h-full w-full px-4 md:flex md:flex-1">
+				<div className="m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+					<DataTable columns={columns} data={allScheduledRoomsDetails} />
+				</div>
+			</ScrollArea>
+			<div className="flex h-full w-full px-4 md:hidden md:flex-1">
+				<div className="m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+					<DataTable columns={columns} data={allScheduledRoomsDetails} />
+				</div>
 			</div>
-		</ScrollArea>
+		</>
 	);
 };
 

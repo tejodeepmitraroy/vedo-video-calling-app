@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Share } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import {
 	Card,
 	CardDescription,
@@ -10,15 +10,15 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
-import useStreamStore from '@/store/useStreamStore';
+// import useStreamStore from '@/store/useStreamStore';
 
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@waitingLobby/components/UserVideoPanel';
-import { useWebRTC } from '@/context/WebRTCContext';
+
 import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -27,26 +27,23 @@ import useScreenStateStore from '@/store/useScreenStateStore';
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
 const WaitingLobby = ({ roomId }: { roomId: string }) => {
-	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
-	const { user } = useUser();
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const [askToEnter, setAskToEnter] = useState(false);
 	const { getToken, userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 	const router = useRouter();
-	const { createOffer, setRemoteDescription, getAnswer } = useWebRTC();
 	const [canJoin, setCanJoin] = useState<boolean>();
-
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
 
-	console.log('Waiting Component mounted++++++++++');
+	// console.log('Waiting Component mounted++++++++++');
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	const getRoomDetails = useCallback(async () => {
 		const token = await getToken();
+
 		try {
 			const { data } = await axios(
 				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
@@ -59,7 +56,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			);
 			const response = data.data;
 
-			console.log('Room Details ------------->>>', response);
+			// console.log('Room Details ------------->>>', response);
 
 			/////////////////////////////////////////////////////////////////////////////
 			const checkJoinedRoom = response.createdById === userId;
@@ -73,8 +70,9 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			/////////////////////////////////////////////////////////////////////////////
 			if (response) {
 				setRoomDetails(response);
+				// toast.success('Room Founded');
 			} else {
-				toast.error('Room Id Not Existed');
+				// toast.error('Room Id Not Existed');
 				router.push('/');
 			}
 		} catch (error) {
@@ -116,70 +114,23 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	//User ask join Room
 	const handleAskToJoin = useCallback(async () => {
-		const offer = await createOffer();
-		// console.log('Client Offer===========>', offer);
 		socketEmit('event:askToJoin', {
 			roomId,
-			offer: offer,
 		});
 
 		setAskToEnter(true);
-	}, [createOffer, roomId, socketEmit]);
+	}, [roomId, socketEmit]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//// All socket Event Function are Define Here
-	const joinRoom = useCallback(
-		async ({
-			answer: hostAnswer,
-			hostOffer,
-			hostUserSocketId,
-		}: {
-			answer: RTCSessionDescriptionInit;
-			hostOffer: RTCSessionDescriptionInit;
-			hostUserSocketId: string;
-		}) => {
-			console.log('Second Socket User Joined', hostUserSocketId);
+	const joinRoom = useCallback(async () => {
+		socketEmit('event:joinRoom', {
+			roomId: roomId,
 
-			if (hostUserSocketId) {
-				setRemoteSocketId(hostUserSocketId);
-				console.log('SET  Remote Socket ID--->', hostUserSocketId);
-			}
-
-			if (roomDetails?.meetingId !== userId) {
-				socketEmit('event:joinRoom', {
-					roomId: roomId,
-					userId,
-					username: user?.fullName,
-					hostUser: false,
-				});
-			}
-			console.log('Host Offer ------------>', hostOffer);
-			console.log('Host answer Added', hostAnswer);
-
-			// await webRTC.setRemoteDescription(hostAnswer);
-			setRemoteDescription(hostAnswer);
-			// const answer = await webRTC.getAnswer(hostOffer);
-			const answer = await getAnswer(hostOffer);
-
-			console.log('Client answer', answer);
-
-			socketEmit('event:sendAnswerHost', {
-				hostUserSocketId,
-				answer,
-			});
-		},
-		[
-			getAnswer,
-			roomDetails?.meetingId,
-			roomId,
-			setRemoteDescription,
-			setRemoteSocketId,
-			socketEmit,
-			user?.fullName,
-			userId,
-		]
-	);
+			hostUser: false,
+		});
+	}, [roomId, socketEmit]);
 
 	const handleEnterRoom = useCallback(() => {
 		setCurrentScreen('Meeting Room');
@@ -188,29 +139,36 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	/////// All socket Notification Function are Define Here
 	const roomEnterPermissionDenied = useCallback(() => {
 		setAskToEnter(false);
-		toast.error("Sorry host don't want to Enter you");
+		toast.error("Sorry host don't want to enter you");
 	}, [setAskToEnter]);
 
-	const handleHostIsNoExistInRoom = useCallback(() => {
+	const handleHostIsNotExistedInRoom = useCallback(() => {
 		setAskToEnter(false);
-		toast.warn(`Host is Not Existed in Room. Please wait`);
+		toast.error(`Host is Not Existed in Room. Please wait`);
 	}, [setAskToEnter]);
 
 	const handleRoomLimitFull = useCallback(() => {
 		setAskToEnter(false);
-		toast.warn(`Room Limit Full`);
+		toast.error(`Room Limit Full`);
 	}, [setAskToEnter]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	useEffect(() => {
-		socketOn('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+		socketOn(
+			'notification:hostIsNotExistedInRoom',
+			handleHostIsNotExistedInRoom
+		);
 		socketOn(
 			'notification:roomEnterPermissionDenied',
 			roomEnterPermissionDenied
 		);
 		socketOn('notification:roomLimitFull', handleRoomLimitFull);
 		return () => {
-			socketOff('notification:hostIsNoExistInRoom', handleHostIsNoExistInRoom);
+			socketOff(
+				'notification:hostIsNotExistedInRoom',
+
+				handleHostIsNotExistedInRoom
+			);
 			socketOff(
 				'notification:roomEnterPermissionDenied',
 				roomEnterPermissionDenied
@@ -218,7 +176,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			socketOff('notification:roomLimitFull', handleRoomLimitFull);
 		};
 	}, [
-		handleHostIsNoExistInRoom,
+		handleHostIsNotExistedInRoom,
 		handleRoomLimitFull,
 		roomEnterPermissionDenied,
 		socketOff,
@@ -227,11 +185,11 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	//// All socket Notification are Executed Here
 	useEffect(() => {
-		console.log('Setup All Socket Events ------------->>>');
+		// console.log('Setup All Socket Events ------------->>>');
 		socketOn('event:joinRoom', joinRoom);
 		socketOn('event:enterRoom', handleEnterRoom);
 		return () => {
-			console.log('Off All Socket Events ------------->>>');
+			// console.log('Off All Socket Events ------------->>>');
 			socketOff('event:joinRoom', joinRoom);
 			socketOff('event:enterRoom', handleEnterRoom);
 		};
