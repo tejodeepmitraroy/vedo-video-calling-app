@@ -215,7 +215,9 @@ export function roomConnections2(
 			offer: RTCSessionDescriptionInit;
 			userSocketId: string;
 		}) => {
-			socket.to(userSocketId).emit('offer', { offer, socketId: socket.id });
+			socket
+				.to(userSocketId)
+				.emit('event:getOffer', { offer, socketId: socket.id });
 		}
 	);
 
@@ -228,7 +230,10 @@ export function roomConnections2(
 			answer: RTCSessionDescriptionInit;
 			socketId: string;
 		}) => {
-			io.to(socketId).emit('answer', { answer, userSocketId: socket.id });
+			io.to(socketId).emit('event:getAnswer', {
+				answer,
+				userSocketId: socket.id,
+			});
 		}
 	);
 
@@ -291,6 +296,7 @@ export function roomConnections2(
 	});
 
 	socket.on('disconnecting', () => {
+		console.log('+++++++++++++++++++++++++Disconnecting++++++++++++++++++++++');
 		const roomId = Array.from(socket.rooms)[1];
 		const roomDetails = rooms.get(roomId);
 		const roomParticipants = roomDetails?.participants;
@@ -318,11 +324,15 @@ export function roomConnections2(
 			rooms.delete(roomId);
 		}
 
-		console.log('Leaving after Room Details', roomDetails);
+		console.log(
+			'socketIdToUserMap.get(socket.id)========>',
+			socketIdToUserMap.get(socket.id)
+		);
 
 		socket.to(roomId).emit('notification:userLeftTheRoom', {
-			userId: socketIdToUserMap.get(socket.id)?.userId,
+			user: socketIdToUserMap.get(socket.id),
 		});
+
 		socket.leave(roomId);
 
 		console.log('Socket Rooms---->', Array.from(socket.rooms)[1]);

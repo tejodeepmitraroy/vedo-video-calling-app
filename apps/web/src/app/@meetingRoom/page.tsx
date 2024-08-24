@@ -9,20 +9,19 @@ import Image from 'next/image';
 import NewControlPanel from './components/NewControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
+import useStreamStore from '@/store/useStreamStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const {
 		streams,
-		// peerStreams,
-		// peerConnections,
-		createOffer,
-		createAnswer,
-		// connectionStatus,
-		setRemoteDescription,
-		addIceCandidate,
+		// createOffer,
+		// createAnswer,
+		// setRemoteDescription,
+		// addIceCandidate,
 	} = useWebRTC();
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
+	const localStream = useStreamStore((state) => state.localStream);
 
 	console.log('Meeting Component mounted++++++++++');
 
@@ -98,9 +97,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
-	// console.log('Connection Status========>', connectionStatus());
-
-	////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleParticipantsInRoom = useCallback(
 		({
@@ -132,78 +128,78 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
-	const handleUserConnected = useCallback(
-		async ({ userSocketId }: { userSocketId: string }) => {
-			createOffer({ userSocketId });
-		},
-		[createOffer]
-	);
+	// const handleUserConnected = useCallback(
+	// 	async ({ userSocketId }: { userSocketId: string }) => {
+	// 		createOffer({ userSocketId });
+	// 	},
+	// 	[createOffer]
+	// );
 
-	const handleGetOffer = useCallback(
-		async ({
-			offer,
-			socketId,
-		}: {
-			offer: RTCSessionDescriptionInit;
-			socketId: string;
-		}) => {
-			createAnswer({ offer, userSocketId: socketId });
-		},
-		[createAnswer]
-	);
+	// const handleGetOffer = useCallback(
+	// 	async ({
+	// 		offer,
+	// 		socketId,
+	// 	}: {
+	// 		offer: RTCSessionDescriptionInit;
+	// 		socketId: string;
+	// 	}) => {
+	// 		createAnswer({ offer, userSocketId: socketId });
+	// 	},
+	// 	[createAnswer]
+	// );
 
-	const handleGetAnswer = useCallback(
-		async ({
-			answer,
-			userSocketId,
-		}: {
-			answer: RTCSessionDescriptionInit;
-			userSocketId: string;
-		}) => {
-			setRemoteDescription({
-				answer,
-				userSocketId,
-			});
-		},
-		[setRemoteDescription]
-	);
+	// const handleGetAnswer = useCallback(
+	// 	async ({
+	// 		answer,
+	// 		userSocketId,
+	// 	}: {
+	// 		answer: RTCSessionDescriptionInit;
+	// 		userSocketId: string;
+	// 	}) => {
+	// 		setRemoteDescription({
+	// 			answer,
+	// 			userSocketId,
+	// 		});
+	// 	},
+	// 	[setRemoteDescription]
+	// );
 
-	const handleAddIceCandidate = useCallback(
-		async ({
-			iceCandidate,
-			socketId,
-		}: {
-			iceCandidate: any;
-			socketId: string;
-		}) => {
-			addIceCandidate({
-				iceCandidate,
-				socketId,
-			});
-		},
-		[addIceCandidate]
-	);
+	// const handleAddIceCandidate = useCallback(
+	// 	async ({
+	// 		iceCandidate,
+	// 		socketId,
+	// 	}: {
+	// 		iceCandidate: any;
+	// 		socketId: string;
+	// 	}) => {
+	// 		addIceCandidate({
+	// 			iceCandidate,
+	// 			socketId,
+	// 		});
+	// 	},
+	// 	[addIceCandidate]
+	// );
 
-	useEffect(() => {
-		socketOn('event:user-connected', handleUserConnected);
-		socketOn('offer', handleGetOffer);
-		socketOn('answer', handleGetAnswer);
-		socketOn('event:addIceCandidate', handleAddIceCandidate);
+	// useEffect(() => {
+	// 	socketOn('event:user-connected', handleUserConnected);
+	// 	socketOn('offer', handleGetOffer);
+	// 	socketOn('answer', handleGetAnswer);
+	// 	socketOn('event:addIceCandidate', handleAddIceCandidate);
 
-		return () => {
-			socketOff('event:user-connected', handleUserConnected);
-			socketOff('offer', handleGetOffer);
-			socketOff('answer', handleGetAnswer);
-			socketOff('event:addIceCandidate', handleAddIceCandidate);
-		};
-	}, [
-		handleAddIceCandidate,
-		handleGetAnswer,
-		handleGetOffer,
-		handleUserConnected,
-		socketOff,
-		socketOn,
-	]);
+	// 	return () => {
+	// 		socketOff('event:user-connected', handleUserConnected);
+	// 		socketOff('offer', handleGetOffer);
+	// 		socketOff('answer', handleGetAnswer);
+	// 		socketOff('event:addIceCandidate', handleAddIceCandidate);
+	// 	};
+	// }, [
+	// 	handleAddIceCandidate,
+	// 	handleGetAnswer,
+	// 	handleGetOffer,
+	// 	handleUserConnected,
+	// 	socketOff,
+	// 	socketOn,
+	// ]);
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -219,14 +215,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			<div className="flex h-full w-full justify-between gap-4 p-4 px-4 pb-20 sm:pb-4 md:pb-20">
-				{/* {Object.values(peerStreams).length === 0 && (
-					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
-						<UserVideoPanel />
-					</div>
-				)} */}
 				{streams.length === 0 && (
 					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
-						<UserVideoPanel />
+						<RemoteUserVideoPanel stream={localStream!} />
 					</div>
 				)}
 
@@ -249,9 +240,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 								<RemoteUserVideoPanel stream={stream} />
 							</div>
 						))}
-						<div className="hidden w-full md:flex">
-							<UserVideoPanel />
-						</div>
+						<RemoteUserVideoPanel stream={localStream!} />
 
 						<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:hidden md:w-[20%] lg:w-[12%]">
 							<UserVideoPanel />

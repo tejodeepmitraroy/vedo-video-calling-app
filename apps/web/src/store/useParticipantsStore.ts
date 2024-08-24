@@ -21,14 +21,13 @@ interface useParticipantsStore {
 const useParticipantsStore = create<useParticipantsStore>((set) => ({
 	onlineUsers: [],
 	participants: [],
-
 	setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
 	addParticipant: (participant) =>
 		set((state) => ({ participants: [...state.participants, participant] })),
 	removeParticipant: (participant) =>
 		set((state) => ({
 			participants: state.participants.filter(
-				(item) => item.id === participant.id
+				(item) => item.userId === participant.userId
 			),
 		})),
 }));
