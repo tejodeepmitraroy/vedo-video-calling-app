@@ -12,10 +12,10 @@ interface OnlineUsers {
 
 interface useParticipantsStore {
 	onlineUsers: OnlineUsers[];
-	participants: User[];
+	participants: RoomUser[];
 	setOnlineUsers: (onlineUsers: OnlineUsers[]) => void;
-	addParticipant: (participant: User) => void;
-	removeParticipant: (participant: User) => void;
+	addParticipant: (participant: RoomUser) => void;
+	removeParticipant: (participant: RoomUser) => void;
 }
 
 const useParticipantsStore = create<useParticipantsStore>((set) => ({

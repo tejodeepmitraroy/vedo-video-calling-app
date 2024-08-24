@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 // import { roomConnections } from './roomConnections';
-import { roomConnections2 } from './roomConnections2';
+import { roomConnections2 } from './roomConnections';
 class SocketService {
 	_io: Server;
 	private userIdToSocketIdMap: Map<string, string>;

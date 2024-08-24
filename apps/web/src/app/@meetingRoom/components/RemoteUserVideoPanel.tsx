@@ -8,19 +8,10 @@ interface RemoteUserVideoPanelProps {
 	stream: MediaStream;
 }
 const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
-	// const { getRemoteStream } = useWebRTC();
-	// const remoteStream = getRemoteStream();
 	const [hasWindow, setHasWindow] = useState(false);
 
 	console.log('REMOTE STREAM ====>', stream);
 
-	// const videoRef = useRef<HTMLVideoElement>(null);
-
-	// useEffect(() => {
-	// 	if (videoRef.current) {
-	// 		videoRef.current.srcObject = stream;
-	// 	}
-	// }, [stream]);
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			setHasWindow(true);

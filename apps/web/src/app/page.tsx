@@ -1,6 +1,6 @@
 'use client';
 import useScreenStateStore from '@/store/useScreenStateStore';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Dashboard from './@dashboard/page';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -23,7 +23,7 @@ import useDeviceStore from '@/store/useDeviceStore';
 import useStreamStore from '@/store/useStreamStore';
 import Conference from './@conference/page';
 import BottomNavigation from '@/components/BottomNavigation';
-import { useWebRTC2 } from '@/context/WebRTCContext2';
+import { useWebRTC } from '@/context/WebRTCContext';
 
 const screens = [
 	{
@@ -51,7 +51,7 @@ const Home = () => {
 		(state) => state.selectedMicrophone
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
-	const { getUserMedia, disconnectPeer } = useWebRTC2();
+	const { getUserMedia, resetRemotePeers } = useWebRTC();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,9 +65,9 @@ const Home = () => {
 	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
 
 	const stopMediaStream = useCallback(async () => {
-		disconnectPeer();
+		resetRemotePeers();
 		setLocalStream(null);
-	}, [disconnectPeer, setLocalStream]);
+	}, [resetRemotePeers, setLocalStream]);
 
 	useEffect(() => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
@@ -89,9 +89,7 @@ const Home = () => {
 		}
 	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
 
-	console.log('Master Component');
-
-	// const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(false);
 
 	return (
 		<>
@@ -100,7 +98,7 @@ const Home = () => {
 					` ${currentScreen === 'Meeting Room' ? 'hidden' : ''} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
 				}
 			>
-				<Sidebar open={true} animate={true}>
+				<Sidebar open={open} setOpen={setOpen}>
 					<SidebarBody className="justify-between gap-10">
 						<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
 							<>

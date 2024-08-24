@@ -1,5 +1,5 @@
 'use client';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 // import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 import { useAuth, useUser } from '@clerk/nextjs';
 import axios from 'axios';
@@ -116,24 +117,24 @@ export default function Dashboard() {
 		getRoomDetails();
 	}, [getRoomDetails]);
 
-	// const handleCallOpenMeeting = ({
-	// 	roomId,
-	// 	userId: id,
-	// }: {
-	// 	roomId: string;
-	// 	userId: string;
-	// }) => {
-	// 	if (id === userId) {
-	// 		router.push(`?roomId=${roomId}`);
-	// 	} else {
-	// 		toast('This room is not created by you.But you can ask to join.');
-	// 		router.push(`?roomId=${roomId}`);
-	// 	}
-	// };
+	const handleCallOpenMeeting = ({
+		roomId,
+		userId: id,
+	}: {
+		roomId: string;
+		userId: string;
+	}) => {
+		if (id === userId) {
+			router.push(`?roomId=${roomId}`);
+		} else {
+			toast('This room is not created by you.But you can ask to join.');
+			router.push(`?roomId=${roomId}`);
+		}
+	};
 
 	return (
 		<ScrollArea className="flex h-full w-full px-4 md:flex-1">
-			<div className="mx-auto my-4 grid h-full w-full max-w-7xl grid-flow-col grid-cols-1 gap-5 overflow-y-auto md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-2">
+			<div className="mx-auto my-4 grid h-full w-full max-w-7xl grid-cols-1 gap-5 overflow-y-auto md:grid-flow-col md:grid-cols-2 xl:grid-rows-3 2xl:grid-cols-2">
 				<Card className="flex flex-col bg-slate-200">
 					<CardHeader>
 						<CardTitle>Quick Actions</CardTitle>
@@ -181,7 +182,7 @@ export default function Dashboard() {
 				</Card>
 
 				{user ? (
-					<Card className="row-span-2 hidden h-fit flex-col bg-slate-100 md:flex">
+					<Card className="hidden h-fit flex-col bg-slate-100 md:row-span-2 md:flex">
 						<CardHeader>
 							<div className="grid w-full grid-cols-4 gap-2">
 								<div className="col-span-1">
@@ -246,7 +247,7 @@ export default function Dashboard() {
 						</CardContent>
 					</Card>
 				) : (
-					<Card className="row-span-2 hidden h-fit animate-pulse flex-col bg-slate-100 md:flex">
+					<Card className="hidden h-fit animate-pulse flex-col bg-slate-100 md:row-span-2 md:flex">
 						<CardHeader>
 							<div className="grid w-full grid-cols-4 gap-2">
 								<div className="col-span-1">
@@ -289,7 +290,7 @@ export default function Dashboard() {
 					</Card>
 				)}
 
-				{/* <Card className=" hidden md:flex row-span-3 flex-col overflow-y-auto bg-slate-100">
+				<Card className="row-span-3 hidden flex-col overflow-y-auto bg-slate-100 md:flex">
 					<CardHeader className="w-full p-4 pb-3 md:p-6">
 						<CardTitle>Recent Meetings</CardTitle>
 						<CardDescription>meeting & calls logs</CardDescription>
@@ -458,7 +459,7 @@ export default function Dashboard() {
 							</div>
 						</ScrollArea>
 					</CardContent>
-				</Card> */}
+				</Card>
 			</div>
 		</ScrollArea>
 	);

@@ -11,3 +11,12 @@ interface MeetingDetails {
 	updatedAt: Date;
 	videoCallUrl: string;
 }
+
+interface RoomUser {
+	socketId: string;
+	userId: string;
+	fullName: string;
+	imageUrl: string;
+	emailAddress: string;
+	host: boolean;
+}

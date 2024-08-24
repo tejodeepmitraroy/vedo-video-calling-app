@@ -12,7 +12,7 @@ import useDeviceStore from '@/store/useDeviceStore';
 // import { useWebRTC } from '@/context/WebRTCContext';
 import Link from 'next/link';
 import useStreamStore from '@/store/useStreamStore';
-import { useWebRTC2 } from '@/context/WebRTCContext2';
+import { useWebRTC } from '@/context/WebRTCContext';
 import useParticipantsStore from '@/store/useParticipantsStore';
 
 const NavBar = () => {
@@ -26,41 +26,46 @@ const NavBar = () => {
 		(state) => state.setCurrentScreen
 	);
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
-	const setRemoteSocketId = useStreamStore((state) => state.setRemoteSocketId);
 	const setOnlineUsers = useParticipantsStore((state) => state.setOnlineUsers);
+	// const participants = useParticipantsStore((state)=>state.participants)
+	const removeParticipant = useParticipantsStore(
+		(state) => state.removeParticipant
+	);
 
-	const { getAllMediaDevices, disconnectPeer, resetRemotePeer } = useWebRTC2();
+	const { getAllMediaDevices, disconnectPeer, resetRemotePeers } = useWebRTC();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleUserLeftTheRoom = useCallback(
-		({ userId: id }: { userId: string }) => {
-			if (id === userId) {
+		({ user }: { user: RoomUser }) => {
+			if (user.userId === userId) {
 				toast.success(`You Left the Room`);
 				setLocalStream(null);
-				disconnectPeer();
+				// disconnectPeer({ user });
 				setCurrentScreen('OutSide Lobby');
 			} else {
-				setRemoteSocketId(null);
-				toast(`${id} Left the Room`);
-				resetRemotePeer();
+				removeParticipant(user);
+				disconnectPeer({ user });
+				toast(`${user.fullName} Left the Room`);
+
+				resetRemotePeers();
 			}
 		},
 		[
 			disconnectPeer,
-			resetRemotePeer,
+			removeParticipant,
+			resetRemotePeers,
 			setCurrentScreen,
 			setLocalStream,
-			setRemoteSocketId,
 			userId,
 		]
 	);
 
 	const handleRemoveEveryoneFromRoom = useCallback(async () => {
-		toast.success(`Host End the Room`);
-		disconnectPeer();
+		toast(`Host End the Room`);
+		resetRemotePeers();
 		setCurrentScreen('OutSide Lobby');
-	}, [disconnectPeer, setCurrentScreen]);
+	}, [resetRemotePeers, setCurrentScreen]);
 
 	//All Notifications Event state here
 	useEffect(() => {
@@ -119,8 +124,6 @@ const NavBar = () => {
 	/////////////////////////////////////////////////////
 	const handleInformAllNewUserAdded = useCallback(
 		({ userId: id, username }: { userId: string; username: string }) => {
-			// console.log('Notiof', { userId, username });
-
 			if (id === userId) {
 				toast.success(`suceesfully joined`);
 			} else {
