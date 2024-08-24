@@ -41,14 +41,12 @@ const NavBar = () => {
 			if (user.userId === userId) {
 				toast.success(`You Left the Room`);
 				setLocalStream(null);
-				// disconnectPeer({ user });
+				resetRemotePeers();
 				setCurrentScreen('OutSide Lobby');
 			} else {
-				removeParticipant(user);
 				disconnectPeer({ user });
+				removeParticipant(user);
 				toast(`${user.fullName} Left the Room`);
-
-				resetRemotePeers();
 			}
 		},
 		[

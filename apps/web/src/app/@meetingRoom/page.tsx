@@ -11,14 +11,13 @@ import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	// const [streams, setStreams] = useState<MediaStream[]>([]);
 	const {
-		// streams,
-		peerStreams,
+		streams,
+		// peerStreams,
 		// peerConnections,
 		createOffer,
 		createAnswer,
-		connectionStatus,
+		// connectionStatus,
 		setRemoteDescription,
 		addIceCandidate,
 	} = useWebRTC();
@@ -99,7 +98,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	);
 
 	////////////////////////////////////////////////////////////////////////////////////////////
-	console.log('Connection Status========>', connectionStatus());
+	// console.log('Connection Status========>', connectionStatus());
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -217,10 +216,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		};
 	}, [socketOff, socketOn, userWantToEnter]);
 
-	// useEffect(()=>{
-	// 	console.log("Remote Streams==============>",streams)
-	// },[streams])
-
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			<div className="flex h-full w-full justify-between gap-4 p-4 px-4 pb-20 sm:pb-4 md:pb-20">
@@ -229,15 +224,15 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 						<UserVideoPanel />
 					</div>
 				)} */}
-				{Object.values(peerStreams).length === 0 && (
+				{streams.length === 0 && (
 					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
 						<UserVideoPanel />
 					</div>
 				)}
 
-				{Object.values(peerStreams).length === 1 && (
+				{streams.length === 1 && (
 					<div className="mx-auto flex w-full flex-col items-center justify-center gap-5 md:max-w-[90rem] md:flex-row">
-						{Object.values(peerStreams).map((stream, index) => (
+						{streams.map((stream, index) => (
 							<RemoteUserVideoPanel key={index} stream={stream} />
 						))}
 
@@ -247,9 +242,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 					</div>
 				)}
 
-				{Object.values(peerStreams).length > 1 && (
+				{streams.length > 1 && (
 					<div className="flex w-full flex-col items-center justify-center gap-5 md:flex-row">
-						{Object.values(peerStreams).map((stream, index) => (
+						{streams.map((stream, index) => (
 							<div key={index} className="w-full">
 								<RemoteUserVideoPanel stream={stream} />
 							</div>
