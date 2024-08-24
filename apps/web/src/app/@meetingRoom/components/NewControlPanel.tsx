@@ -32,34 +32,27 @@ import {
 import React, { useCallback } from 'react';
 import { RWebShare } from 'react-web-share';
 
-export interface Device {
-	deviceId: string;
-	label: string;
-	groupId: string;
-}
-
 const NewControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
+	const localStream = useStreamStore((state) => state.localStream);
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
-	// const { disconnectPeer } = useWebRTC();
 
-	// console.log('selected Camera------>', selectedCamera);
-	// console.log('selected Microphone------>', selectedMicrophone);
-
-	// console.log(
-	// 	'camera--->',
-	// 	isCameraOn,
-	// 	'Mic--->',
-	// 	isMicrophoneOn,
-	// 	'Stream-------->',
-	// 	isScreenSharing
-	// );
+	console.log(
+		'local Stream--->',
+		localStream,
+		'camera--->',
+		isCameraOn,
+		'Mic--->',
+		isMicrophoneOn
+		// 'Stream-------->',
+		// isScreenSharing
+	);
 
 	const handleLeaveRoom = useCallback(() => {
 		socketEmit('event:callEnd', {

@@ -5,20 +5,13 @@ import { useSocket } from '@/context/SocketContext';
 import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
-
 import NewControlPanel from './components/NewControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 import useStreamStore from '@/store/useStreamStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	const {
-		streams,
-		// createOffer,
-		// createAnswer,
-		// setRemoteDescription,
-		// addIceCandidate,
-	} = useWebRTC();
+	const { streams } = useWebRTC();
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const localStream = useStreamStore((state) => state.localStream);
@@ -118,88 +111,11 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	useEffect(() => {
 		socketOn('event:participantsInRoom', handleParticipantsInRoom);
-		socketOn('event:user-disconnected', handleParticipantsInRoom);
 
 		return () => {
 			socketOff('event:participantsInRoom', handleParticipantsInRoom);
-			socketOff('event:user-disconnected', handleParticipantsInRoom);
 		};
 	}, [handleParticipantsInRoom, socketOff, socketOn]);
-
-	///////////////////////////////////////////////////////////////////////////////////////////
-
-	// const handleUserConnected = useCallback(
-	// 	async ({ userSocketId }: { userSocketId: string }) => {
-	// 		createOffer({ userSocketId });
-	// 	},
-	// 	[createOffer]
-	// );
-
-	// const handleGetOffer = useCallback(
-	// 	async ({
-	// 		offer,
-	// 		socketId,
-	// 	}: {
-	// 		offer: RTCSessionDescriptionInit;
-	// 		socketId: string;
-	// 	}) => {
-	// 		createAnswer({ offer, userSocketId: socketId });
-	// 	},
-	// 	[createAnswer]
-	// );
-
-	// const handleGetAnswer = useCallback(
-	// 	async ({
-	// 		answer,
-	// 		userSocketId,
-	// 	}: {
-	// 		answer: RTCSessionDescriptionInit;
-	// 		userSocketId: string;
-	// 	}) => {
-	// 		setRemoteDescription({
-	// 			answer,
-	// 			userSocketId,
-	// 		});
-	// 	},
-	// 	[setRemoteDescription]
-	// );
-
-	// const handleAddIceCandidate = useCallback(
-	// 	async ({
-	// 		iceCandidate,
-	// 		socketId,
-	// 	}: {
-	// 		iceCandidate: any;
-	// 		socketId: string;
-	// 	}) => {
-	// 		addIceCandidate({
-	// 			iceCandidate,
-	// 			socketId,
-	// 		});
-	// 	},
-	// 	[addIceCandidate]
-	// );
-
-	// useEffect(() => {
-	// 	socketOn('event:user-connected', handleUserConnected);
-	// 	socketOn('offer', handleGetOffer);
-	// 	socketOn('answer', handleGetAnswer);
-	// 	socketOn('event:addIceCandidate', handleAddIceCandidate);
-
-	// 	return () => {
-	// 		socketOff('event:user-connected', handleUserConnected);
-	// 		socketOff('offer', handleGetOffer);
-	// 		socketOff('answer', handleGetAnswer);
-	// 		socketOff('event:addIceCandidate', handleAddIceCandidate);
-	// 	};
-	// }, [
-	// 	handleAddIceCandidate,
-	// 	handleGetAnswer,
-	// 	handleGetOffer,
-	// 	handleUserConnected,
-	// 	socketOff,
-	// 	socketOn,
-	// ]);
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 

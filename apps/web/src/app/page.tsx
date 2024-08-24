@@ -57,12 +57,11 @@ const Home = () => {
 
 	// Set User Media Stream
 	const getMediaStream = useCallback(async () => {
-		const mediaStream = await getUserMedia({
+		await getUserMedia({
 			camera: selectedCamera,
 			microphone: selectedMicrophone,
 		});
-		setLocalStream(mediaStream!);
-	}, [getUserMedia, selectedCamera, selectedMicrophone, setLocalStream]);
+	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
 	const stopMediaStream = useCallback(async () => {
 		resetRemotePeers();
@@ -73,7 +72,7 @@ const Home = () => {
 		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
 			getMediaStream();
 		} else {
-			console.log('currentScreen===============>', currentScreen);
+			// console.log('currentScreen===============>', currentScreen);
 			stopMediaStream();
 		}
 	}, [currentScreen, getMediaStream, stopMediaStream]);
@@ -83,11 +82,10 @@ const Home = () => {
 	useEffect(() => {
 		if (roomId) {
 			setCurrentScreen('Waiting Lobby');
-			// getMediaStream();
 		} else {
 			setCurrentScreen('Dashboard');
 		}
-	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
+	}, [roomId, setCurrentScreen]);
 
 	const [open, setOpen] = useState(false);
 

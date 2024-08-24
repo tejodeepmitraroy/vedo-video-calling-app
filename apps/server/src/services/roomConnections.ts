@@ -296,7 +296,6 @@ export function roomConnections2(
 	});
 
 	socket.on('disconnecting', () => {
-		console.log('+++++++++++++++++++++++++Disconnecting++++++++++++++++++++++');
 		const roomId = Array.from(socket.rooms)[1];
 		const roomDetails = rooms.get(roomId);
 		const roomParticipants = roomDetails?.participants;

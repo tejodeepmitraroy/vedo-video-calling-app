@@ -11,8 +11,10 @@ import {
 	useEffect,
 } from 'react';
 import { useSocket } from './SocketContext';
+import useStreamStore from '@/store/useStreamStore';
 
 interface IWebRTCContext {
+	localStream: MediaStream | null;
 	streams: MediaStream[];
 	peerConnections: Map<string, RTCPeerConnection>;
 	getAllMediaDevices: () => Promise<
@@ -29,29 +31,6 @@ interface IWebRTCContext {
 		camera: string;
 		microphone: string;
 	}) => Promise<MediaStream | null>;
-	getLocalStream: () => MediaStream | undefined;
-	// createOffer: ({ userSocketId }: { userSocketId: string }) => void;
-	// createAnswer: ({
-	// 	offer,
-	// 	socketId,
-	// }: {
-	// 	offer: RTCSessionDescriptionInit;
-	// 	socketId: string;
-	// }) => void;
-	// setRemoteDescription: ({
-	// 	answer,
-	// 	userSocketId,
-	// }: {
-	// 	answer: RTCSessionDescriptionInit;
-	// 	userSocketId: string;
-	// }) => void;
-	// addIceCandidate: ({
-	// 	iceCandidate,
-	// 	socketId,
-	// }: {
-	// 	iceCandidate: any;
-	// 	socketId: string;
-	// }) => void;
 	disconnectPeer: ({ user }: { user: RoomUser }) => void;
 	resetRemotePeers: () => void;
 	createPeerConnection: (userId: string) => RTCPeerConnection;
@@ -73,9 +52,10 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		() => new Map<string, RTCPeerConnection>(),
 		[]
 	);
-
 	const { socketEmit, socketOn, socketOff } = useSocket();
 
+	// const localStream = useStreamStore((state) => state.localStream);
+	const setLocalStream = useStreamStore((state) => state.setLocalStream);
 	const getAllMediaDevices: IWebRTCContext['getAllMediaDevices'] =
 		useCallback(async () => {
 			try {
@@ -92,7 +72,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				console.error('Error opening video camera.', error);
 			}
 		}, []);
-
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
 		async ({ camera, microphone }: { camera: string; microphone: string }) => {
 			try {
@@ -115,13 +94,15 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				localStream.current =
 					await navigator.mediaDevices.getUserMedia(constraints);
 
+				setLocalStream(localStream.current);
+
 				return localStream.current;
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
 				return null;
 			}
 		},
-		[]
+		[setLocalStream]
 	);
 
 	////////////////////////////////////////////////////////////////////////////
@@ -173,7 +154,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				peerConnections.get(userSocketId) || createPeerConnection(userSocketId);
 			if (localStream.current) {
 				localStream.current?.getTracks().forEach((track) => {
-					console.log('Sending tracks================+>', localStream.current);
 					peerConnection.addTrack(track, localStream.current as MediaStream);
 				});
 
@@ -265,21 +245,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 
 	///////////////////////////////////////////////////////////////////////////////
 
-	const getLocalStream: IWebRTCContext['getLocalStream'] = useCallback(() => {
-		if (localStream.current) {
-			return localStream.current;
-		}
-	}, []);
-
 	const disconnectPeer: IWebRTCContext['disconnectPeer'] = useCallback(
 		({ user }) => {
 			const socketId = user.socketId;
 			const peerConnection = peerConnections.get(socketId);
-
 			peerConnection?.close();
-
 			peerStreams.delete(socketId);
-
 			const AllUsers = peerStreams?.values();
 			const remoteStreams = Array.from(AllUsers);
 			setStreams(remoteStreams);
@@ -288,28 +259,17 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		[peerConnections, peerStreams]
 	);
 
-	const resetRemotePeers = useCallback(() => {
-		localStream.current?.getTracks().forEach((track) => track.stop());
-		peerConnections.forEach((value) => {
-			value.close();
-		});
-	}, [peerConnections]);
-
-	// const handleAddIceCandidate = useCallback(
-	// 	async ({
-	// 		iceCandidate,
-	// 		socketId,
-	// 	}: {
-	// 		iceCandidate: any;
-	// 		socketId: string;
-	// 	}) => {
-	// 		addIceCandidate({
-	// 			iceCandidate,
-	// 			socketId,
-	// 		});
-	// 	},
-	// 	[addIceCandidate]
-	// );
+	const resetRemotePeers: IWebRTCContext['resetRemotePeers'] =
+		useCallback(() => {
+			if (localStream.current) {
+				console.log('Reseting Peer======================>');
+				peerConnections.forEach((value) => {
+					value.close();
+				});
+				localStream.current.getTracks().forEach((track) => track.stop());
+				setLocalStream(localStream.current);
+			}
+		}, [peerConnections, setLocalStream]);
 
 	useEffect(() => {
 		socketOn('event:user-connected', handleCreateOffer);
@@ -335,16 +295,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	return (
 		<WebRTCContext.Provider
 			value={{
+				localStream: localStream.current,
 				streams,
 				peerConnections,
 				createPeerConnection,
 				getAllMediaDevices,
 				getUserMedia,
-				getLocalStream,
-				// createOffer,
-				// createAnswer,
-				// setRemoteDescription,
-				// addIceCandidate,
 				disconnectPeer,
 				resetRemotePeers,
 			}}
