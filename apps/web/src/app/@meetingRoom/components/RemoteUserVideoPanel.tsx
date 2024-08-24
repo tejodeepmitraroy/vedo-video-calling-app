@@ -10,8 +10,6 @@ interface RemoteUserVideoPanelProps {
 const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
 	const [hasWindow, setHasWindow] = useState(false);
 
-	console.log('REMOTE STREAM ====>', stream);
-
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			setHasWindow(true);

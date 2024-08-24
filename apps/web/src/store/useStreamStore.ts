@@ -4,17 +4,11 @@ import { create } from 'zustand';
 interface WebRTCStore {
 	localStream: MediaStream | null;
 	localScreenStream: MediaStream | null;
-	remoteStream: MediaStream | null;
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
-	peerOffer: RTCSessionDescriptionInit | null;
-	remoteSocketId: string | null;
 	setLocalStream: (localStream: MediaStream | null) => void;
-	setRemoteStream: (remoteStream: MediaStream | null) => void;
 	setLocalScreenStream: (localScreenStream: MediaStream | null) => void;
-	setPeerOffer: (peerOffer: RTCSessionDescriptionInit | undefined) => void;
-	setRemoteSocketId: (remoteSocketId: string | null) => void;
 	toggleCamera: () => void;
 	toggleMicrophone: () => void;
 	toggleScreenShare: () => void;
@@ -24,16 +18,10 @@ interface WebRTCStore {
 const useStreamStore = create<WebRTCStore>((set, get) => ({
 	localStream: null,
 	localScreenStream: null,
-	remoteStream: null,
 	isCameraOn: true,
 	isMicrophoneOn: true,
 	isScreenSharing: false,
-	peerOffer: null,
-	remoteSocketId: null,
 	setLocalStream: (localStream) => set({ localStream }),
-	setRemoteStream: (remoteStream) => set({ remoteStream }),
-	setPeerOffer: (peerOffer) => set({ peerOffer }),
-	setRemoteSocketId: (remoteSocketId) => set({ remoteSocketId }),
 	setLocalScreenStream: (localScreenStream) => set({ localScreenStream }),
 	toggleCamera: () => {
 		const { localStream, isCameraOn } = get();

@@ -61,7 +61,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			/////////////////////////////////////////////////////////////////////////////
 			const checkJoinedRoom = response.createdById === userId;
 
-			console.log('checkPreviouslyJoinedRoom====>', checkJoinedRoom);
+			// console.log('checkPreviouslyJoinedRoom====>', checkJoinedRoom);
 			socketEmit('event:checkPreviouslyJoinedRoom', {
 				roomId,
 				hostUser: checkJoinedRoom,

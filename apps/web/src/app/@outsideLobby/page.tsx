@@ -1,13 +1,21 @@
 'use client';
 
+import { useWebRTC } from '@/context/WebRTCContext';
 import useScreenStateStore from '@/store/useScreenStateStore';
+import useStreamStore from '@/store/useStreamStore';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 const OutsideLobby = () => {
 	const setCurrentState = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
+	const setLocalStream = useStreamStore((state) => state.setLocalStream);
+	const { resetRemotePeers } = useWebRTC();
+	const stopMediaStream = useCallback(async () => {
+		resetRemotePeers();
+		setLocalStream(null);
+	}, [resetRemotePeers, setLocalStream]);
 
 	const router = useRouter();
 	useEffect(() => {
@@ -15,7 +23,11 @@ const OutsideLobby = () => {
 			setCurrentState('Dashboard');
 			router.push('/');
 		}, 2000);
-	}, [router, setCurrentState]);
+
+		return () => {
+			stopMediaStream();
+		};
+	}, [router, setCurrentState, setLocalStream, stopMediaStream]);
 	return (
 		<div className="flex flex-1 rounded-lg bg-background p-4">
 			<div className="flex w-full flex-col items-center justify-center gap-5 rounded-lg p-5">
