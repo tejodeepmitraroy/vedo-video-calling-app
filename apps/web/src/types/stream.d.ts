@@ -12,7 +12,7 @@ interface MeetingDetails {
 	videoCallUrl: string;
 }
 
-interface RoomUser {
+interface ServerStoreUser {
 	socketId: string;
 	userId: string;
 	fullName: string;

@@ -43,8 +43,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const socketOn: ISocketContext['socketOn'] = useCallback(
 		(event: string, callback: (...args: any) => void) => {
 			if (socket) {
-				// console.log('Socket is On', event);
-				// console.log('Socket is On CB', callback);
 				socket.on(event, callback);
 			}
 		},
@@ -54,8 +52,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const socketOff: ISocketContext['socketOff'] = useCallback(
 		(event: string, callback?: (...args: any[]) => void) => {
 			if (socket) {
-				// console.log('Socket is Off', event);
-				// console.log('Socket is Off CB', callback);
 				socket.off(event, callback);
 			}
 		},
@@ -65,8 +61,6 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const socketEmit: ISocketContext['socketEmit'] = useCallback(
 		(event: string, data?: any) => {
 			if (socket) {
-				// console.log('Socket is Emit', event);
-				// console.log('Socket is On Emit', data);
 				socket.emit(event, data);
 			}
 		},

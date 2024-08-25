@@ -5,16 +5,18 @@ import { useSocket } from '@/context/SocketContext';
 import toast from 'react-hot-toast';
 import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
-import NewControlPanel from './components/NewControlPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
 import useStreamStore from '@/store/useStreamStore';
+import useParticipantsStore from '@/store/useParticipantsStore';
+import ControlPanel from './components/ControlPanel';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const { streams } = useWebRTC();
 
 	const { socketOn, socketEmit, socketOff } = useSocket();
 	const localStream = useStreamStore((state) => state.localStream);
+	const setOnlineUsers = useParticipantsStore((state) => state.setParticipants);
 
 	console.log('Meeting Component mounted++++++++++');
 
@@ -89,6 +91,13 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
 
+	useEffect(() => {
+		socketOn('event:userWantToEnter', userWantToEnter);
+		return () => {
+			socketOff('event:userWantToEnter', userWantToEnter);
+		};
+	}, [socketOff, socketOn, userWantToEnter]);
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 
 	const handleParticipantsInRoom = useCallback(
@@ -105,8 +114,9 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			}[];
 		}) => {
 			console.log('ParticipantsInRoom=========>', participants);
+			setOnlineUsers(participants);
 		},
-		[]
+		[setOnlineUsers]
 	);
 
 	useEffect(() => {
@@ -120,13 +130,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	///// All socket Event Function are Executed Here
-
-	useEffect(() => {
-		socketOn('event:userWantToEnter', userWantToEnter);
-		return () => {
-			socketOff('event:userWantToEnter', userWantToEnter);
-		};
-	}, [socketOff, socketOn, userWantToEnter]);
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
@@ -165,7 +168,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				)}
 			</div>
 
-			<NewControlPanel roomId={roomId} />
+			<ControlPanel roomId={roomId} />
 		</main>
 	);
 };
