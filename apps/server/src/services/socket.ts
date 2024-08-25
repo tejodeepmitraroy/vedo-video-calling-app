@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
+import { roomConnections } from './roomConnections';
 // import { roomConnections } from './roomConnections';
-import { roomConnections2 } from './roomConnections';
+
 class SocketService {
 	_io: Server;
 	private userIdToSocketIdMap: Map<string, string>;
@@ -58,7 +59,7 @@ class SocketService {
 
 			//////////////////////////////////////////////////////////////////////////////////////////////
 			socket.on(
-				'connectWithUser',
+				'event:connectWithServer',
 				({
 					userId,
 					fullName,
@@ -80,30 +81,26 @@ class SocketService {
 						host: false,
 					});
 
-					socket.broadcast.emit('getOnlineUsers', {
+					socket.broadcast.emit('event:getOnlineUsers', {
 						users: getOnlineUsers(),
 					});
-					socket.emit('getOnlineUsers', {
+					socket.emit('event:getOnlineUsers', {
 						users: getOnlineUsers(),
 					});
 
-					// console.log('connectWithUser',this.socketIdToUserMap);
-					socket.emit('userConnected');
+					socket.emit('event:userConnected');
 				}
 			);
 
 			const getOnlineUsers = () => {
 				const AllUsers = this.socketIdToUserMap.values();
 				const valuesArray = Array.from(AllUsers);
-
-				// console.log('Online UserSs', valuesArray);
-				// console.log('Online UserSs2213', this.socketIdToUserMap);
 				return valuesArray;
 			};
 
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			roomConnections2(
+			roomConnections(
 				socket,
 				io,
 				this.rooms,
@@ -116,23 +113,14 @@ class SocketService {
 			// Disconnection Socket
 			socket.on('disconnect', (reason) => {
 				console.log(`User ${socket.id} disconnected. Reason: ${reason}`);
-
-				console.log(socket.id);
-
-				// const userId = this.socketIdToUserIdMap.get(socket.id)!;
 				const userId = this.socketIdToUserMap.get(socket.id)?.userId;
 
 				this.userIdToSocketIdMap.delete(userId!);
-				// this.socketIdToUserIdMap.delete(socket.id);
 				this.socketIdToUserMap.delete(socket.id);
 
-				socket.broadcast.emit('getOnlineUsers', {
+				socket.broadcast.emit('event:getOnlineUsers', {
 					users: getOnlineUsers(),
 				});
-
-				// console.log('After', this.userIdToSocketIdMap);
-				// console.log('After', this.socketIdToUserIdMap);
-				// console.log('After', this.socketIdToUserMap);
 			});
 		});
 	}

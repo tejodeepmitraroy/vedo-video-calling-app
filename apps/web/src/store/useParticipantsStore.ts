@@ -12,24 +12,16 @@ interface OnlineUsers {
 
 interface useParticipantsStore {
 	onlineUsers: OnlineUsers[];
-	participants: RoomUser[];
+	participants: OnlineUsers[];
 	setOnlineUsers: (onlineUsers: OnlineUsers[]) => void;
-	addParticipant: (participant: RoomUser) => void;
-	removeParticipant: (participant: RoomUser) => void;
+	setParticipants: (participants: OnlineUsers[]) => void;
 }
 
 const useParticipantsStore = create<useParticipantsStore>((set) => ({
 	onlineUsers: [],
 	participants: [],
 	setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
-	addParticipant: (participant) =>
-		set((state) => ({ participants: [...state.participants, participant] })),
-	removeParticipant: (participant) =>
-		set((state) => ({
-			participants: state.participants.filter(
-				(item) => item.userId === participant.userId
-			),
-		})),
+	setParticipants: (participants) => set({ participants }),
 }));
 
 export default useParticipantsStore;

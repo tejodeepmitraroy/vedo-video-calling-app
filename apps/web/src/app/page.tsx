@@ -20,7 +20,6 @@ import WaitingLobby from './@waitingLobby/page';
 import MeetingRoom from './@meetingRoom/page';
 import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
-import useStreamStore from '@/store/useStreamStore';
 import Conference from './@conference/page';
 import BottomNavigation from '@/components/BottomNavigation';
 import { useWebRTC } from '@/context/WebRTCContext';
@@ -50,14 +49,14 @@ const Home = () => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
-	const setLocalStream = useStreamStore((state) => state.setLocalStream);
+
 	const { getUserMedia, resetRemotePeers } = useWebRTC();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Set User Media Stream
 	const getMediaStream = useCallback(async () => {
-		await getUserMedia({
+		getUserMedia({
 			camera: selectedCamera,
 			microphone: selectedMicrophone,
 		});
@@ -65,27 +64,27 @@ const Home = () => {
 
 	const stopMediaStream = useCallback(async () => {
 		resetRemotePeers();
-		setLocalStream(null);
-	}, [resetRemotePeers, setLocalStream]);
+	}, [resetRemotePeers]);
 
-	useEffect(() => {
-		if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
-			getMediaStream();
-		} else {
-			// console.log('currentScreen===============>', currentScreen);
-			stopMediaStream();
-		}
-	}, [currentScreen, getMediaStream, stopMediaStream]);
+	// useEffect(() => {
+	// 	if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
+	// 		getMediaStream();
+	// 	} else {
+	// 		console.log('currentScreen===============>', currentScreen);
+	// 		stopMediaStream();
+	// 	}
+	// }, [currentScreen, getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	useEffect(() => {
 		if (roomId) {
 			setCurrentScreen('Waiting Lobby');
+			getMediaStream();
 		} else {
-			setCurrentScreen('Dashboard');
+			stopMediaStream();
 		}
-	}, [roomId, setCurrentScreen]);
+	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
 
 	const [open, setOpen] = useState(false);
 

@@ -33,7 +33,7 @@ type rooms = Map<
 	}
 >;
 
-export function roomConnections2(
+export function roomConnections(
 	socket: Socket,
 	io: Server,
 	rooms: rooms,
@@ -273,7 +273,7 @@ export function roomConnections2(
 				user: socketIdToUserMap.get(socket.id),
 			});
 
-			socket.to(roomId).emit('event:participantsInRoom', {
+			io.to(roomId).emit('event:participantsInRoom', {
 				participants,
 			});
 

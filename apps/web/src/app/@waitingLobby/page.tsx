@@ -14,11 +14,8 @@ import toast from 'react-hot-toast';
 import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
-// import useStreamStore from '@/store/useStreamStore';
-
 import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/app/@waitingLobby/components/UserVideoPanel';
-
 import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -38,7 +35,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		(state) => state.setCurrentScreen
 	);
 
-	// console.log('Waiting Component mounted++++++++++');
+	console.log('Waiting Component mounted++++++++++');
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 	const getRoomDetails = useCallback(async () => {
@@ -55,8 +52,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 				}
 			);
 			const response = data.data;
-
-			// console.log('Room Details ------------->>>', response);
 
 			/////////////////////////////////////////////////////////////////////////////
 			const checkJoinedRoom = response.createdById === userId;
@@ -80,10 +75,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		}
 	}, [getToken, roomId, router, setRoomDetails, socketEmit, userId]);
 
-	useEffect(() => {
-		getRoomDetails();
-	}, [getRoomDetails]);
-
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//// Previously joined User
@@ -95,11 +86,12 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	);
 
 	useEffect(() => {
+		getRoomDetails();
 		socketOn('event:directlyCanJoin', handleDirectlyCanJoin);
 		return () => {
 			socketOff('event:directlyCanJoin', handleDirectlyCanJoin);
 		};
-	}, [handleDirectlyCanJoin, socketOff, socketOn]);
+	}, [getRoomDetails, handleDirectlyCanJoin, socketOff, socketOn]);
 
 	/////////////////////////////////////////////////////////////////////////
 
@@ -122,19 +114,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	}, [roomId, socketEmit]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//// All socket Event Function are Define Here
-	const joinRoom = useCallback(async () => {
-		socketEmit('event:joinRoom', {
-			roomId: roomId,
-
-			hostUser: false,
-		});
-	}, [roomId, socketEmit]);
-
-	const handleEnterRoom = useCallback(() => {
-		setCurrentScreen('Meeting Room');
-	}, [setCurrentScreen]);
 
 	/////// All socket Notification Function are Define Here
 	const roomEnterPermissionDenied = useCallback(() => {
@@ -183,6 +162,19 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		socketOn,
 	]);
 
+	//// All socket Event Function are Define Here
+	const joinRoom = useCallback(async () => {
+		socketEmit('event:joinRoom', {
+			roomId: roomId,
+
+			hostUser: false,
+		});
+	}, [roomId, socketEmit]);
+
+	const handleEnterRoom = useCallback(() => {
+		setCurrentScreen('Meeting Room');
+	}, [setCurrentScreen]);
+
 	//// All socket Notification are Executed Here
 	useEffect(() => {
 		// console.log('Setup All Socket Events ------------->>>');
@@ -213,7 +205,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 									Title{' '}
 									<RWebShare
 										data={{
-											text: 'Share',
+											text: `To join the meeting on VEDO Meet, click this link: ${window.location.href} Or open Meet and enter this code: ${roomId}`,
 											url: window.location.href,
 											title: 'roomUrl',
 										}}
