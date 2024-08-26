@@ -1,6 +1,7 @@
 'use client';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -37,7 +38,6 @@ import {
 	VideoOff,
 	EllipsisVertical,
 	Share2,
-	Info,
 	Users,
 } from 'lucide-react';
 import React, { useCallback } from 'react';
@@ -46,7 +46,6 @@ import { RWebShare } from 'react-web-share';
 const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
-	// const localStream = useStreamStore((state) => state.localStream);
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
@@ -54,17 +53,6 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
-
-	// console.log(
-	// 	'local Stream--->',
-	// 	localStream,
-	// 	'camera--->',
-	// 	isCameraOn,
-	// 	'Mic--->',
-	// 	isMicrophoneOn
-	// 	// 'Stream-------->',
-	// 	// isScreenSharing
-	// );
 
 	const handleLeaveRoom = useCallback(() => {
 		socketEmit('event:callEnd', {
@@ -75,6 +63,19 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const handleEndRoom = useCallback(() => {
 		socketEmit('event:endRoom', { roomId });
 	}, [roomId, socketEmit]);
+
+	const handleKickUser = useCallback(
+		(socketId: string) => {
+			socketEmit('event:kickUser', { roomId, socketId });
+		},
+		[roomId, socketEmit]
+	);
+	const handleChangeHost = useCallback(
+		(socketId: string) => {
+			socketEmit('event:changeHost', { roomId, socketId });
+		},
+		[roomId, socketEmit]
+	);
 
 	return (
 		<div className="absolute bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 justify-between border-gray-200 px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">
@@ -127,6 +128,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 							<p>Microphone On/Off</p>
 						</TooltipContent>
 					</Tooltip>
+
 					{roomDetails?.createdById === userId ? (
 						<Tooltip>
 							<TooltipTrigger>
@@ -213,12 +215,146 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 							<p>Options</p>
 						</TooltipContent>
 					</Tooltip>
+
+					<Tooltip>
+						<TooltipTrigger>
+							<Popover>
+								<PopoverTrigger className="flex w-full items-center gap-1.5 text-sm">
+									<Button
+										data-tooltip-target="tooltip-microphone"
+										type="button"
+										className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+									>
+										<Users className="h-6 w-7" />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="flex flex-col gap-2">
+									<span className="text-lg font-semibold">Participants</span>
+									<Separator />
+
+									{participants.find(
+										(participant) =>
+											participant.userId === userId && participant.host === true
+									) ? (
+										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
+											{participants.map((participant) => (
+												<div
+													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
+													key={participant.userId}
+												>
+													<Avatar className="h-7 w-7">
+														<AvatarImage src={participant.imageUrl} />
+													</Avatar>
+													<div className="flex flex-col">
+														<span className="text-sm font-semibold">
+															{participant.fullName}
+														</span>
+														<span className="text-xs">
+															{participant.host && <span>(Meeting Host)</span>}
+														</span>
+													</div>
+
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant={'outline'}
+																className="group rounded-full p-1 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+															>
+																<EllipsisVertical />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent>
+															<DropdownMenuLabel>
+																Meeting Options
+															</DropdownMenuLabel>
+															{!participant.host ? (
+																<>
+																	<DropdownMenuItem
+																		onClick={() =>
+																			handleKickUser(participant.socketId)
+																		}
+																	>
+																		Kick Out
+																	</DropdownMenuItem>
+																	<DropdownMenuItem
+																		onClick={() =>
+																			handleChangeHost(participant.socketId)
+																		}
+																	>
+																		Change to Host
+																	</DropdownMenuItem>
+																</>
+															) : (
+																<DropdownMenuItem>
+																	Leave Meeting
+																</DropdownMenuItem>
+															)}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))}
+										</ScrollArea>
+									) : (
+										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
+											{participants.map((participant) => (
+												<div
+													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
+													key={participant.userId}
+												>
+													<Avatar className="h-7 w-7">
+														<AvatarImage src={participant.imageUrl} />
+													</Avatar>
+													<div className="flex flex-col">
+														<span className="text-sm font-semibold">
+															{participant.fullName}
+														</span>
+														<span className="text-xs">
+															{participant.host && <span>(Meeting Host)</span>}
+														</span>
+													</div>
+
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant={'outline'}
+																className="group rounded-full p-1 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+															>
+																<EllipsisVertical />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent>
+															<DropdownMenuLabel>
+																Meeting Options
+															</DropdownMenuLabel>
+															{participant.userId === userId ? (
+																<DropdownMenuItem
+																	onClick={() => handleLeaveRoom()}
+																>
+																	Leave Meeting
+																</DropdownMenuItem>
+															) : (
+																<DropdownMenuItem>No Options</DropdownMenuItem>
+															)}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))}
+										</ScrollArea>
+									)}
+								</PopoverContent>
+							</Popover>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>Participants</p>
+						</TooltipContent>
+					</Tooltip>
 				</div>
 			</div>
 
 			<div className="flex w-full items-center justify-end gap-4">
-				<div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
-					<Tooltip>
+				{/* <div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
+					
+					{/* <Tooltip>
 						<TooltipTrigger>
 							<Popover>
 								<PopoverTrigger>
@@ -234,24 +370,28 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 									<span className="text-lg font-semibold">Participants</span>
 									<Separator />
 
-									<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
-										{participants.map((participant) => (
-											<div
-												className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
-												key={participant.userId}
-											>
-												<Avatar className="h-7 w-7">
-													<AvatarImage src={participant.imageUrl} />
-												</Avatar>
-												<div className="flex flex-col">
-													<span className="text-sm font-semibold">
-														{participant.fullName}
-													</span>
-													<span className="text-xs">
-														{participant.fullName}
-													</span>
-												</div>
-												<div>
+									{participants.find(
+										(participant) =>
+											participant.userId === userId && participant.host === true
+									) ? (
+										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
+											{participants.map((participant) => (
+												<div
+													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
+													key={participant.userId}
+												>
+													<Avatar className="h-7 w-7">
+														<AvatarImage src={participant.imageUrl} />
+													</Avatar>
+													<div className="flex flex-col">
+														<span className="text-sm font-semibold">
+															{participant.fullName}
+														</span>
+														<span className="text-xs">
+															{participant.host && <span>(Meeting Host)</span>}
+														</span>
+													</div>
+
 													<DropdownMenu>
 														<DropdownMenuTrigger asChild>
 															<Button
@@ -262,27 +402,81 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 															</Button>
 														</DropdownMenuTrigger>
 														<DropdownMenuContent>
-															<DropdownMenuLabel>My Account</DropdownMenuLabel>
-															<DropdownMenuSeparator />
-															<DropdownMenuItem>Profile</DropdownMenuItem>
-															<DropdownMenuItem>Billing</DropdownMenuItem>
-															<DropdownMenuItem>Team</DropdownMenuItem>
-															<DropdownMenuItem>Subscription</DropdownMenuItem>
+															<DropdownMenuLabel>
+																Meeting Options
+															</DropdownMenuLabel>
+															{!participant.host ? (
+																<>
+																	<DropdownMenuItem>Kick Out</DropdownMenuItem>
+
+																	<DropdownMenuItem>
+																		Change to Host
+																	</DropdownMenuItem>
+																</>
+															) : (
+																<DropdownMenuItem>
+																	Leave Meeting
+																</DropdownMenuItem>
+															)}
 														</DropdownMenuContent>
 													</DropdownMenu>
 												</div>
-											</div>
-										))}
-									</ScrollArea>
+											))}
+										</ScrollArea>
+									) : (
+										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
+											{participants.map((participant) => (
+												<div
+													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
+													key={participant.userId}
+												>
+													<Avatar className="h-7 w-7">
+														<AvatarImage src={participant.imageUrl} />
+													</Avatar>
+													<div className="flex flex-col">
+														<span className="text-sm font-semibold">
+															{participant.fullName}
+														</span>
+														<span className="text-xs">
+															{participant.host && <span>(Meeting Host)</span>}
+														</span>
+													</div>
+
+													<DropdownMenu>
+														<DropdownMenuTrigger asChild>
+															<Button
+																variant={'outline'}
+																className="group rounded-full p-1 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+															>
+																<EllipsisVertical />
+															</Button>
+														</DropdownMenuTrigger>
+														<DropdownMenuContent>
+															<DropdownMenuLabel>
+																Meeting Options
+															</DropdownMenuLabel>
+															{participant.userId === userId ? (
+																<DropdownMenuItem>
+																	Leave Meeting
+																</DropdownMenuItem>
+															) : (
+																<DropdownMenuItem>No Options</DropdownMenuItem>
+															)}
+														</DropdownMenuContent>
+													</DropdownMenu>
+												</div>
+											))}
+										</ScrollArea>
+									)}
 								</PopoverContent>
 							</Popover>
 						</TooltipTrigger>
 						<TooltipContent>
 							<p>Show participants</p>
 						</TooltipContent>
-					</Tooltip>
+					</Tooltip> */}
 
-					<Tooltip>
+				{/* <Tooltip>
 						<TooltipTrigger>
 							<Button
 								variant={'outline'}
@@ -296,8 +490,8 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						<TooltipContent>
 							<p>Show information</p>
 						</TooltipContent>
-					</Tooltip>
-				</div>
+					</Tooltip> 
+				</div> */}
 			</div>
 		</div>
 	);

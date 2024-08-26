@@ -146,7 +146,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 							<RemoteUserVideoPanel key={index} stream={stream} />
 						))}
 
-						<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+						<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 							<UserVideoPanel />
 						</div>
 					</div>

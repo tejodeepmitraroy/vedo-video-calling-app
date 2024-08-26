@@ -295,6 +295,70 @@ export function roomConnections(
 		}
 	});
 
+	socket.on(
+		'event:kickUser',
+		({ roomId, socketId }: { roomId: string; socketId: string }) => {
+			const roomDetails = rooms.get(roomId);
+			const roomParticipants = roomDetails?.participants;
+
+			roomParticipants?.delete(socketId);
+
+			const AllUsers = rooms.get(roomId)?.participants.values();
+			const participants = Array.from(AllUsers!);
+
+			const userSocket = io.sockets.sockets.get(socketId);
+
+			io.to(roomId).emit('notification:userKickedFromTheRoom', {
+				user: socketIdToUserMap.get(socketId),
+			});
+
+			io.to(roomId).emit('event:participantsInRoom', {
+				participants,
+			});
+
+			userSocket?.leave(roomId);
+
+			// console.log('Leaving after Room Details', roomDetails);
+		}
+	);
+
+	socket.on(
+		'event:changeHost',
+		({ roomId, socketId }: { roomId: string; socketId: string }) => {
+			const roomDetails = rooms.get(roomId);
+			const roomParticipants = roomDetails?.participants;
+
+			const currentHost = roomParticipants?.get(socket.id);
+			const participant = roomParticipants?.get(socketId);
+
+			if (roomDetails?.hostSocketId === socket.id) {
+				roomDetails.hostId = '';
+				roomDetails.hostSocketId = '';
+				roomParticipants?.delete(socketId);
+			}
+
+			if (roomDetails && participant && currentHost) {
+				roomDetails.hostId = socketId;
+				roomDetails.hostSocketId = socketIdToUserMap.get(socketId)!.userId;
+				participant ? (participant.host = true) : undefined;
+				currentHost ? (currentHost.host = false) : undefined;
+				roomParticipants?.set(socketId, participant!);
+				roomParticipants?.set(socket.id, currentHost!);
+			}
+
+			const AllUsers = rooms.get(roomId)?.participants.values();
+			const participants = Array.from(AllUsers!);
+
+			io.to(roomId).emit('notification:hostIsChanged', {
+				user: socketIdToUserMap.get(socketId),
+			});
+
+			io.to(roomId).emit('event:participantsInRoom', {
+				participants,
+			});
+		}
+	);
+
 	socket.on('disconnecting', () => {
 		const roomId = Array.from(socket.rooms)[1];
 		const roomDetails = rooms.get(roomId);

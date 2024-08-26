@@ -37,9 +37,9 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
-	const removeParticipant = useParticipantsStore(
-		(state) => state.removeParticipant
-	);
+	// const removeParticipant = useParticipantsStore(
+	// 	(state) => state.removeParticipant
+	// );
 
 	const { disconnectPeer, resetRemotePeers } = useWebRTC();
 
@@ -121,18 +121,11 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 				setCurrentScreen('OutSide Lobby');
 			} else {
 				disconnectPeer({ user });
-				removeParticipant(user);
+				// removeParticipant(user);
 				toast(`${user.fullName} Left the Room`);
 			}
 		},
-		[
-			disconnectPeer,
-			removeParticipant,
-			resetRemotePeers,
-			setCurrentScreen,
-			setLocalStream,
-			userId,
-		]
+		[disconnectPeer, resetRemotePeers, setCurrentScreen, setLocalStream, userId]
 	);
 
 	const handleRemoveEveryoneFromRoom = useCallback(async () => {
@@ -141,6 +134,28 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 		setCurrentScreen('OutSide Lobby');
 	}, [resetRemotePeers, setCurrentScreen]);
 
+	const handleUserKickedFromTheRoom = useCallback(
+		({ user }: { user: ServerStoreUser }) => {
+			if (user.userId === userId) {
+				toast.success(`You Left the Room`);
+				setLocalStream(null);
+				resetRemotePeers();
+				setCurrentScreen('OutSide Lobby');
+			} else {
+				disconnectPeer({ user });
+				toast(`${user.fullName} is kicked from the Room`);
+			}
+		},
+		[disconnectPeer, resetRemotePeers, setCurrentScreen, setLocalStream, userId]
+	);
+
+	const handleHostIsChanged = useCallback(
+		({ user }: { user: ServerStoreUser }) => {
+			toast(`${user.fullName} is now host of the Room`);
+		},
+		[]
+	);
+
 	///////////////////////////////////////////////////////
 	////// Listener 👇
 
@@ -148,6 +163,8 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 		socketOn('notification:informAllNewUserAdded', handleInformAllNewUserAdded);
 		socketOn('notification:userLeftTheRoom', handleUserLeftTheRoom);
 		socketOn('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
+		socketOn('notification:userKickedFromTheRoom', handleUserKickedFromTheRoom);
+		socketOn('notification:hostIsChanged', handleHostIsChanged);
 
 		return () => {
 			socketOff(
@@ -156,10 +173,17 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 			);
 			socketOff('event:removeEveryoneFromRoom', handleRemoveEveryoneFromRoom);
 			socketOff('notification:userLeftTheRoom', handleUserLeftTheRoom);
+			socketOff(
+				'notification:userKickedFromTheRoom',
+				handleUserKickedFromTheRoom
+			);
+			socketOff('notification:hostIsChanged', handleHostIsChanged);
 		};
 	}, [
+		handleHostIsChanged,
 		handleInformAllNewUserAdded,
 		handleRemoveEveryoneFromRoom,
+		handleUserKickedFromTheRoom,
 		handleUserLeftTheRoom,
 		socketOff,
 		socketOn,
