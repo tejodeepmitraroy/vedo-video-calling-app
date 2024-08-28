@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import prisma from '../lib/prismaClient';
 
-type hostSocketIdToRoomId = Map<string, string>;
+// type hostSocketIdToRoomId = Map<string, string>;
 type socketIdToUserMap = Map<
 	string,
 	{
@@ -17,8 +17,8 @@ type socketIdToUserMap = Map<
 type rooms = Map<
 	string,
 	{
-		hostId: string;
-		hostSocketId: string;
+		// hostId: string;
+		// hostSocketId: string;
 		participants: Map<
 			string,
 			{
@@ -37,7 +37,7 @@ export function roomConnections(
 	socket: Socket,
 	io: Server,
 	rooms: rooms,
-	hostSocketIdToRoomId: hostSocketIdToRoomId,
+	// hostSocketIdToRoomId: hostSocketIdToRoomId,
 	socketIdToUserMap: socketIdToUserMap
 ) {
 	socket.on(
@@ -72,10 +72,13 @@ export function roomConnections(
 			if (rooms.get(roomId)?.participants.size === 4) {
 				io.to(socket.id).emit('notification:roomLimitFull');
 			} else {
-				const hostSocketId = rooms.get(roomId)?.hostSocketId;
+				const AllUsers = rooms.get(roomId)?.participants.values();
+				const host = Array.from(AllUsers!).find(
+					(participant) => participant.host === true
+				);
 
-				if (hostSocketId) {
-					io.to(hostSocketId).emit('event:userWantToEnter', {
+				if (host) {
+					io.to(host.socketId).emit('event:userWantToEnter', {
 						username: socketIdToUserMap.get(socket.id)?.fullName,
 						profilePic: socketIdToUserMap.get(socket.id)?.imageUrl,
 						socketId: socket.id,
@@ -113,12 +116,12 @@ export function roomConnections(
 		'event:joinRoom',
 		async ({ roomId, hostUser }: { roomId: string; hostUser: boolean }) => {
 			if (!rooms.has(roomId) && hostUser) {
-				hostSocketIdToRoomId.set(socket.id, roomId);
-				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
+				// hostSocketIdToRoomId.set(socket.id, roomId);
+				// const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
 
 				const roomDetails = {
-					hostId: hostUserId!,
-					hostSocketId: socket.id,
+					// hostId: hostUserId!,
+					// hostSocketId: socket.id,
 
 					participants: new Map<
 						string,
@@ -137,16 +140,16 @@ export function roomConnections(
 			}
 
 			if (rooms.has(roomId) && hostUser) {
-				console.log('Participents=========>', rooms.get(roomId));
+				console.log('Participant=========>', rooms.get(roomId));
 
 				const updateUser = socketIdToUserMap.get(socket.id)!;
 
 				socketIdToUserMap.set(socket.id, { ...updateUser, host: true });
 
-				const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
+				// const hostUserId = socketIdToUserMap.get(socket.id)?.userId;
 				const roomDetails = {
-					hostId: hostUserId!,
-					hostSocketId: socket.id,
+					// hostId: hostUserId!,
+					// hostSocketId: socket.id,
 					participants: rooms.get(roomId)!.participants,
 				};
 				rooms.set(roomId, roomDetails);
@@ -199,7 +202,7 @@ export function roomConnections(
 				userData: socketIdToUserMap.get(socket.id),
 				roomId,
 				socketId: socket.id,
-				hostSocketIdToRoomId: hostSocketIdToRoomId.get(socket.id),
+				// hostSocketIdToRoomId: hostSocketIdToRoomId.get(socket.id),
 				roomStatus: rooms.get(roomId),
 			});
 		}
@@ -258,13 +261,15 @@ export function roomConnections(
 			const roomDetails = rooms.get(roomId);
 			const roomParticipants = roomDetails?.participants;
 
-			if (roomDetails?.hostSocketId === socket.id) {
-				roomDetails.hostId = '';
-				roomDetails.hostSocketId = '';
-				roomParticipants?.delete(socket.id);
-			} else {
-				roomParticipants?.delete(socket.id);
-			}
+			// if (roomDetails?.hostSocketId === socket.id) {
+			// 	roomDetails.hostId = '';
+			// 	roomDetails.hostSocketId = '';
+			// 	roomParticipants?.delete(socket.id);
+			// } else {
+			// 	roomParticipants?.delete(socket.id);
+			// }
+
+			roomParticipants?.delete(socket.id);
 
 			const AllUsers = rooms.get(roomId)?.participants.values();
 			const participants = Array.from(AllUsers!);
@@ -287,12 +292,12 @@ export function roomConnections(
 	);
 
 	socket.on('event:endRoom', ({ roomId }: { roomId: string }) => {
-		const roomDetails = rooms.get(roomId);
-		if (roomDetails?.hostSocketId === socket.id) {
-			io.to(roomId).emit('event:removeEveryoneFromRoom');
-			rooms.delete(roomId);
-			io.socketsLeave(roomId);
-		}
+		// const roomDetails = rooms.get(roomId);
+		// if (roomDetails?.hostSocketId === socket.id) {
+		io.to(roomId).emit('event:removeEveryoneFromRoom');
+		rooms.delete(roomId);
+		io.socketsLeave(roomId);
+		// }
 	});
 
 	socket.on(
@@ -331,15 +336,9 @@ export function roomConnections(
 			const currentHost = roomParticipants?.get(socket.id);
 			const participant = roomParticipants?.get(socketId);
 
-			if (roomDetails?.hostSocketId === socket.id) {
-				roomDetails.hostId = '';
-				roomDetails.hostSocketId = '';
-				roomParticipants?.delete(socketId);
-			}
-
-			if (roomDetails && participant && currentHost) {
-				roomDetails.hostId = socketId;
-				roomDetails.hostSocketId = socketIdToUserMap.get(socketId)!.userId;
+			if (participant && currentHost) {
+				// roomDetails.hostId = socketId;
+				// roomDetails.hostSocketId = socketIdToUserMap.get(socketId)!.userId;
 				participant ? (participant.host = true) : undefined;
 				currentHost ? (currentHost.host = false) : undefined;
 				roomParticipants?.set(socketId, participant!);
@@ -355,6 +354,7 @@ export function roomConnections(
 
 			io.to(roomId).emit('event:participantsInRoom', {
 				participants,
+				// roomDetails,
 			});
 		}
 	);
@@ -364,13 +364,14 @@ export function roomConnections(
 		const roomDetails = rooms.get(roomId);
 		const roomParticipants = roomDetails?.participants;
 
-		if (roomDetails?.hostSocketId === socket.id) {
-			roomDetails.hostId = '';
-			roomDetails.hostSocketId = '';
-			roomParticipants?.delete(socket.id);
-		} else {
-			roomParticipants?.delete(socket.id);
-		}
+		// if (roomDetails?.hostSocketId === socket.id) {
+		// 	roomDetails.hostId = '';
+		// 	roomDetails.hostSocketId = '';
+		// 	roomParticipants?.delete(socket.id);
+		// } else {
+		// 	roomParticipants?.delete(socket.id);
+		// }
+		roomParticipants?.delete(socket.id);
 
 		const AllUsers = roomParticipants?.values();
 

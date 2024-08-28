@@ -18,7 +18,7 @@ const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
 
 	return (
 		<div className="relative z-20 flex h-full w-full">
-			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-black">
+			<div className="z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-[#3c4043]">
 				{hasWindow && (
 					<ReactPlayer
 						url={stream!}

@@ -49,7 +49,6 @@ const Home = () => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
-
 	const { getUserMedia, resetRemotePeers } = useWebRTC();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -13,10 +13,21 @@ import {
 import { useSocket } from './SocketContext';
 import useStreamStore from '@/store/useStreamStore';
 import useDeviceStore from '@/store/useDeviceStore';
+// import useParticipantsStore from '@/store/useParticipantsStore';
 
+// interface Participant {
+// 	socketId: string;
+// 	userId: string;
+// 	fullName: string;
+// 	imageUrl: string;
+// 	emailAddress: string;
+// 	host: boolean;
+// 	stream: MediaStream;
+// }
 interface IWebRTCContext {
 	localStream: MediaStream | null;
 	streams: MediaStream[];
+	// participantStreams: Participant[];
 	getAllMediaDevices: () => void;
 	getUserMedia: ({
 		camera,
@@ -39,12 +50,17 @@ export const useWebRTC = () => {
 
 export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	const [streams, setStreams] = useState<MediaStream[]>([]);
+	// const [participantStreams, setParticipantStreams] = useState<Participant[]>(
+	// 	[]
+	// );
 	const localStream = useRef<MediaStream | null>(null);
 	const peerStreams = useMemo(() => new Map<string, MediaStream>(), []);
 	const peerConnections = useMemo(
 		() => new Map<string, RTCPeerConnection>(),
 		[]
 	);
+
+	// const participants = useParticipantsStore((state) => state.participants);
 	const { socketEmit, socketOn, socketOff } = useSocket();
 
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
@@ -116,8 +132,49 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			peerConnection.addEventListener('track', (event) => {
 				console.log('getting tracks================+>', event.streams[0]);
 				peerStreams.set(userSocketId, event.streams[0]);
-				const AllUsers = peerStreams?.values();
-				const remoteStreams = Array.from(AllUsers);
+				const usersStream = peerStreams?.values();
+				// const usersSocket = peerStreams?.keys();
+				const remoteStreams = Array.from(usersStream);
+				// const remoteSocketIds = Array.from(usersSocket);
+
+				// const updatedStream = remoteSocketIds.map((socketId) => {
+
+				// 	return {
+				// 		socketId: participant.socketId,
+				// 		userId: participant.userId,
+				// 		fullName: participant.fullName,
+				// 		imageUrl: participant.imageUrl,
+				// 		emailAddress: participant.emailAddress,
+				// 		host: participant.host,
+				// 		stream: peerStreams.get(participant.socketId)!,
+				// 	};
+				// } );
+
+				// const newStreams = participants.map((participant) => {
+				// 	if (peerStreams.get(participant.socketId)) {
+				// 		return {
+				// 			socketId: participant.socketId,
+				// 			userId: participant.userId,
+				// 			fullName: participant.fullName,
+				// 			imageUrl: participant.imageUrl,
+				// 			emailAddress: participant.emailAddress,
+				// 			host: participant.host,
+				// 			stream: peerStreams.get(participant.socketId)!,
+				// 		};
+				// 	} else {
+				// 		return {
+				// 			socketId: participant.socketId,
+				// 			userId: participant.userId,
+				// 			fullName: participant.fullName,
+				// 			imageUrl: participant.imageUrl,
+				// 			emailAddress: participant.emailAddress,
+				// 			host: participant.host,
+				// 			stream: localStream.current!,
+				// 		};
+				// 	}
+				// });
+
+				// setParticipantStreams(newStreams);
 				setStreams(remoteStreams);
 			});
 
@@ -266,6 +323,8 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			}
 		}, [peerConnections, setLocalStream]);
 
+	///////////////////////////////////////////////////////////////////////////////////////////
+
 	useEffect(() => {
 		socketOn('event:user-connected', handleCreateOffer);
 		socketOn('event:getOffer', handleCreateAnswer);
@@ -292,6 +351,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			value={{
 				localStream: localStream.current,
 				streams,
+				// participantStreams,
 				getAllMediaDevices,
 				getUserMedia,
 				disconnectPeer,
