@@ -23,9 +23,11 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<ClerkProvider
-			// appearance={{
-			// 	baseTheme: neobrutalism,
-			// }}
+				appearance={{
+					elements: {
+						formButtonPrimary: 'bg-primary hover:bg-[#f3f4f6] hover:text-black',
+					},
+				}}
 			>
 				<SocketProvider>
 					<WebRTCProvider>

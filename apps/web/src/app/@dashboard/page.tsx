@@ -182,7 +182,7 @@ export default function Dashboard() {
 				</Card>
 
 				{user ? (
-					<Card className="hidden h-fit flex-col bg-slate-100 md:row-span-2 md:flex">
+					<Card className="hidden h-fit flex-col bg-slate-200 md:row-span-2 md:flex">
 						<CardHeader>
 							<div className="grid w-full grid-cols-4 gap-2">
 								<div className="col-span-1">
@@ -247,7 +247,7 @@ export default function Dashboard() {
 						</CardContent>
 					</Card>
 				) : (
-					<Card className="hidden h-fit animate-pulse flex-col bg-slate-100 md:row-span-2 md:flex">
+					<Card className="hidden h-fit animate-pulse flex-col bg-slate-200 md:row-span-2 md:flex">
 						<CardHeader>
 							<div className="grid w-full grid-cols-4 gap-2">
 								<div className="col-span-1">
@@ -290,7 +290,7 @@ export default function Dashboard() {
 					</Card>
 				)}
 
-				<Card className="row-span-3 hidden flex-col overflow-y-auto bg-slate-100 md:flex">
+				<Card className="row-span-3 hidden flex-col overflow-y-auto bg-slate-200 md:flex">
 					<CardHeader className="w-full p-4 pb-3 md:p-6">
 						<CardTitle>Recent Meetings</CardTitle>
 						<CardDescription>meeting & calls logs</CardDescription>

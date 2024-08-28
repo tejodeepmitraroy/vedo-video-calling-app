@@ -23,10 +23,7 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useSocket } from '@/context/SocketContext';
-
-import useGlobalStore from '@/store/useGlobalStore';
 import useParticipantsStore from '@/store/useParticipantsStore';
-
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
@@ -39,8 +36,11 @@ import {
 	EllipsisVertical,
 	Share2,
 	Users,
+	// ScreenShare,
+	// ScreenShareOff,
 } from 'lucide-react';
 import React, { useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { RWebShare } from 'react-web-share';
 
 const ControlPanel = ({ roomId }: { roomId: string }) => {
@@ -48,17 +48,40 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleMicrophone = useStreamStore((state) => state.toggleMicrophone);
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
-	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const participants = useParticipantsStore((state) => state.participants);
+	// const isScreenSharing = useStreamStore((state) => state.isScreenSharing);
+	// const toggleScreenShare = useStreamStore((state) => state.toggleScreenShare);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
 
+	const currentUser = participants.find(
+		(participant) => participant.userId === userId
+	);
+
+	console.log(
+		'participants,currentUser=============>',
+		participants,
+		currentUser
+	);
+
 	const handleLeaveRoom = useCallback(() => {
-		socketEmit('event:callEnd', {
-			roomId,
-		});
-	}, [roomId, socketEmit]);
+		if (currentUser?.host) {
+			if (participants.length === 1) {
+				socketEmit('event:callEnd', {
+					roomId,
+				});
+			} else {
+				toast.error(
+					'Please, set another participant as host to leave the room '
+				);
+			}
+		} else {
+			socketEmit('event:callEnd', {
+				roomId,
+			});
+		}
+	}, [currentUser?.host, participants.length, roomId, socketEmit]);
 
 	const handleEndRoom = useCallback(() => {
 		socketEmit('event:endRoom', { roomId });
@@ -117,7 +140,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
 							>
 								{isMicrophoneOn ? (
-									<Mic className="h-6 w-7" />
+									<Mic className="h-7 w-7" />
 								) : (
 									<MicOff className="h-7 w-7" />
 								)}
@@ -129,7 +152,29 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</TooltipContent>
 					</Tooltip>
 
-					{roomDetails?.createdById === userId ? (
+					{/* <Tooltip>
+						<TooltipTrigger>
+							<Button
+								data-tooltip-target="tooltip-camera"
+								variant={isScreenSharing ? 'destructive' : 'default'}
+								onClick={() => toggleScreenShare()}
+								type="button"
+								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+							>
+								{isScreenSharing ? (
+									<ScreenShareOff className="h-7 w-7" />
+								) : (
+									<ScreenShare className="h-7 w-7" />
+								)}
+								<span className="sr-only">Hide camera</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>Screen Sharing On/Off</p>
+						</TooltipContent>
+					</Tooltip> */}
+
+					{currentUser?.host ? (
 						<Tooltip>
 							<TooltipTrigger>
 								<DropdownMenu>
@@ -353,130 +398,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 
 			<div className="flex w-full items-center justify-end gap-4">
 				{/* <div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
-					
-					{/* <Tooltip>
-						<TooltipTrigger>
-							<Popover>
-								<PopoverTrigger>
-									<Button
-										variant={'outline'}
-										className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-									>
-										<Users className="h-4 w-4" />
-										<span className="sr-only">Show participants</span>
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="flex flex-col gap-2">
-									<span className="text-lg font-semibold">Participants</span>
-									<Separator />
-
-									{participants.find(
-										(participant) =>
-											participant.userId === userId && participant.host === true
-									) ? (
-										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
-											{participants.map((participant) => (
-												<div
-													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
-													key={participant.userId}
-												>
-													<Avatar className="h-7 w-7">
-														<AvatarImage src={participant.imageUrl} />
-													</Avatar>
-													<div className="flex flex-col">
-														<span className="text-sm font-semibold">
-															{participant.fullName}
-														</span>
-														<span className="text-xs">
-															{participant.host && <span>(Meeting Host)</span>}
-														</span>
-													</div>
-
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button
-																variant={'outline'}
-																className="group rounded-full p-1 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-															>
-																<EllipsisVertical />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent>
-															<DropdownMenuLabel>
-																Meeting Options
-															</DropdownMenuLabel>
-															{!participant.host ? (
-																<>
-																	<DropdownMenuItem>Kick Out</DropdownMenuItem>
-
-																	<DropdownMenuItem>
-																		Change to Host
-																	</DropdownMenuItem>
-																</>
-															) : (
-																<DropdownMenuItem>
-																	Leave Meeting
-																</DropdownMenuItem>
-															)}
-														</DropdownMenuContent>
-													</DropdownMenu>
-												</div>
-											))}
-										</ScrollArea>
-									) : (
-										<ScrollArea className="flex h-[500px] w-full max-w-[600px] flex-col gap-2 rounded-lg border-gray-200">
-											{participants.map((participant) => (
-												<div
-													className="flex w-full items-center justify-between gap-3 rounded-lg p-2"
-													key={participant.userId}
-												>
-													<Avatar className="h-7 w-7">
-														<AvatarImage src={participant.imageUrl} />
-													</Avatar>
-													<div className="flex flex-col">
-														<span className="text-sm font-semibold">
-															{participant.fullName}
-														</span>
-														<span className="text-xs">
-															{participant.host && <span>(Meeting Host)</span>}
-														</span>
-													</div>
-
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button
-																variant={'outline'}
-																className="group rounded-full p-1 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-															>
-																<EllipsisVertical />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent>
-															<DropdownMenuLabel>
-																Meeting Options
-															</DropdownMenuLabel>
-															{participant.userId === userId ? (
-																<DropdownMenuItem>
-																	Leave Meeting
-																</DropdownMenuItem>
-															) : (
-																<DropdownMenuItem>No Options</DropdownMenuItem>
-															)}
-														</DropdownMenuContent>
-													</DropdownMenu>
-												</div>
-											))}
-										</ScrollArea>
-									)}
-								</PopoverContent>
-							</Popover>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Show participants</p>
-						</TooltipContent>
-					</Tooltip> */}
-
-				{/* <Tooltip>
+					<Tooltip>
 						<TooltipTrigger>
 							<Button
 								variant={'outline'}
@@ -490,7 +412,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						<TooltipContent>
 							<p>Show information</p>
 						</TooltipContent>
-					</Tooltip> 
+					</Tooltip>
 				</div> */}
 			</div>
 		</div>

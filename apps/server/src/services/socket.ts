@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
 import { roomConnections } from './roomConnections';
-// import { roomConnections } from './roomConnections';
 
 class SocketService {
 	_io: Server;
@@ -16,7 +15,7 @@ class SocketService {
 			host: boolean;
 		}
 	>;
-	private hostSocketIdToRoomId: Map<string, string>;
+	// private hostSocketIdToRoomId: Map<string, string>;
 	private rooms: Map<
 		string,
 		{
@@ -47,7 +46,7 @@ class SocketService {
 		});
 		this.userIdToSocketIdMap = new Map();
 		this.socketIdToUserMap = new Map();
-		this.hostSocketIdToRoomId = new Map();
+		// this.hostSocketIdToRoomId = new Map();
 		this.rooms = new Map();
 	}
 
@@ -104,7 +103,7 @@ class SocketService {
 				socket,
 				io,
 				this.rooms,
-				this.hostSocketIdToRoomId,
+				// this.hostSocketIdToRoomId,
 				this.socketIdToUserMap
 			);
 

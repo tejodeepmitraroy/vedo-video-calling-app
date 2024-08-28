@@ -7,16 +7,18 @@ import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
 import Image from 'next/image';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-import useStreamStore from '@/store/useStreamStore';
 import useParticipantsStore from '@/store/useParticipantsStore';
 import ControlPanel from './components/ControlPanel';
+import { useUser } from '@clerk/nextjs';
+// import useGlobalStore from '@/store/useGlobalStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const { streams } = useWebRTC();
-
+	const { user } = useUser();
 	const { socketOn, socketEmit, socketOff } = useSocket();
-	const localStream = useStreamStore((state) => state.localStream);
 	const setOnlineUsers = useParticipantsStore((state) => state.setParticipants);
+	// const participants = useParticipantsStore(state=>state.participants)
+	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 
 	console.log('Meeting Component mounted++++++++++');
 
@@ -103,6 +105,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const handleParticipantsInRoom = useCallback(
 		({
 			participants,
+			// roomDetails,
 		}: {
 			participants: {
 				socketId: string;
@@ -111,10 +114,12 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				imageUrl: string;
 				emailAddress: string;
 				host: boolean;
+				stream: MediaStream;
 			}[];
 		}) => {
 			console.log('ParticipantsInRoom=========>', participants);
 			setOnlineUsers(participants);
+			// setRoomDetails(roomDetails);
 		},
 		[setOnlineUsers]
 	);
@@ -127,45 +132,151 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		};
 	}, [handleParticipantsInRoom, socketOff, socketOn]);
 
+	console.log('MediaStream Array ========================>', streams);
+
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	///// All socket Event Function are Executed Here
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
-			<div className="flex h-full w-full justify-between gap-4 p-4 px-4 pb-20 sm:pb-4 md:pb-20">
-				{streams.length === 0 && (
+			<div className="h-full w-full flex-col justify-between gap-4 p-4 px-4 pb-20 sm:pb-4 md:pb-20">
+				{/* <div className="flex w-full items-center justify-between rounded-md border bg-[#3c4043] p-1">
+					<span className="flex gap-4 text-sm font-semibold text-white">
+						{' '}
+						<MonitorUp size={'20'} />
+						Tejodeep Mitra Roy (You, presenting)
+					</span>
+
+					<Button size={'sm'}>Stop presenting</Button>
+				</div> */}
+				{/* {isScreenSharing ? (
 					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
-						<RemoteUserVideoPanel stream={localStream!} />
+						<ScreenSharePanel />
+						<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+							<UserVideoPanel />
+							<span className="absolute bottom-3 left-4 z-40 rounded-lg text-xs font-semibold text-white sm:text-base">
+								{user?.fullName}
+							</span>
+						</div>
+					</div>
+				) : (
+					<>
+						{streams.length === 0 && (
+							<div className="relative mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
+								<UserVideoPanel />
+								<span className="absolute bottom-3 left-4 z-40 rounded-lg text-xs font-semibold text-white sm:text-base">
+									{user?.fullName}
+								</span>
+							</div>
+						)}
+						{streams.length === 1 && (
+							<div className="mx-auto flex w-full flex-col items-center justify-center gap-5 md:max-w-[90rem] md:flex-row">
+								{streams.map((stream, index) => (
+									<RemoteUserVideoPanel key={index} stream={stream} />
+								))}
+								<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+									<UserVideoPanel />
+								</div>
+							</div>
+						)}
+						{streams.length > 1 && (
+							<div className="flex w-full flex-col items-center justify-center gap-5 md:flex-row">
+								{streams.map((stream, index) => (
+									<div key={index} className="w-full">
+										<RemoteUserVideoPanel stream={stream} />
+									</div>
+								))}
+								{/* <RemoteUserVideoPanel stream={localStream!} /> 
+
+								<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+									<UserVideoPanel />
+								</div>
+							</div>
+						)}
+					</>
+				)} */}
+				{/*              */}
+
+				{streams.length === 0 && (
+					<div className="relative grid h-full w-full grid-cols-1">
+						<div className="mx-auto flex h-full w-full items-center justify-center gap-5 md:max-w-[90rem]">
+							<UserVideoPanel />
+							<span className="absolute bottom-3 left-4 z-40 rounded-lg text-xs font-semibold text-white sm:text-base">
+								{user?.fullName}
+							</span>
+						</div>
 					</div>
 				)}
 
 				{streams.length === 1 && (
-					<div className="mx-auto flex w-full flex-col items-center justify-center gap-5 md:max-w-[90rem] md:flex-row">
+					<div className="relative grid h-full w-full grid-cols-1">
+						<div className="mx-auto flex w-full flex-col items-center justify-center gap-5 md:max-w-[90rem] md:flex-row">
+							{streams.map((stream, index) => (
+								<RemoteUserVideoPanel key={index} stream={stream} />
+							))}
+						</div>
+						<div className="absolute bottom-[7vh] right-3 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[3vh] md:right-8 md:w-[20%] lg:right-14 lg:w-[12%]">
+							<UserVideoPanel />
+						</div>
+					</div>
+				)}
+
+				{(streams.length === 2 || streams.length === 3) && (
+					<div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-4">
+						{streams.map((stream, index) => (
+							<div
+								key={index}
+								className="flex h-full w-full flex-col items-center justify-center gap-5 md:flex-row"
+							>
+								<RemoteUserVideoPanel stream={stream} />
+							</div>
+						))}
+						<div className="relative flex h-full w-full flex-col items-center justify-center gap-5 md:flex-row">
+							<UserVideoPanel />
+							<span className="absolute bottom-3 left-4 z-40 rounded-lg text-xs font-semibold text-white sm:text-base">
+								{user?.fullName}
+							</span>
+						</div>
+						{/* <div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
+								<UserVideoPanel />
+							</div> */}
+					</div>
+				)}
+
+				{/* {streams.length === 0 && (
+					<div className="mx-auto flex h-full  w-full items-center justify-center gap-5 md:max-w-[90rem]">
+						<UserVideoPanel />
+						{/* <span className="absolute bottom-3 left-4 z-40 rounded-lg text-xs font-semibold text-white sm:text-base">
+							{user?.fullName}
+						</span> 
+					</div>
+				)}
+				{streams.length === 1 && (
+					<div className="mx-auto flex h-full w-full flex-col items-center justify-center gap-5 md:max-w-[90rem] md:flex-row">
 						{streams.map((stream, index) => (
 							<RemoteUserVideoPanel key={index} stream={stream} />
 						))}
-
 						<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 							<UserVideoPanel />
 						</div>
 					</div>
 				)}
-
 				{streams.length > 1 && (
-					<div className="flex w-full flex-col items-center justify-center gap-5 md:flex-row">
+					<div className="flex h-full w-full flex-col items-center justify-center gap-5 md:flex-row">
 						{streams.map((stream, index) => (
 							<div key={index} className="w-full">
 								<RemoteUserVideoPanel stream={stream} />
 							</div>
 						))}
-						<RemoteUserVideoPanel stream={localStream!} />
+						{/* =<RemoteUserVideoPanel stream={localStream!} /> 
+						<UserVideoPanel />
 
-						<div className="absolute bottom-[10vh] right-8 z-40 aspect-square w-[20%] resize sm:aspect-video md:bottom-[15vh] md:right-16 md:hidden md:w-[20%] lg:w-[12%]">
+						<div className="absolute bottom-[12vh] right-8 z-40 h-24 w-[20%] resize rounded-lg sm:aspect-video sm:h-auto md:bottom-[15vh] md:right-16 md:w-[20%] lg:w-[12%]">
 							<UserVideoPanel />
-						</div>
+						</div> 
 					</div>
-				)}
+				)} */}
 			</div>
 
 			<ControlPanel roomId={roomId} />

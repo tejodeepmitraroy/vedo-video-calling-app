@@ -9,12 +9,21 @@ interface OnlineUsers {
 	emailAddress: string;
 	host: boolean;
 }
+interface Participant {
+	socketId: string;
+	userId: string;
+	fullName: string;
+	imageUrl: string;
+	emailAddress: string;
+	host: boolean;
+	stream: MediaStream;
+}
 
 interface useParticipantsStore {
 	onlineUsers: OnlineUsers[];
-	participants: OnlineUsers[];
+	participants: Participant[];
 	setOnlineUsers: (onlineUsers: OnlineUsers[]) => void;
-	setParticipants: (participants: OnlineUsers[]) => void;
+	setParticipants: (participants: Participant[]) => void;
 }
 
 const useParticipantsStore = create<useParticipantsStore>((set) => ({
