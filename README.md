@@ -1,26 +1,79 @@
-# Turborepo starter
+# VEDO - Video Calling App
 
-This is an official starter Turborepo.
+## Description
 
-## Using this example
+V.E.D.O is a WebRTC and SocketIO based Video Calling Application just like Google meet/Zoom meeting but written in Next js and Express js.
 
-Run the following command:
+This is a video calling app and User can create, call, join, remove another user. This app maintain your call logs. User have a phone book and User can send invite request another user which is not present in friend list.
 
-```sh
-npx create-turbo@latest
+### Key Features
+
+- Users can do 1:1/many-screen video meeting
+- User can share Meeting link
+- Multiple User can Join in a meeting
+
+## Tech Stack
+
+1. **Next JS** - Frontend UI
+2. **Tailwind CSS** - CSS Framework
+3. **Shadcn UI** - Component Library
+4. **Zustand** - State Management of whole app
+5. **Express.Js** - Backend Framework
+6. **Clark** - Authentication of full app
+7. **Supabase** - PAAS(Platform as a Service)
+8. **PostgreSQL** - Database
+9. **Socket Io** - WebSocket
+10. **WebRTC** - WebRTC for realtime video,audio sharing
+11. **Prisma** - Database Query
+
+## Setup
+
+There are some necessary steps to get the project up and running.
+
+### Supabase
+
+- Create an [Supabase account](https://supabase.com/)
+
+## 🌐 Deployment
+
+- Hosted on Microsoft Azure: Leveraging Azure Web App for reliable and scalable hosting. Continuous integration and deployment pipelines via Azure DevOps streamline updates and maintenance.
+- Optimized Performance: Database queries are optimized for speed, and the URL encoding/decoding process ensures quick redirection. QR code generation and storage are also enhanced for efficiency.
+
+## Run The project
+
+### Develop
+
+To develop all apps and packages, run the following command:
+``` 
+yarn dev
 ```
 
-## What's inside?
+To build all apps and packages, run the following command:
+``` 
+yarn build
+```
 
-This Turborepo includes the following packages/apps:
+Run Lint the project
+``` 
+yarn lint
+```
+
+Run Prettier the project
+``` 
+yarn prettier
+```
+
+Find and fix all bugs in project
+``` 
+yarn fix:all
+```
+
+
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `server`: a Express js app
+- `web`: a Next.js app
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
@@ -31,24 +84,6 @@ This Turborepo has some additional tools already setup for you:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
 
 ### Remote Caching
 
@@ -68,14 +103,3 @@ Next, you can link your Turborepo to your Remote Cache by running the following 
 ```
 npx turbo link
 ```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

@@ -51,44 +51,49 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 			profilePic: string;
 			socketId: string;
 		}) => {
-			toast((t) => (
-				<div className="w-full">
-					<div className="flex">
-						<div className="flex w-[20%] items-center justify-center">
-							<Image
-								src={profilePic}
-								width={30}
-								height={30}
-								className="rounded-full"
-								alt={'Profile Pic'}
-							/>
+			toast(
+				(t) => (
+					<div className="w-full">
+						<div className="flex">
+							<div className="flex w-[20%] items-center justify-center">
+								<Image
+									src={profilePic}
+									width={30}
+									height={30}
+									className="rounded-full"
+									alt={'Profile Pic'}
+								/>
+							</div>
+							<div className="w-[80%]">{username} Want to Enter</div>
 						</div>
-						<div className="w-[80%]">{username} Want to Enter</div>
+						<div className="flex justify-evenly">
+							<Button
+								size={'sm'}
+								variant={'default'}
+								onClick={() => {
+									toast.dismiss(t.id);
+									roomEnterPermissionAccepted(socketId);
+								}}
+							>
+								Accept
+							</Button>
+							<Button
+								size={'sm'}
+								variant={'default'}
+								onClick={() => {
+									toast.dismiss(t.id);
+									roomEnterPermissionDenied(socketId);
+								}}
+							>
+								Rejected
+							</Button>
+						</div>
 					</div>
-					<div className="flex justify-evenly">
-						<Button
-							size={'sm'}
-							variant={'default'}
-							onClick={() => {
-								toast.dismiss(t.id);
-								roomEnterPermissionAccepted(socketId);
-							}}
-						>
-							Accept
-						</Button>
-						<Button
-							size={'sm'}
-							variant={'default'}
-							onClick={() => {
-								toast.dismiss(t.id);
-								roomEnterPermissionDenied(socketId);
-							}}
-						>
-							Rejected
-						</Button>
-					</div>
-				</div>
-			));
+				),
+				{
+					duration: 600000,
+				}
+			);
 		},
 		[roomEnterPermissionAccepted, roomEnterPermissionDenied]
 	);
