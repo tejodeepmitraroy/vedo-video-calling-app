@@ -1,18 +1,18 @@
 # VEDO - Video Calling App
 
-## Description
+## 📝Description
 
 V.E.D.O is a WebRTC and SocketIO based Video Calling Application just like Google meet/Zoom meeting but written in Next js and Express js.
 
 This is a video calling app and User can create, call, join, remove another user. This app maintain your call logs. User have a phone book and User can send invite request another user which is not present in friend list.
 
-### Key Features
+### 🔨Key Features
 
 - Users can do 1:1/many-screen video meeting
 - User can share Meeting link
 - Multiple User can Join in a meeting
 
-## Tech Stack
+## 🕸️Tech Stack
 
 1. **Next JS** - Frontend UI
 2. **Tailwind CSS** - CSS Framework
@@ -25,19 +25,6 @@ This is a video calling app and User can create, call, join, remove another user
 9. **Socket Io** - WebSocket
 10. **WebRTC** - WebRTC for realtime video,audio sharing
 11. **Prisma** - Database Query
-
-## Setup
-
-There are some necessary steps to get the project up and running.
-
-### Supabase
-
-- Create an [Supabase account](https://supabase.com/)
-
-## 🌐 Deployment
-
-- Hosted on Microsoft Azure: Leveraging Azure Web App for reliable and scalable hosting. Continuous integration and deployment pipelines via Azure DevOps streamline updates and maintenance.
-- Optimized Performance: Database queries are optimized for speed, and the URL encoding/decoding process ensures quick redirection. QR code generation and storage are also enhanced for efficiency.
 
 ## Run The project
 
