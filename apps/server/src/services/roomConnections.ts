@@ -339,8 +339,12 @@ export function roomConnections(
 			if (participant && currentHost) {
 				// roomDetails.hostId = socketId;
 				// roomDetails.hostSocketId = socketIdToUserMap.get(socketId)!.userId;
-				participant ? (participant.host = true) : undefined;
-				currentHost ? (currentHost.host = false) : undefined;
+				if (participant) {
+					participant.host = true;
+				}
+				if (currentHost) {
+					currentHost.host = false;
+				}
 				roomParticipants?.set(socketId, participant!);
 				roomParticipants?.set(socket.id, currentHost!);
 			}

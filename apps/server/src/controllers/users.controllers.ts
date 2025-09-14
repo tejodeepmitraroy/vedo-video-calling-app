@@ -1,14 +1,20 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import prisma from '../lib/prismaClient';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
-import { AuthenticatedRequest } from '../types/apiRequest';
+
+import { clerkClient, getAuth } from '@clerk/express';
 
 export const findAUser = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
+		// Use `getAuth()` to get the user's `userId`
+		const { userId } = getAuth(request);
+
+		// Use Clerk's JavaScript Backend SDK to get the user's User object
+		const user = await clerkClient.users.getUser(userId!);
 		const userName = request.query.user;
-		const user = request.auth?.userId;
+
 		console.log('user=======>>>>>', user);
 		if (typeof userName === 'string') {
 			try {
@@ -96,14 +102,14 @@ export const findAUser = asyncHandler(
 					},
 				});
 
-				const filteredUser = users.filter((item) => item.id !== user);
+				const filteredUser = users.filter((item) => item.id !== user.id);
 
 				const result = filteredUser.map((item) => {
 					const friend = item.friends.map((item) => {
-						return item.friend.id === user;
+						return item.friend.id === user.id;
 					});
 					const friendOf = item.friendOf.map((item) => {
-						return item.user.id === user;
+						return item.user.id === user.id;
 					});
 
 					const friendShip = [...friend, ...friendOf];
@@ -135,13 +141,15 @@ export const findAUser = asyncHandler(
 );
 
 export const getAllFriendList = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const user = request.auth?.userId;
+	async (request: Request, response: Response) => {
+		const { userId } = getAuth(request);
+		// Use Clerk's JavaScript Backend SDK to get the user's User object
+		const user = await clerkClient.users.getUser(userId!);
 		console.log('user=======>>>>>', user);
 		try {
 			const friends = await prisma.user.findUnique({
 				where: {
-					id: user,
+					id: userId!,
 				},
 				select: {
 					friends: {
@@ -192,7 +200,7 @@ export const getAllFriendList = asyncHandler(
 				console.log('friend =====>', friends);
 				const friend = friends.friends.map((item) => {
 					const friendship = item.friend.friendOf.map(
-						(item) => item.user.id === user
+						(item) => item.user.id === userId
 					);
 					return {
 						id: item.friend.id,
@@ -207,7 +215,7 @@ export const getAllFriendList = asyncHandler(
 				});
 				const friendOf = friends.friendOf.map((item) => {
 					const friendship = item.user.friends.map(
-						(item) => item.friend.id === user
+						(item) => item.friend.id === userId
 					);
 
 					console.log('friendOf =====>', item.user.friends);
@@ -239,16 +247,16 @@ export const getAllFriendList = asyncHandler(
 );
 
 export const sendFriendRequest = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
 		const { friendId } = request.body;
+		const { userId } = getAuth(request);
 
-		const user = request.auth!.userId;
 		console.log('friendId=======>>>>>', friendId);
 
 		try {
 			const friend = await prisma.friendShip.create({
 				data: {
-					user_id: user,
+					user_id: userId!,
 					friend_id: friendId,
 				},
 			});
@@ -265,24 +273,24 @@ export const sendFriendRequest = asyncHandler(
 );
 
 export const removeFriend = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
 		const friendId = request.query.friendId;
 
-		const user = request.auth?.userId;
+		const { userId } = getAuth(request);
 		console.log('friendId=======>>>>>', friendId);
 
-		if (typeof user === 'string' && typeof friendId === 'string') {
+		if (typeof userId === 'string' && typeof friendId === 'string') {
 			try {
 				const friend = await prisma.friendShip.deleteMany({
 					where: {
 						OR: [
 							{
-								user_id: user,
+								user_id: userId!,
 								friend_id: friendId,
 							},
 							{
 								user_id: friendId,
-								friend_id: user,
+								friend_id: userId!,
 							},
 						],
 					},

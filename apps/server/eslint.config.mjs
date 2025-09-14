@@ -1,14 +1,15 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
-
-export default [
-  { files: ['**/*.{js,mjs,cjs,ts}'] },
-  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    ignores: ['dist','.turbo']
-  }
-];
+export default defineConfig([
+	{ ignores: ['dist', 'generated','.turbo'] },
+	{
+		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+		plugins: { js },
+		extends: ['js/recommended'],
+		languageOptions: { globals: { ...globals.browser, ...globals.node } },
+	},
+	tseslint.configs.recommended,
+]);
