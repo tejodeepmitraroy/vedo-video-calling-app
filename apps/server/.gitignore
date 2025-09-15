@@ -15,6 +15,10 @@ node_modules
 # Database Migrations
 generated
 
+# Docker
+.docker-compose.yml
+
+
 
 # Build Outputs
 build

@@ -1,0 +1,8 @@
+node_modules
+.gitignore
+!dockerfile
+
+# /editorconfig
+.turbo
+.vscode
+dist

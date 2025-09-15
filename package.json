@@ -9,7 +9,8 @@
     "prettier": "turbo run prettier",
     "prettier:fix": "turbo run prettier:fix",
     "prepare": "husky",
-    "fix:all": "yarn lint:fix && yarn prettier:fix && yarn prettier && yarn lint && yarn build"
+    "fix:all": "yarn lint:fix && yarn prettier:fix && yarn prettier && yarn lint && yarn build",
+    "webhook": "yarn workspace server webhook"
   },
   "devDependencies": {
     "husky": "^9.0.11",

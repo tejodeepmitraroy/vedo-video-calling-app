@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  server:
+    container_name: <continer_name>
+    image: <build_image_name>
+    restart: always
+    environment:
+      PORT: 8000
+      DATABASE_URL: <database_url>
+      FRONTEND_ENDPOINT_URL: 'http://localhost:3000'
+      CLERK_PUBLISHABLE_KEY: <clerk_publishable_key>
+      CLERK_SECRET_KEY: <clerk_secret_key>
+      CLERK_WEBHOOK_SIGNING_SECRET: <clerk_webhook_signing_secret>
+    ports:
+      - 8000:8000
