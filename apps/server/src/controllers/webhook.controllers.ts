@@ -41,6 +41,7 @@ export const handleClerkWebhook = async (
 				const userData = await prisma.user.create({
 					data: {
 						id,
+						clerkId: id,
 						first_name: first_name ?? '',
 						last_name: last_name ?? '',
 						email,
