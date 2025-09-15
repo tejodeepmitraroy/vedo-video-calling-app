@@ -146,7 +146,6 @@ export const getAllRooms = asyncHandler(
 					};
 				});
 
-				// console.log('Meeting Data==========>', ModifyRoomDetails);
 				return response
 					.status(200)
 					.json(new ApiResponse(200, ModifyRoomDetails));

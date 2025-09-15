@@ -18,7 +18,7 @@
 		"db:push": "prisma db push",
 		"db:validate": "prisma db validate",
 		"db:migrate": "npx prisma migrate dev --name init",
-		"webhook": "ngrok http --url=swan-possible-dodo.ngrok-free.app 8000"
+		"webhook": "ngrok http --domain swan-possible-dodo.ngrok-free.app 8000"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.35.0",
