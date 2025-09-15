@@ -1,18 +1,24 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
 import { nanoid } from 'nanoid';
 import prisma from '../lib/prismaClient';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
-import { AuthenticatedRequest } from '../types/apiRequest';
+import { getAuth } from '@clerk/express';
 
 export const createInstantRoom = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.userId;
+	async (request: Request, response: Response) => {
+		const { userId } = getAuth(request);
+
+		if (!userId) {
+			response
+				.status(401)
+				.json(new ApiError(401, 'Unauthorized: missing userId'));
+		}
 
 		const shortId = nanoid(8);
 
-		console.log('User Id========>>', request.auth);
+		console.log('User Id========>>', userId);
 
 		try {
 			const meetingDetails = await prisma.room.create({
@@ -24,7 +30,7 @@ export const createInstantRoom = asyncHandler(
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
 					createdById: userId!,
 					hostById: userId!,
-					startTime: new Date().toISOString(),
+					startTime: new Date(),
 				},
 				select: {
 					id: true,
@@ -36,20 +42,18 @@ export const createInstantRoom = asyncHandler(
 				},
 			});
 
-			// console.log('meetingDetails', meetingDetails);
-			return response.status(200).json(new ApiResponse(200, meetingDetails));
+			console.log('meetingDetails', meetingDetails);
+			response.status(200).json(new ApiResponse(200, meetingDetails));
 		} catch (error) {
 			console.log(error);
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+			response.status(400).json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );
 
 export const getAllRooms = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.userId;
+	async (request: Request, response: Response) => {
+		const { userId } = getAuth(request);
 		const roomId = request.query.roomId;
 
 		if (typeof roomId === 'string') {
@@ -78,9 +82,9 @@ export const getAllRooms = asyncHandler(
 					},
 				});
 
-				return response.status(200).json(new ApiResponse(200, meetingData));
+				response.status(200).json(new ApiResponse(200, meetingData));
 			} catch (error) {
-				return response
+				response
 					.status(400)
 					.json(new ApiError(400, 'Error While getting a Call', error));
 			}
@@ -96,7 +100,7 @@ export const getAllRooms = asyncHandler(
 							{
 								participants: {
 									some: {
-										user_id: userId,
+										user_id: userId!,
 									},
 								},
 							},
@@ -195,14 +199,27 @@ export const getAllRooms = asyncHandler(
 // );
 
 export const createScheduleCall = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const user = request.auth?.userId;
+	async (request: Request, response: Response) => {
+		const { userId } = getAuth(request);
 		const shortId = nanoid(8);
 		const { title, description, startTime, endTime, participantIds } =
 			request.body;
 		console.log(request.body);
 
 		try {
+			if (!userId) {
+				response
+					.status(401)
+					.json(new ApiError(401, 'Unauthorized: missing userId'));
+			}
+
+			// Normalize participants list to an array of objects with user_id
+			const inviteUserIds: string[] = Array.isArray(participantIds)
+				? participantIds
+				: participantIds
+					? [participantIds]
+					: [userId];
+
 			const meetingDetails = await prisma.room.create({
 				data: {
 					id: shortId,
@@ -211,11 +228,11 @@ export const createScheduleCall = asyncHandler(
 					description,
 					startTime,
 					endTime,
-					createdById: user!,
-					hostById: user!,
+					createdById: userId!,
+					hostById: userId!,
 					invitedUsers: {
 						createMany: {
-							data: [participantIds ? participantIds : user!],
+							data: inviteUserIds.map((id: string) => ({ user_id: id })),
 						},
 					},
 					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
@@ -224,19 +241,17 @@ export const createScheduleCall = asyncHandler(
 
 			console.log(meetingDetails);
 
-			return response.status(200).json(new ApiResponse(200, meetingDetails));
+			response.status(200).json(new ApiResponse(200, meetingDetails));
 		} catch (error) {
 			console.log(error);
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+			response.status(400).json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );
 
 export const getAllScheduledRoomsDetails = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
-		const userId = request.auth?.userId;
+	async (request: Request, response: Response) => {
+		const { userId } = getAuth(request);
 
 		console.log('Schedule Rooms---->>>');
 		try {
@@ -277,17 +292,17 @@ export const getAllScheduledRoomsDetails = asyncHandler(
 );
 
 export const updateScheduledRoom = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
 		const { roomId, title, description, startTime, endTime, participants } =
 			request.body;
-		const userId = request.auth?.userId;
+		const { userId } = getAuth(request);
 
 		try {
 			const updatedRoom = await prisma.room.update({
 				where: {
 					type: 'SCHEDULE',
 					id: roomId,
-					createdById: userId,
+					createdById: userId!,
 				},
 				data: {
 					title,
@@ -308,7 +323,7 @@ export const updateScheduledRoom = asyncHandler(
 );
 
 export const deleteScheduledRoom = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
 		// const roomId = request.params.roomId;
 		const roomId = request.query.roomId;
 		console.log(roomId);
@@ -337,7 +352,7 @@ export const deleteScheduledRoom = asyncHandler(
 );
 
 export const getScheduledRoom = asyncHandler(
-	async (request: AuthenticatedRequest, response: Response) => {
+	async (request: Request, response: Response) => {
 		const roomId = request.params.roomId;
 
 		try {

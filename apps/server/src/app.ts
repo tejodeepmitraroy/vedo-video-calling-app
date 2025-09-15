@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import userRouter from './routes/users.routes';
 import roomRouter from './routes/room.routes';
 import callRouter from './routes/call.routes';
+import webhooksRouter from './routes/webhooks.routes';
 
 dotenv.config();
 
@@ -18,9 +19,10 @@ app.use(
 	})
 );
 
-app.use(express.json());
+app.use('/api/v1/webhooks', webhooksRouter);
 app.use(cookieParser());
 
+app.use(express.json());
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/room', roomRouter);
 app.use('/api/v1/call', callRouter);
