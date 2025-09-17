@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import {
 	Home,
 	Laptop,
@@ -8,8 +8,8 @@ import {
 	// Settings,
 	Video,
 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import UserProfile from './UserProfile';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import UserProfile from '../UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
 

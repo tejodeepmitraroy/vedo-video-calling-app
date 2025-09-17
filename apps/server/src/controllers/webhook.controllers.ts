@@ -41,11 +41,10 @@ export const handleClerkWebhook = async (
 				const userData = await prisma.user.create({
 					data: {
 						id,
-						clerkId: id,
-						first_name: first_name ?? '',
-						last_name: last_name ?? '',
+						firstName: first_name ?? '',
+						lastName: last_name ?? '',
 						email,
-						image_url,
+						imageUrl: image_url,
 					},
 				});
 
@@ -77,9 +76,9 @@ export const handleClerkWebhook = async (
 					where: { id },
 					data: {
 						email,
-						first_name: first_name ?? '',
-						last_name: last_name ?? '',
-						image_url,
+						firstName: first_name ?? '',
+						lastName: last_name ?? '',
+						imageUrl: image_url,
 					},
 				});
 
@@ -94,7 +93,9 @@ export const handleClerkWebhook = async (
 				const { id } = evt.data;
 				console.log('Initated Delete', eventType);
 
-				const deletedUser = await prisma.user.delete({ where: { id } });
+				const deletedUser = await prisma.user.delete({
+					where: { id },
+				});
 
 				console.log('User Deleted:', deletedUser);
 
@@ -103,111 +104,6 @@ export const handleClerkWebhook = async (
 					message: 'Webhook received',
 				});
 			}
-
-			// switch (eventType) {
-			// 	case 'user.created': {
-			// 		console.log('Type of Call-------------->', eventType);
-			// 		console.log('This is DAta---------->', {
-			// 			id,
-			// 			email_addresses,
-			// 			first_name,
-			// 			last_name,
-			// 			image_url,
-			// 		});
-
-			// 		const email = email_addresses[0]
-			// 			? email_addresses[0].email_address
-			// 			: '';
-
-			// 		console.log('Initiate creation');
-
-			// 		const { data, error } = await supabase
-			// 			.from('User')
-			// 			.insert({
-			// 				id,
-			// 				email,
-			// 				first_name: first_name ? first_name : '',
-			// 				last_name: last_name ? last_name : '',
-			// 				image_url,
-			// 			})
-			// 			.select();
-
-			// 		console.log('User created Data--->', data);
-			// 		if (error) {
-			// 			console.log('User created Data Error--->', error);
-			// 			return NextResponse.json({ error: error.message }, { status: 500 });
-			// 		}
-
-			// 		console.log('User inserted successfully:', data);
-
-			// 		return NextResponse.json(
-			// 			{
-			// 				success: true,
-			// 				message: 'Webhook received',
-			// 			},
-			// 			{ status: 200 }
-			// 		);
-			// 	}
-
-			// 	case 'user.updated': {
-			// 		console.log('Type of Call-------------->', eventType);
-			// 		console.log('This is DAta---------->', {
-			// 			id,
-			// 			email_addresses,
-			// 			first_name,
-			// 			last_name,
-			// 			image_url,
-			// 		});
-			// 		console.log('Initiate Updating');
-			// 		const email = email_addresses[0]
-			// 			? email_addresses[0].email_address
-			// 			: '';
-			// 		const { data, error } = await supabase
-			// 			.from('User')
-			// 			.update({
-			// 				email,
-			// 				// username,
-			// 				first_name,
-			// 				last_name,
-			// 				image_url,
-			// 			})
-			// 			.eq('id', id)
-			// 			.select();
-
-			// 		console.log('User updated successfully:', data);
-			// 		if (error) {
-			// 			console.log('User Updated Data Error--->', error);
-			// 			return NextResponse.json({ error: error.message }, { status: 500 });
-			// 		}
-			// 		return NextResponse.json(
-			// 			{
-			// 				success: true,
-			// 				message: 'Webhook received',
-			// 			},
-			// 			{ status: 200 }
-			// 		);
-			// 	}
-
-			// 	case 'user.deleted': {
-			// 		console.log('Initated Delete', type);
-
-			// 		const response = await supabase.from('User').delete().eq('id', id);
-
-			// 		console.log('User Deleted status:', response);
-
-			// 		return NextResponse.json(
-			// 			{
-			// 				success: true,
-			// 				message: 'Webhook received',
-			// 			},
-			// 			{ status: 200 }
-			// 		);
-			// 	}
-
-			// 	default: {
-			// 		console.log('no parameter hitted');
-			// 	}
-			// }
 		} catch (error) {
 			console.log('Unexpected error:', error);
 

@@ -75,8 +75,11 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				const microphones = devices.filter(
 					(device) => device.kind === 'audioinput'
 				);
+				const speakers = devices.filter(
+					(device) => device.kind === 'audiooutput'
+				);
 
-				setMediaDevices({ cameras, microphones });
+				setMediaDevices({ cameras, microphones, speakers });
 			} catch (error) {
 				console.error('Error opening video camera.', error);
 			}

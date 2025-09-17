@@ -15,13 +15,13 @@ import { Laptop, HomeIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UserProfile from '@/components/UserProfile';
 import { useUser } from '@clerk/nextjs';
-import NavBar from '@/components/Navbar';
+import NavBar from '@/components/navigation/Navbar';
 import WaitingLobby from './@waitingLobby/page';
 import MeetingRoom from './@meetingRoom/page';
 import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
 import Conference from './@conference/page';
-import BottomNavigation from '@/components/BottomNavigation';
+import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { useWebRTC } from '@/context/WebRTCContext';
 
 const screens = [

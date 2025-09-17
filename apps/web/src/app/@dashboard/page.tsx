@@ -62,7 +62,7 @@ export default function Dashboard() {
 		);
 
 		const response: RoomDetails = data.data;
-		const roomId = response.id;
+		const roomId = response.shortId;
 
 		router.push(`?roomId=${roomId}`);
 	};

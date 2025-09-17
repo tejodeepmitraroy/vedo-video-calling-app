@@ -10,8 +10,7 @@ interface User {
 interface RoomDetails {
 	id: string;
 	type: string;
-	roomId: string;
-	url: string;
+	shortId: string;
 	title: string;
 	description: string | null;
 	startTime: Date;

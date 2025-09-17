@@ -1,10 +1,10 @@
 import { Home, Laptop, Plus } from 'lucide-react';
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import UserProfile from './UserProfile';
+import { Button } from '../ui/button';
+import UserProfile from '../UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
-import { Input } from './ui/input';
+import { Input } from '../ui/input';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -16,9 +16,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from './ui/dialog';
+} from '../ui/dialog';
 
-import { Separator } from './ui/separator';
+import { Separator } from '../ui/separator';
 
 import Link from 'next/link';
 

@@ -15,7 +15,7 @@ import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
 import dynamic from 'next/dynamic';
-import UserVideoPanel from '@/app/@waitingLobby/components/UserVideoPanel';
+import UserVideoPanel from '@/feature/videoCall/components/UserVideoPanel';
 import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';

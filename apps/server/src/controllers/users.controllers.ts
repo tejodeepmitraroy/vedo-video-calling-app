@@ -27,12 +27,12 @@ export const findAUser = asyncHandler(
 								},
 							},
 							{
-								first_name: {
+								firstName: {
 									startsWith: userName,
 								},
 							},
 							{
-								last_name: {
+								lastName: {
 									startsWith: userName,
 								},
 							},
@@ -53,10 +53,10 @@ export const findAUser = asyncHandler(
 					},
 					select: {
 						id: true,
-						first_name: true,
-						last_name: true,
+						firstName: true,
+						lastName: true,
 						email: true,
-						image_url: true,
+						imageUrl: true,
 						createdAt: true,
 						updatedAt: true,
 						friendOf: {
@@ -64,12 +64,12 @@ export const findAUser = asyncHandler(
 								user: {
 									select: {
 										id: true,
-										// first_name: true,
-										// last_name: true,
-										// email: true,
-										// image_url: true,
-										// createdAt: true,
-										// updatedAt: true,
+										firstName: true,
+										lastName: true,
+										email: true,
+										imageUrl: true,
+										createdAt: true,
+										updatedAt: true,
 										// friends: {
 										// 	include: {
 										// 		friend: true,
@@ -116,24 +116,24 @@ export const findAUser = asyncHandler(
 
 					return {
 						id: item.id,
-						first_name: item.first_name,
-						last_name: item.last_name,
+						firstName: item.firstName,
+						lastName: item.lastName,
 						email: item.email,
-						image_url: item.image_url,
+						imageUrl: item.imageUrl,
 						friendShip: friendShip.length === 1,
 						createdAt: item.createdAt,
 						updatedAt: item.updatedAt,
 					};
 				});
 
-				return response.status(200).json(new ApiResponse(200, result));
+				response.status(200).json(new ApiResponse(200, result));
 			} catch (error) {
-				return response
+				response
 					.status(400)
 					.json(new ApiError(400, 'Error While getting a Call', error));
 			}
 		} else {
-			return response
+			response
 				.status(400)
 				.json(new ApiError(400, 'Query Parameter is invalid'));
 		}
@@ -157,10 +157,10 @@ export const getAllFriendList = asyncHandler(
 							friend: {
 								select: {
 									id: true,
-									first_name: true,
-									last_name: true,
+									firstName: true,
+									lastName: true,
 									email: true,
-									image_url: true,
+									imageUrl: true,
 									createdAt: true,
 									updatedAt: true,
 									friendOf: {
@@ -178,10 +178,10 @@ export const getAllFriendList = asyncHandler(
 							user: {
 								select: {
 									id: true,
-									first_name: true,
-									last_name: true,
+									firstName: true,
+									lastName: true,
 									email: true,
-									image_url: true,
+									imageUrl: true,
 									createdAt: true,
 									updatedAt: true,
 									friends: {
@@ -204,10 +204,10 @@ export const getAllFriendList = asyncHandler(
 					);
 					return {
 						id: item.friend.id,
-						first_name: item.friend.first_name,
-						last_name: item.friend.last_name,
+						firstName: item.friend.firstName,
+						lastName: item.friend.lastName,
 						email: item.friend.email,
-						image_url: item.friend.image_url,
+						imageUrl: item.friend.imageUrl,
 						friendShip: friendship.map((item) => item === true),
 						createdAt: item.friend.createdAt,
 						updatedAt: item.friend.updatedAt,
@@ -221,10 +221,10 @@ export const getAllFriendList = asyncHandler(
 					console.log('friendOf =====>', item.user.friends);
 					return {
 						id: item.user.id,
-						first_name: item.user.first_name,
-						last_name: item.user.last_name,
+						firstName: item.user.firstName,
+						lastName: item.user.lastName,
 						email: item.user.email,
-						image_url: item.user.image_url,
+						imageUrl: item.user.imageUrl,
 						friendShip: friendship.map((item) => item === true),
 						createdAt: item.user.createdAt,
 						updatedAt: item.user.updatedAt,
@@ -256,8 +256,8 @@ export const sendFriendRequest = asyncHandler(
 		try {
 			const friend = await prisma.friendShip.create({
 				data: {
-					user_id: userId!,
-					friend_id: friendId,
+					userId: userId!,
+					friendId: friendId,
 				},
 			});
 
@@ -285,12 +285,12 @@ export const removeFriend = asyncHandler(
 					where: {
 						OR: [
 							{
-								user_id: userId!,
-								friend_id: friendId,
+								userId: userId!,
+								friendId: friendId,
 							},
 							{
-								user_id: friendId,
-								friend_id: userId!,
+								userId: friendId,
+								friendId: userId!,
 							},
 						],
 					},

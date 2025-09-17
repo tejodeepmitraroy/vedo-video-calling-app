@@ -163,15 +163,16 @@ export function roomConnections(
 
 			const meeting = await prisma.participantsInRoom.upsert({
 				where: {
-					user_id_room_id: {
-						room_id: roomId,
-						user_id: socketIdToUserMap.get(socket.id)!.userId,
+					userId_roomId: {
+						roomId,
+						userId: socketIdToUserMap.get(socket.id)!.userId,
 					},
 				},
 				update: {},
 				create: {
-					room_id: roomId,
-					user_id: socketIdToUserMap.get(socket.id)!.userId,
+					roomId,
+					userId: socketIdToUserMap.get(socket.id)!.userId,
+					roomExit: new Date(),
 				},
 			});
 

@@ -1,28 +1,32 @@
 'use client';
-import React, { useCallback, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { useSocket } from '@/context/SocketContext';
-import toast from 'react-hot-toast';
-import UserVideoPanel from '../@waitingLobby/components/UserVideoPanel';
-import Image from 'next/image';
+import React from 'react';
+// import { Button } from '@/components/ui/button';
+import { useMeetingRoomSocket } from '../../feature/videoCall/hooks/useMeetingRoomSocket';
+// import toast from 'react-hot-toast';
+import UserVideoPanel from '../../feature/videoCall/components/UserVideoPanel';
+// import Image from 'next/image';
 import { useWebRTC } from '@/context/WebRTCContext';
-import RemoteUserVideoPanel from './components/RemoteUserVideoPanel';
-import useParticipantsStore from '@/store/useParticipantsStore';
-import ControlPanel from './components/ControlPanel';
+import RemoteUserVideoPanel from '../../feature/videoCall/components/RemoteUserVideoPanel';
+// import useParticipantsStore from '@/store/useParticipantsStore';
+import ControlPanel from '../../feature/videoCall/components/ControlPanel';
 import { useUser } from '@clerk/nextjs';
+import { MonitorUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 // import useGlobalStore from '@/store/useGlobalStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const { streams } = useWebRTC();
 	const { user } = useUser();
-	const { socketOn, socketEmit, socketOff } = useSocket();
-	const setOnlineUsers = useParticipantsStore((state) => state.setParticipants);
+
+	// initialise socket listeners
+	useMeetingRoomSocket();
 	// const participants = useParticipantsStore(state=>state.participants)
 	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 
 	console.log('Meeting Component mounted++++++++++');
 
-	//////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 	///// All socket Event Function are Define Here
 	const roomEnterPermissionAccepted = useCallback(
@@ -133,28 +137,19 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		socketOn('event:participantsInRoom', handleParticipantsInRoom);
 
 		return () => {
-			socketOff('event:participantsInRoom', handleParticipantsInRoom);
-		};
-	}, [handleParticipantsInRoom, socketOff, socketOn]);
-
-	console.log('MediaStream Array ========================>', streams);
-
-	///////////////////////////////////////////////////////////////////////////////////////////
-
-	///// All socket Event Function are Executed Here
-
+*/
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
 			<div className="h-full w-full flex-col justify-between gap-4 p-4 px-4 pb-20 sm:pb-4 md:pb-20">
-				{/* <div className="flex w-full items-center justify-between rounded-md border bg-[#3c4043] p-1">
-					<span className="flex gap-4 text-sm font-semibold text-white">
+				<div className="flex items-center justify-between">
+					<span className="flex items-center gap-2">
 						{' '}
 						<MonitorUp size={'20'} />
 						Tejodeep Mitra Roy (You, presenting)
 					</span>
 
 					<Button size={'sm'}>Stop presenting</Button>
-				</div> */}
+				</div>
 				{/* {isScreenSharing ? (
 					<div className="mx-auto flex w-full items-center justify-center md:max-w-[90rem]">
 						<ScreenSharePanel />
@@ -201,7 +196,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 						)}
 					</>
 				)} */}
-				{/*              */}
 
 				{streams.length === 0 && (
 					<div className="relative grid h-full w-full grid-cols-1">

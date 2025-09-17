@@ -42,6 +42,7 @@ import {
 import React, { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { RWebShare } from 'react-web-share';
+import SettingsDialog from './SettingsDialog';
 
 const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
@@ -152,6 +153,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</TooltipContent>
 					</Tooltip>
 
+					<SettingsDialog />
 					{/* <Tooltip>
 						<TooltipTrigger>
 							<Button
