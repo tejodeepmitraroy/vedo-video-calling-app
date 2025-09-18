@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SocketProvider } from '@/context/SocketContext';
 import { WebRTCProvider } from '@/context/WebRTCContext';
 import { SocketLayerProvider } from '@/context/SocketLayerContext';
+import SidebarWrapper from '@/components/navigation/sidebar/SidebarWrapper';
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
 	description: 'This is Video calling App',
@@ -17,14 +18,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<SocketProvider>
-				<WebRTCProvider>
-					<SocketLayerProvider>
-						<body>{children}</body>
-					</SocketLayerProvider>
-				</WebRTCProvider>
-			</SocketProvider>
-		</html>
+		<SocketProvider>
+			<WebRTCProvider>
+				<SocketLayerProvider>
+					<SidebarWrapper>{children}</SidebarWrapper>
+				</SocketLayerProvider>
+			</WebRTCProvider>
+		</SocketProvider>
 	);
 }

@@ -16,6 +16,11 @@ export default [
 		ignores: ['.next'],
 	},
 	{
+		settings: {
+			react: {
+				version: 'detect', // ✅ fixes React version warning + crash
+			},
+		},
 		plugins: {
 			'react-hooks': pluginReactHooks,
 		},

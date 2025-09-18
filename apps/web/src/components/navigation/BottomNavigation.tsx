@@ -1,7 +1,7 @@
 import { Home, Laptop, Plus } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
-import UserProfile from '../UserProfile';
+import UserProfile from '../../feature/auth/components/UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
 import { Input } from '../ui/input';

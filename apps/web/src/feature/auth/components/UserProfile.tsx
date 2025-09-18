@@ -8,7 +8,7 @@ const UserProfile = () => {
 				<SignInButton />
 			</SignedOut>
 			<SignedIn>
-				<UserButton afterSignOutUrl="/sign-in" />
+				<UserButton />
 			</SignedIn>
 		</>
 	);

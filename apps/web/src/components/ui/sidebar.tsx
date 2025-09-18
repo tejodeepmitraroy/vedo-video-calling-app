@@ -8,12 +8,14 @@ import useScreenStateStore from '@/store/useScreenStateStore';
 interface Links {
 	label: string;
 	href: string;
+	active?: boolean;
 	icon: React.JSX.Element | React.ReactNode;
 }
 
 interface Screens {
 	label: string;
 	screen: string;
+	href?: string;
 	icon: React.JSX.Element | React.ReactNode;
 }
 
@@ -171,11 +173,13 @@ export const SidebarLink = ({
 	props?: LinkProps;
 }) => {
 	const { open, animate } = useSidebar();
+
 	return (
 		<Link
 			href={link.href}
 			className={cn(
-				'group/sidebar flex items-center justify-start gap-2 py-2',
+				link.active ? 'bg-primary text-white' : 'text-neutral-700',
+				'group/sidebar flex items-center justify-start gap-2 rounded-lg border px-2 py-2',
 				className
 			)}
 			{...props}
@@ -187,7 +191,10 @@ export const SidebarLink = ({
 					display: animate ? (open ? 'inline-block' : 'none') : 'inline-block',
 					opacity: animate ? (open ? 1 : 0) : 1,
 				}}
-				className="!m-0 inline-block whitespace-pre !p-0 text-sm text-neutral-700 transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200"
+				className={cn(
+					link.active ? 'bg-primary text-white' : 'text-neutral-700',
+					'!m-0 inline-block whitespace-pre !p-0 text-sm transition duration-150 group-hover/sidebar:translate-x-1 dark:text-neutral-200'
+				)}
 			>
 				{link.label}
 			</motion.span>
