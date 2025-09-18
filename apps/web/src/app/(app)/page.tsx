@@ -20,7 +20,7 @@ import WaitingLobby from './@waitingLobby/page';
 import MeetingRoom from './@meetingRoom/page';
 import OutsideLobby from './@outsideLobby/page';
 import useDeviceStore from '@/store/useDeviceStore';
-import Conference from './@conference/page';
+import Conference from './conference/page';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { useWebRTC } from '@/context/WebRTCContext';
 
@@ -49,15 +49,15 @@ const Home = () => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
-	const { getUserMedia, resetRemotePeers } = useWebRTC();
+	const { getUserMedia, resetRemotePeers, getAllMediaDevices } = useWebRTC();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Set User Media Stream
 	const getMediaStream = useCallback(async () => {
 		getUserMedia({
-			camera: selectedCamera,
-			microphone: selectedMicrophone,
+			camera: selectedCamera.deviceId,
+			microphone: selectedMicrophone.deviceId,
 		});
 	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
@@ -75,6 +75,27 @@ const Home = () => {
 	// }, [currentScreen, getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Get media devices once on mount
+	useEffect(() => {
+		getAllMediaDevices();
+	}, [getAllMediaDevices]);
+
+	// Refresh media stream whenever selected camera or microphone changes while user is in media screens
+	useEffect(() => {
+		if (
+			(currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') &&
+			(roomId || currentScreen === 'Meeting Room')
+		) {
+			getMediaStream();
+		}
+	}, [
+		selectedCamera,
+		selectedMicrophone,
+		currentScreen,
+		roomId,
+		getMediaStream,
+	]);
 
 	useEffect(() => {
 		if (roomId) {

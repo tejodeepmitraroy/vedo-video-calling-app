@@ -20,6 +20,10 @@ import useGlobalStore from '@/store/useGlobalStore';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import useScreenStateStore from '@/store/useScreenStateStore';
+import MediaSettings from '@/feature/videoCall/components/MediaSettings';
+import useDeviceStore from '@/store/useDeviceStore';
+import { useWebRTC } from '@/context/WebRTCContext';
+import useStreamStore from '@/store/useStreamStore';
 
 const MediaControls = dynamic(() => import('./components/MediaControls'));
 
@@ -34,6 +38,40 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
+	const { getUserMedia, getAllMediaDevices } = useWebRTC();
+	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
+	const selectedMicrophone = useDeviceStore(
+		(state) => state.selectedMicrophone
+	);
+	const localStream = useStreamStore((state) => state.localStream);
+
+	// Initialize media devices and get user media when component mounts
+	useEffect(() => {
+		const initializeMedia = async () => {
+			await getAllMediaDevices();
+			if (!localStream) {
+				getUserMedia({
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+				});
+			}
+		};
+
+		initializeMedia();
+
+		// Cleanup function to stop tracks when component unmounts
+		return () => {
+			if (localStream) {
+				localStream.getTracks().forEach((track) => track.stop());
+			}
+		};
+	}, [
+		getAllMediaDevices,
+		getUserMedia,
+		localStream,
+		selectedCamera.deviceId,
+		selectedMicrophone.deviceId,
+	]);
 
 	console.log('Waiting Component mounted++++++++++');
 
@@ -194,6 +232,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
 					<MediaControls />
+					<MediaSettings />
 				</div>
 			</div>
 			<div className="flex h-full w-full items-center justify-center md:w-[50%] md:justify-start md:p-5">

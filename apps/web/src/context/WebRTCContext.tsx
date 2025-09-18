@@ -88,32 +88,66 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
 		async ({ camera, microphone }: { camera: string; microphone: string }) => {
 			try {
-				const constraints = {
-					video: camera
-						? {
-								deviceId: { exact: camera },
-								width: { ideal: 1280 },
-								height: { ideal: 720 },
-								cursor: 'never',
-							}
-						: {
-								width: { ideal: 1280 },
-								height: { ideal: 720 },
-								cursor: 'never',
-							},
-
+				const constraints: MediaStreamConstraints = {
+					video: {
+						...(camera && { deviceId: { exact: camera } }),
+						width: { ideal: 1280 },
+						height: { ideal: 720 },
+					},
 					audio: microphone ? { deviceId: { exact: microphone } } : true,
 				};
-				localStream.current =
+				// Get new media stream with selected devices
+				const newStream =
 					await navigator.mediaDevices.getUserMedia(constraints);
+				// Stop previous tracks if any
+				if (localStream.current) {
+					localStream.current.getTracks().forEach((track) => track.stop());
+				}
+				localStream.current = newStream;
+				setLocalStream(newStream);
 
-				setLocalStream(localStream.current);
+				// Debug logging
+				console.log(
+					'Video tracks:',
+					newStream.getVideoTracks().map((track) => ({
+						enabled: track.enabled,
+						readyState: track.readyState,
+						kind: track.kind,
+						label: track.label,
+						muted: track.muted,
+					}))
+				);
+
+				console.log(
+					'Audio tracks:',
+					newStream.getAudioTracks().map((track) => ({
+						enabled: track.enabled,
+						readyState: track.readyState,
+						kind: track.kind,
+						label: track.label,
+						muted: track.muted,
+					}))
+				);
+
+				// Replace tracks in all active peer connections so remote users get the updated media
+				peerConnections.forEach((connection) => {
+					newStream.getTracks().forEach((newTrack) => {
+						const sender = connection
+							.getSenders()
+							.find((s) => s.track && s.track.kind === newTrack.kind);
+						if (sender) {
+							sender.replaceTrack(newTrack);
+						} else {
+							connection.addTrack(newTrack, newStream);
+						}
+					});
+				});
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
 				return null;
 			}
 		},
-		[setLocalStream]
+		[setLocalStream, peerConnections]
 	);
 
 	////////////////////////////////////////////////////////////////////////////

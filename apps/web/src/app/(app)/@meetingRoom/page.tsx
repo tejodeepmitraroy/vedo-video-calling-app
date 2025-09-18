@@ -1,14 +1,14 @@
 'use client';
 import React from 'react';
 // import { Button } from '@/components/ui/button';
-import { useMeetingRoomSocket } from '../../feature/videoCall/hooks/useMeetingRoomSocket';
+import { useMeetingRoomSocket } from '../../../feature/videoCall/hooks/useMeetingRoomSocket';
 // import toast from 'react-hot-toast';
-import UserVideoPanel from '../../feature/videoCall/components/UserVideoPanel';
+import UserVideoPanel from '../../../feature/videoCall/components/UserVideoPanel';
 // import Image from 'next/image';
 import { useWebRTC } from '@/context/WebRTCContext';
-import RemoteUserVideoPanel from '../../feature/videoCall/components/RemoteUserVideoPanel';
+import RemoteUserVideoPanel from '../../../feature/videoCall/components/RemoteUserVideoPanel';
 // import useParticipantsStore from '@/store/useParticipantsStore';
-import ControlPanel from '../../feature/videoCall/components/ControlPanel';
+import ControlPanel from '../../../feature/videoCall/components/ControlPanel';
 import { useUser } from '@clerk/nextjs';
 import { MonitorUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';

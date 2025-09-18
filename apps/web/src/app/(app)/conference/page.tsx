@@ -2,8 +2,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs';
-import { DataTable } from './data-table';
-import { columns } from './columns';
+import { DataTable } from '../../../feature/confererence/components/data-table';
+import { columns } from '../../../feature/confererence/components/columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Conference = () => {
