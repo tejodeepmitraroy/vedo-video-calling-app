@@ -2,13 +2,15 @@
 import { create } from 'zustand';
 
 interface useScreenStateStore {
-	currentScreen: string | null;
-	setCurrentScreen: (roomState: string) => void;
+	currentScreen: 'Waiting Lobby' | 'Meeting Room' | 'Outside Lobby' | null;
+	setCurrentScreen: (
+		roomState: 'Waiting Lobby' | 'Meeting Room' | 'Outside Lobby'
+	) => void;
 }
 
 const useScreenStateStore = create<useScreenStateStore>((set) => ({
-	currentScreen: 'Dashboard',
-	setCurrentScreen: (currentScreen) => set({ currentScreen }),
+	currentScreen: 'Waiting Lobby',
+	setCurrentScreen: (currentScreen) => set({ currentScreen: currentScreen }),
 }));
 
 export default useScreenStateStore;

@@ -1,7 +1,7 @@
 import { Home, Laptop, Plus } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
-import UserProfile from '../../feature/auth/components/UserProfile';
+import UserProfile from '../../features/auth/components/UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useGlobalStore from '@/store/useGlobalStore';
 import { Input } from '../ui/input';
@@ -105,13 +105,13 @@ const BottomNavigation = () => {
 					<button
 						type="button"
 						className="inline-flex flex-col items-center justify-center"
-						onClick={() => setCurrentState('Dashboard')}
+						onClick={() => setCurrentState('Waiting Lobby')}
 					>
 						<Home
-							className={`${currentState === 'Dashboard' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${currentState === 'Waiting Lobby' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
-							className={` ${currentState === 'Dashboard' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+							className={` ${currentState === 'Waiting Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
 						>
 							Home
 						</span>
@@ -202,13 +202,13 @@ const BottomNavigation = () => {
 					<button
 						type="button"
 						className="inline-flex flex-col items-center justify-center"
-						onClick={() => setCurrentState('Conference')}
+						onClick={() => setCurrentState('Outside Lobby')}
 					>
 						<Laptop
-							className={`${currentState === 'Conference' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${currentState === 'Outside Lobby' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
-							className={` ${currentState === 'Conference' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+							className={` ${currentState === 'Outside Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
 						>
 							Meeting
 						</span>

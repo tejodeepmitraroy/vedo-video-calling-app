@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import Link, { LinkProps } from 'next/link';
 import React, { useState, createContext, useContext } from 'react';
 import { motion } from 'framer-motion';
-import useScreenStateStore from '@/store/useScreenStateStore';
 
 interface Links {
 	label: string;
@@ -211,20 +210,16 @@ export const SidebarButton = ({
 	className?: string;
 	props?: LinkProps;
 }) => {
-	const currentState = useScreenStateStore((state) => state.currentScreen);
-	const setCurrentState = useScreenStateStore(
-		(state) => state.setCurrentScreen
-	);
 	const { open, animate } = useSidebar();
 	return (
 		<Link href={'/'} className="w-full">
 			<button
 				className={cn(
-					`${currentState === screen.screen ? 'bg-primary text-white' : 'text-neutral-700'} group/sidebar flex w-full items-center justify-start gap-2 rounded-lg px-2 py-2`,
+					`group/sidebar flex w-full items-center justify-start gap-2 rounded-lg bg-primary px-2 py-2 text-white`,
 					className
 				)}
 				{...props}
-				onClick={() => setCurrentState(screen.screen)}
+				// onClick={() => setCurrentState(screen.screen)}
 			>
 				{screen.icon}
 

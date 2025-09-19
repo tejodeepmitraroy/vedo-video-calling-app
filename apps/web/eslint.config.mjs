@@ -30,6 +30,8 @@ export default [
 			'react/prop-types': 'off',
 			'react-hooks/rules-of-hooks': 'error',
 			'react-hooks/exhaustive-deps': 'warn',
+			
+			'@typescript-eslint/triple-slash-reference': 'off',
 		},
 	},
 ];

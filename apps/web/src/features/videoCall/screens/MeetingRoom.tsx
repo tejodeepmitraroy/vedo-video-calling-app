@@ -1,14 +1,14 @@
 'use client';
 import React from 'react';
 // import { Button } from '@/components/ui/button';
-import { useMeetingRoomSocket } from '../../../feature/videoCall/hooks/useMeetingRoomSocket';
+// import { useMeetingRoomSocket } from'../hooks/useMeetingRoomSocket.ts';
 // import toast from 'react-hot-toast';
-import UserVideoPanel from '../../../feature/videoCall/components/UserVideoPanel';
+import UserVideoPanel from '../components/UserVideoPanel';
 // import Image from 'next/image';
 import { useWebRTC } from '@/context/WebRTCContext';
-import RemoteUserVideoPanel from '../../../feature/videoCall/components/RemoteUserVideoPanel';
+import RemoteUserVideoPanel from '../components/RemoteUserVideoPanel';
 // import useParticipantsStore from '@/store/useParticipantsStore';
-import ControlPanel from '../../../feature/videoCall/components/ControlPanel';
+import ControlPanel from '../components/ControlPanel';
 import { useUser } from '@clerk/nextjs';
 import { MonitorUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const { user } = useUser();
 
 	// initialise socket listeners
-	useMeetingRoomSocket();
+	// useMeetingRoomSocket();
 	// const participants = useParticipantsStore(state=>state.participants)
 	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 

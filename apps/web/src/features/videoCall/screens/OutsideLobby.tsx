@@ -20,7 +20,7 @@ const OutsideLobby = () => {
 	const router = useRouter();
 	useEffect(() => {
 		setTimeout(() => {
-			setCurrentState('Dashboard');
+			setCurrentState('Waiting Lobby');
 			router.push('/');
 		}, 2000);
 

@@ -26,9 +26,6 @@ export default function RootLayout({
 					},
 				}}
 			>
-				{/* <SocketProvider>
-					<WebRTCProvider>
-						<SocketLayerProvider> */}
 				<body>
 					<TooltipProvider>
 						<Toaster
@@ -46,9 +43,6 @@ export default function RootLayout({
 						{children}
 					</TooltipProvider>
 				</body>
-				{/* </SocketLayerProvider>
-					</WebRTCProvider>
-				</SocketProvider> */}
 			</ClerkProvider>
 		</html>
 	);

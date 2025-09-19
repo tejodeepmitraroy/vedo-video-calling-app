@@ -44,7 +44,7 @@ const WebRTCContext = createContext<IWebRTCContext | null>(null);
 
 export const useWebRTC = () => {
 	const state = useContext(WebRTCContext);
-	if (!state) throw new Error('state is undefined');
+	if (!state) throw new Error('useWebRTC must be used within a WebRTCProvider');
 	return state;
 };
 

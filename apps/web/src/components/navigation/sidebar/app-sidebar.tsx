@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { HomeIcon, Laptop } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
-import UserProfile from '@/feature/auth/components/UserProfile';
+import UserProfile from '@/features/auth/components/UserProfile';
 import { usePathname } from 'next/navigation';
 
 const AppSidebar = () => {

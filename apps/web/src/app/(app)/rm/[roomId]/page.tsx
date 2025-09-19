@@ -4,8 +4,9 @@ import { useParams } from 'next/navigation';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
-import Dashboard from '../../@dashboard/page';
-import MeetingRoom from '../../@meetingRoom/page';
+import MeetingRoom from '@/features/videoCall/screens/MeetingRoom';
+import WaitingLobby from '@/features/videoCall/screens/WaitingLobby';
+import OutsideLobby from '@/features/videoCall/screens/OutsideLobby';
 
 const Room = () => {
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
@@ -78,10 +79,8 @@ const Room = () => {
 	return (
 		<>
 			<div className="flex h-full w-full">
-				{currentScreen === 'Dashboard' && <Dashboard />}
-
-				{/* {currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}
-				{currentScreen === 'OutSide Lobby' && <OutsideLobby />} */}
+				{currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}
+				{currentScreen === 'Outside Lobby' && <OutsideLobby />}
 			</div>
 
 			{currentScreen === 'Meeting Room' && <MeetingRoom roomId={roomId} />}

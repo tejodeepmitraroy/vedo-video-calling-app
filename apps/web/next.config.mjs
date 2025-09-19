@@ -11,9 +11,9 @@ const nextConfig = {
 		],
 	},
 	reactStrictMode: false,
-	typescript: {
-		ignoreBuildErrors: true,
-	},
+	// typescript: {
+	// 	ignoreBuildErrors: true,
+	// },
 	...nextPwa({
 		dest: 'public',
 		register: true,
