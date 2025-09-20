@@ -18,14 +18,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<ClerkProvider
-				appearance={{
-					elements: {
-						formButtonPrimary: 'bg-primary hover:bg-[#f3f4f6] hover:text-black',
-					},
-				}}
-			>
+		<ClerkProvider
+			appearance={{
+				elements: {
+					formButtonPrimary: 'bg-primary hover:bg-[#f3f4f6] hover:text-black',
+				},
+			}}
+		>
+			<html lang="en">
 				<body>
 					<TooltipProvider>
 						<Toaster
@@ -43,7 +43,7 @@ export default function RootLayout({
 						{children}
 					</TooltipProvider>
 				</body>
-			</ClerkProvider>
-		</html>
+			</html>
+		</ClerkProvider>
 	);
 }

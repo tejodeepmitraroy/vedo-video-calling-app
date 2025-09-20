@@ -29,7 +29,7 @@ import useWaitingLobbySocket from '@/hooks/useWaitingLobbySocket';
 const MediaControls = dynamic(() => import('../components/MediaControls'));
 
 const WaitingLobby = ({ roomId }: { roomId: string }) => {
-	const { socketOn,  socketOff } = useSocket();
+	const { socketOn, socketOff } = useSocket();
 	// const [askToEnter, setAskToEnter] = useState(false);
 	// const { userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);

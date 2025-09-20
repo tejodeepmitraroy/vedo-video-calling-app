@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 // }
 
 export const useWaitingLobbySocket = (roomId: string) => {
-	const {socketOn, socketOff, socketEmit } = useSocket();
+	const { socketOn, socketOff, socketEmit } = useSocket();
 	const [askToEnterLoading, setAskToEnterLoading] = useState(false);
 	const { getToken, userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
@@ -72,7 +72,7 @@ export const useWaitingLobbySocket = (roomId: string) => {
 	//User join Room
 	const handleJoinRoom = useCallback(async () => {
 		const checkJoinedRoom = roomDetails?.createdById === userId;
-		console.log('HOOOJK askToJoin --------->',checkJoinedRoom);
+		console.log('HOOOJK askToJoin --------->', checkJoinedRoom);
 		socketEmit('event:joinRoom', {
 			roomId: roomId,
 			hostUser: checkJoinedRoom,
@@ -100,39 +100,29 @@ export const useWaitingLobbySocket = (roomId: string) => {
 
 	//--- User join Waiting Room ---
 
-
 	//// All socket Event Function are Define Here
-		const joinRoom = useCallback(async () => {
-			socketEmit('event:joinRoom', {
-				roomId: roomId,
-				hostUser: false,
-			});
-		}, [roomId, socketEmit]);
-	
-		const handleEnterRoom = useCallback(() => {
-			setCurrentScreen('Meeting Room');
-		}, [setCurrentScreen]);
-	
-		//// All socket Notification are Executed Here
-		useEffect(() => {
-			// console.log('Setup All Socket Events ------------->>>');
-			socketOn('event:joinRoom', joinRoom);
-			socketOn('event:enterRoom', handleEnterRoom);
-			return () => {
-				// console.log('Off All Socket Events ------------->>>');
-				socketOff('event:joinRoom', joinRoom);
-				socketOff('event:enterRoom', handleEnterRoom);
-			};
-		}, [joinRoom, handleEnterRoom, socketOff, socketOn]);
-	
+	const joinRoom = useCallback(async () => {
+		socketEmit('event:joinRoom', {
+			roomId: roomId,
+			hostUser: false,
+		});
+	}, [roomId, socketEmit]);
 
+	const handleEnterRoom = useCallback(() => {
+		setCurrentScreen('Meeting Room');
+	}, [setCurrentScreen]);
 
-
-
-
-
-
-
+	//// All socket Notification are Executed Here
+	useEffect(() => {
+		// console.log('Setup All Socket Events ------------->>>');
+		socketOn('event:joinRoom', joinRoom);
+		socketOn('event:enterRoom', handleEnterRoom);
+		return () => {
+			// console.log('Off All Socket Events ------------->>>');
+			socketOff('event:joinRoom', joinRoom);
+			socketOff('event:enterRoom', handleEnterRoom);
+		};
+	}, [joinRoom, handleEnterRoom, socketOff, socketOn]);
 
 	//User join Waiting Room
 

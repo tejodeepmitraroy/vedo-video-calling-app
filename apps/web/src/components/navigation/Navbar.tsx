@@ -8,7 +8,7 @@ import { useWebRTC } from '@/context/WebRTCContext';
 const NavBar = () => {
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const webRTC = useWebRTC();
- 
+
 	// Only try to use WebRTC if we're in a route where it's available
 	const isRoomRoute =
 		typeof window !== 'undefined'

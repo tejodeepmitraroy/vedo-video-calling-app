@@ -54,7 +54,6 @@ const useNotificationSocket = () => {
 
 	return {
 		askToEnterLoading,
-        
 	};
 };
 

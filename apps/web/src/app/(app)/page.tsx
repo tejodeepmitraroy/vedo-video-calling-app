@@ -16,14 +16,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+// import { Separator } from '@/components/ui/separator';
 import {
 	createInstantCall,
 	getRoomDetails,
 } from '@/features/videoCall/services';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { Laptop, Phone } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -32,7 +32,7 @@ export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
 	const router = useRouter();
 	const { getToken } = useAuth();
-	const { user } = useUser();
+	// const { user } = useUser();
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
 		const response = await toast.promise(createInstantCall(token), {
@@ -47,7 +47,7 @@ export default function Dashboard() {
 	const handleEnterRoom = async () => {
 		const token = await getToken();
 		if (roomId) {
-			const response = await toast.promise( getRoomDetails(token, roomId), {
+			const response = await toast.promise(getRoomDetails(token, roomId), {
 				loading: 'Finding Room',
 				success: 'Connecting👌',
 				error: `Error happend, We don't find the room 🤯`,
@@ -146,7 +146,7 @@ export default function Dashboard() {
 					</CardContent>
 				</Card>
 
-				{user ? (
+				{/* {user ? (
 					<Card className="hidden h-fit flex-col bg-slate-200 md:row-span-2 md:flex">
 						<CardHeader>
 							<div className="grid w-full grid-cols-4 gap-2">
@@ -188,7 +188,7 @@ export default function Dashboard() {
 										) : (
 											<>0</>
 										)}
-									</div> */}
+									</div> 
 								</div>
 								<div className="flex w-full justify-between">
 									<div className="flex flex-col">
@@ -205,7 +205,7 @@ export default function Dashboard() {
 										) : (
 											<>0</>
 										)}
-									</div> */}
+									</div> 
 								</div>
 							</div>
 							<Separator className="bg-black" />
@@ -253,7 +253,7 @@ export default function Dashboard() {
 							<Separator className="bg-black" />
 						</CardContent>
 					</Card>
-				)}
+				)} */}
 
 				<Card className="row-span-3 hidden flex-col overflow-y-auto bg-slate-200 md:flex">
 					<CardHeader className="w-full p-4 pb-3 md:p-6">

@@ -22,7 +22,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// initialise socket listeners
 	// const participants = useParticipantsStore(state=>state.participants)
 	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
-	
+
 	console.log('Meeting Component mounted++++++++++');
 	useMeetingRoomSocket();
 
