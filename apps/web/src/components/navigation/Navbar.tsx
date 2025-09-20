@@ -8,19 +8,19 @@ import { useWebRTC } from '@/context/WebRTCContext';
 const NavBar = () => {
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 	const webRTC = useWebRTC();
-
+ 
 	// Only try to use WebRTC if we're in a route where it's available
 	const isRoomRoute =
 		typeof window !== 'undefined'
-			? window.location.pathname.startsWith('/room')
+			? window.location.pathname.startsWith('/rm')
 			: false;
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Get All Media Devices When Component Render
-	const getDevices = useCallback(async () => {
+	const getDevices = useCallback(() => {
 		if (isRoomRoute && webRTC?.getAllMediaDevices) {
 			try {
-				await webRTC.getAllMediaDevices();
+				webRTC.getAllMediaDevices();
 			} catch (error) {
 				console.error('Error getting media devices:', error);
 			}

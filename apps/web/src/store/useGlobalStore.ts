@@ -3,11 +3,11 @@ import { create } from 'zustand';
 
 interface useGlobalStore {
 	friendList: FriendListResponse[] | null;
-	roomDetails: MeetingDetails | null;
+	roomDetails: MeetingDetails | RoomDetails | null;
 	onLineStatus: boolean;
 
 	setFriendList: (roomState: FriendListResponse[]) => void;
-	setRoomDetails: (roomDetails: MeetingDetails | null) => void;
+	setRoomDetails: (roomDetails: MeetingDetails | RoomDetails | null) => void;
 	setOnLineStatus: (onLineStatus: boolean) => void;
 }
 

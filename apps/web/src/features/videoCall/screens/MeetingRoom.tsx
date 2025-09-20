@@ -12,6 +12,7 @@ import ControlPanel from '../components/ControlPanel';
 import { useUser } from '@clerk/nextjs';
 import { MonitorUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import useMeetingRoomSocket from '@/hooks/useMeetingRoomSocket';
 // import useGlobalStore from '@/store/useGlobalStore';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
@@ -19,11 +20,11 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const { user } = useUser();
 
 	// initialise socket listeners
-	// useMeetingRoomSocket();
 	// const participants = useParticipantsStore(state=>state.participants)
 	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
-
+	
 	console.log('Meeting Component mounted++++++++++');
+	useMeetingRoomSocket();
 
 	/*
 //////////////////////////////////////////////////////////////////////////////////////////////

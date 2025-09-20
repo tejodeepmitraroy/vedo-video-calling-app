@@ -21,7 +21,6 @@ import {
 	createInstantCall,
 	getRoomDetails,
 } from '@/features/videoCall/services';
-// import convertISOTo12HourFormat from '@/utils/ISOFormatconverter';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { Laptop, Phone } from 'lucide-react';
 import Image from 'next/image';
@@ -31,16 +30,9 @@ import toast from 'react-hot-toast';
 
 export default function Dashboard() {
 	const [roomId, setRoomId] = useState<string>('');
-	// const [allScheduledRoomsDetails, setAllScheduledRoomsDetails] = useState<
-	// 	RoomDetails[] | null
-	// >(null);
 	const router = useRouter();
 	const { getToken } = useAuth();
-
 	const { user } = useUser();
-
-	console.log('Dashboard Component++++++++++++');
-
 	const handleInstantCreateCall = async () => {
 		const token = await getToken();
 		const response = await toast.promise(createInstantCall(token), {
@@ -55,14 +47,15 @@ export default function Dashboard() {
 	const handleEnterRoom = async () => {
 		const token = await getToken();
 		if (roomId) {
-			const response = await toast.promise(getRoomDetails(token, roomId), {
+			const response = await toast.promise( getRoomDetails(token, roomId), {
 				loading: 'Finding Room',
 				success: 'Connecting👌',
 				error: `Error happend, We don't find the room 🤯`,
 			});
 			const roomDetails = response;
+			console.log('roomDetails', roomDetails);
 
-			router.push(`?roomId=${roomDetails.shortId}`);
+			router.push(`/rm/${roomDetails.shortId}`);
 		}
 	};
 

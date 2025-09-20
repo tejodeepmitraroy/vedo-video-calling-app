@@ -5,9 +5,6 @@ import { useAuth } from '@clerk/nextjs';
 import { DataTable } from '@/features/confererence/components/data-table';
 import { columns } from '@/features/confererence/components/columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import SidebarWrapper from '@/components/navigation/sidebar/SidebarWrapper';
-import { SocketLayerProvider } from '@/context/SocketLayerContext';
-import { WebRTCProvider } from '@/context/WebRTCContext';
 
 const Conference = () => {
 	const { getToken } = useAuth();
@@ -45,22 +42,16 @@ const Conference = () => {
 
 	return (
 		<>
-			<WebRTCProvider>
-				<SocketLayerProvider>
-					<SidebarWrapper>
-						<ScrollArea className="hidden h-full w-full px-4 md:flex md:flex-1">
-							<div className="m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
-								<DataTable columns={columns} data={allScheduledRoomsDetails} />
-							</div>
-						</ScrollArea>
-						<div className="flex h-full w-full px-4 md:hidden md:flex-1">
-							<div className="m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
-								<DataTable columns={columns} data={allScheduledRoomsDetails} />
-							</div>
-						</div>
-					</SidebarWrapper>
-				</SocketLayerProvider>
-			</WebRTCProvider>
+			<ScrollArea className="hidden h-full w-full px-4 md:flex md:flex-1">
+				<div className="m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+					<DataTable columns={columns} data={allScheduledRoomsDetails} />
+				</div>
+			</ScrollArea>
+			<div className="flex h-full w-full px-4 md:hidden md:flex-1">
+				<div className="m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+					<DataTable columns={columns} data={allScheduledRoomsDetails} />
+				</div>
+			</div>
 		</>
 	);
 };

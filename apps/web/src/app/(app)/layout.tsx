@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { SocketProvider } from '@/context/SocketContext';
+import { WebRTCProvider } from '@/context/WebRTCContext';
+import SidebarWrapper from '@/components/navigation/sidebar/SidebarWrapper';
 
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
@@ -15,5 +17,11 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <SocketProvider>{children}</SocketProvider>;
+	return (
+		<SocketProvider>
+			<WebRTCProvider>
+				<SidebarWrapper>{children}</SidebarWrapper>
+			</WebRTCProvider>
+		</SocketProvider>
+	);
 }

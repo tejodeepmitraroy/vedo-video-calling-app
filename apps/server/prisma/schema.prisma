@@ -43,7 +43,7 @@ model ParticipantsInRoom {
   userId    String
   roomId    String
   roomEnter DateTime  @default(now())
-  roomExit  DateTime
+  roomExit  DateTime? 
   isHost    Boolean   @default(false)
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt

@@ -65,7 +65,6 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 			if (socket.connected) {
 				toast.dismiss();
 				toast.success('Connected');
-
 				setOnLineStatus(true);
 			} else {
 				toast.error('Not Connected');

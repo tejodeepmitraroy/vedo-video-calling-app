@@ -29,6 +29,10 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
 	const { isSignedIn } = useUser();
 	const [socket, setSocket] = useState<Socket>();
+
+	///////////////////////////////////////////////
+	// First Setup Layer
+
 	useEffect(() => {
 		if (isSignedIn) {
 			const _socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_SERVER_URL!);
