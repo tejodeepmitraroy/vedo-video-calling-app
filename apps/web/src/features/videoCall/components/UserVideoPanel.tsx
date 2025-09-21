@@ -1,30 +1,36 @@
 'use client';
 import useStreamStore from '@/store/useStreamStore';
-
-import dynamic from 'next/dynamic';
-import React from 'react';
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
+import React, { useEffect, useRef } from 'react';
 
 const UserVideoPanel = () => {
 	const localStream = useStreamStore((state) => state.localStream);
+	const videoRef = useRef<HTMLVideoElement>(null);
+
+	useEffect(() => {
+		const video = videoRef.current;
+		if (video && localStream) {
+			video.srcObject = localStream;
+			video.play().catch((error) => {
+				console.error('Error playing video:', error);
+			});
+		}
+
+		return () => {
+			if (video) {
+				video.srcObject = null;
+			}
+		};
+	}, [localStream]);
 
 	return (
 		<div className="relative z-20 flex h-full w-full rounded-xl">
 			<div className="relative z-30 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl bg-[#3c4043]">
-				<ReactPlayer
-					url={localStream!}
-					playing
-					style={{
-						position: 'relative',
-						top: '0',
-						left: '0',
-						width: '100%',
-						height: '100%',
-						objectFit: 'contain',
-					}}
-					muted={true}
-					width={'100%'}
-					height={'100%'}
+				<video
+					ref={videoRef}
+					autoPlay
+					playsInline
+					muted
+					className="h-full w-full object-cover"
 				/>
 			</div>
 		</div>

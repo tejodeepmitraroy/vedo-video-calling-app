@@ -85,6 +85,28 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			}
 		}, [setMediaDevices]);
 
+	// Function to update all peer connections with the current stream
+	const updatePeerConnections = useCallback(
+		(stream: MediaStream) => {
+			peerConnections.forEach((connection) => {
+				// Remove all existing tracks
+				connection.getSenders().forEach((sender) => {
+					if (sender.track) {
+						connection.removeTrack(sender);
+					}
+				});
+
+				// Add new tracks
+				stream.getTracks().forEach((track) => {
+					if (connection.connectionState === 'connected') {
+						connection.addTrack(track, stream);
+					}
+				});
+			});
+		},
+		[peerConnections]
+	);
+
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
 		async ({ camera, microphone }: { camera: string; microphone: string }) => {
 			try {
@@ -129,25 +151,26 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					}))
 				);
 
-				// Replace tracks in all active peer connections so remote users get the updated media
-				peerConnections.forEach((connection) => {
-					newStream.getTracks().forEach((newTrack) => {
-						const sender = connection
-							.getSenders()
-							.find((s) => s.track && s.track.kind === newTrack.kind);
-						if (sender) {
-							sender.replaceTrack(newTrack);
-						} else {
-							connection.addTrack(newTrack, newStream);
-						}
-					});
-				});
+				// // Replace tracks in all active peer connections so remote users get the updated media
+				// peerConnections.forEach((connection) => {
+				// 	newStream.getTracks().forEach((newTrack) => {
+				// 		const sender = connection
+				// 			.getSenders()
+				// 			.find((s) => s.track && s.track.kind === newTrack.kind);
+				// 		if (sender) {
+				// 			sender.replaceTrack(newTrack);
+				// 		} else {
+				// 			connection.addTrack(newTrack, newStream);
+				// 		}
+				// 	});
+				// });
+				updatePeerConnections(newStream);
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
 				return null;
 			}
 		},
-		[setLocalStream, peerConnections]
+		[setLocalStream, updatePeerConnections]
 	);
 
 	////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,6 @@ export const useWaitingLobbySocket = (roomId: string) => {
 	const router = useRouter();
 
 	console.log('HOOOJK roomId--------->', roomId);
-	console.log('HOOOJK userId--------->', userId);
 	const roomDetailsFetch = useCallback(async () => {
 		const token = await getToken();
 

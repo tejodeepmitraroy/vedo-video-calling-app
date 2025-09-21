@@ -7,12 +7,12 @@ interface WebRTCStore {
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
-	setLocalStream: (localStream: MediaStream | null) => void;
-	setLocalScreenStream: (localScreenStream: MediaStream | null) => void;
-	toggleCamera: () => void;
-	toggleMicrophone: () => void;
-	toggleScreenShare: () => void;
-	// toggleStopStream: () => void;
+	setLocalStream: (stream: MediaStream | null) => void;
+	setLocalScreenStream: (stream: MediaStream | null) => void;
+	toggleCamera: () => Promise<void>;
+	toggleMicrophone: () => Promise<void>;
+	toggleScreenShare: () => Promise<void>;
+	stopAllTracks: () => void;
 }
 
 const useStreamStore = create<WebRTCStore>((set, get) => ({
@@ -21,67 +21,94 @@ const useStreamStore = create<WebRTCStore>((set, get) => ({
 	isCameraOn: true,
 	isMicrophoneOn: true,
 	isScreenSharing: false,
-	setLocalStream: (localStream) => set({ localStream }),
-	setLocalScreenStream: (localScreenStream) => set({ localScreenStream }),
-	toggleCamera: () => {
+
+	setLocalStream: (stream) => {
+		// Stop any existing tracks when setting a new stream
+		const currentStream = get().localStream;
+		if (currentStream) {
+			currentStream.getTracks().forEach((track) => track.stop());
+		}
+		set({ localStream: stream });
+	},
+
+	setLocalScreenStream: (stream) => {
+		const currentScreenStream = get().localScreenStream;
+		if (currentScreenStream) {
+			currentScreenStream.getTracks().forEach((track) => track.stop());
+		}
+		set({ localScreenStream: stream });
+	},
+
+	toggleCamera: async () => {
 		const { localStream, isCameraOn } = get();
-		if (localStream) {
-			localStream
-				.getVideoTracks()
-				.forEach((track) => (track.enabled = !isCameraOn));
+		if (!localStream) return;
+
+		const videoTracks = localStream.getVideoTracks();
+		if (videoTracks.length > 0) {
+			const newState = !isCameraOn;
+			videoTracks[0].enabled = newState;
+			set({ isCameraOn: newState });
 		}
-		set({ isCameraOn: !isCameraOn });
 	},
-	toggleMicrophone: () => {
+
+	toggleMicrophone: async () => {
 		const { localStream, isMicrophoneOn } = get();
-		if (localStream) {
-			localStream
-				.getAudioTracks()
-				.forEach((track) => (track.enabled = !isMicrophoneOn));
+		if (!localStream) return;
+
+		const audioTracks = localStream.getAudioTracks();
+		if (audioTracks.length > 0) {
+			const newState = !isMicrophoneOn;
+			audioTracks[0].enabled = newState;
+			set({ isMicrophoneOn: newState });
 		}
-		set({ isMicrophoneOn: !isMicrophoneOn });
 	},
+
 	toggleScreenShare: async () => {
-		const {
-			localStream,
-			localScreenStream,
-			isScreenSharing,
-			setLocalScreenStream,
-		} = get();
+		const { isScreenSharing } = get();
 
-		if (isScreenSharing && localScreenStream) {
-			localScreenStream.getTracks().forEach((track) => track.stop());
-			setLocalScreenStream(null);
-		} else {
-			try {
-				const screenStream = await navigator.mediaDevices.getDisplayMedia({
-					video: true,
-					audio: true,
-				});
-
-				const mergedStream = new MediaStream();
-				localStream!
-					.getTracks()
-					.forEach((track) => mergedStream.addTrack(track));
-				screenStream
-					.getTracks()
-					.forEach((track) => mergedStream.addTrack(track));
-				console.log('Video Stream-------->>', screenStream);
-				setLocalScreenStream(screenStream);
-			} catch (error) {
-				console.error('Error starting screen share:', error);
+		if (isScreenSharing) {
+			const { localScreenStream } = get();
+			if (localScreenStream) {
+				localScreenStream.getTracks().forEach((track) => track.stop());
 			}
+			set({ localScreenStream: null, isScreenSharing: false });
+			return;
 		}
-		set({ isScreenSharing: !isScreenSharing });
-	},
-	// toggleStopStream: () => {
-	// 	const { localStream } = get();
-	// 	if (localStream) {
-	// 		localStream.getTracks().forEach((track) => track.stop());
 
-	// 		console.log('Get Track Off', localStream);
-	// 	}
-	// },
+		try {
+			const screenStream = await navigator.mediaDevices.getDisplayMedia({
+				video: true,
+				audio: true,
+			});
+
+			// Handle when user stops sharing from the browser UI
+			screenStream.getVideoTracks()[0].onended = () => {
+				get().toggleScreenShare();
+			};
+
+			set({ localScreenStream: screenStream, isScreenSharing: true });
+		} catch (error) {
+			console.error('Error starting screen share:', error);
+			set({ isScreenSharing: false });
+		}
+	},
+
+	stopAllTracks: () => {
+		const { localStream, localScreenStream } = get();
+		if (localStream) {
+			localStream.getTracks().forEach((track) => track.stop());
+		}
+		if (localScreenStream) {
+			localScreenStream.getTracks().forEach((track) => track.stop());
+		}
+		set({
+			localStream: null,
+			localScreenStream: null,
+			isCameraOn: false,
+			isMicrophoneOn: false,
+			isScreenSharing: false,
+		});
+	},
 }));
 
 export default useStreamStore;
