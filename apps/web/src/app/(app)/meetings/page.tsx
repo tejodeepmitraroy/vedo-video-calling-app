@@ -43,12 +43,12 @@ const Conference = () => {
 	return (
 		<>
 			<ScrollArea className="hidden h-full w-full px-4 md:flex md:flex-1">
-				<div className="m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+				<div className="bg-card text-card-foreground m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-slate-100 p-5">
 					<DataTable columns={columns} data={allScheduledRoomsDetails} />
 				</div>
 			</ScrollArea>
 			<div className="flex h-full w-full px-4 md:hidden md:flex-1">
-				<div className="m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-card bg-slate-100 p-5 text-card-foreground">
+				<div className="bg-card text-card-foreground m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-slate-100 p-5">
 					<DataTable columns={columns} data={allScheduledRoomsDetails} />
 				</div>
 			</div>

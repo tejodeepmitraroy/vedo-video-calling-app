@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "relationJoins"]
+  previewFeatures = ["relationJoins"]
   // output = "../generated/prisma_client"
 }
 
@@ -55,7 +55,6 @@ model ParticipantsInRoom {
 
 model Room {
   id           String               @id @unique @default(uuid())
-  shortId      String               @unique
   type         RoomType             @default(INSTANT)
   title        String
   description  String?

@@ -193,16 +193,16 @@ const CallRoom = () => {
 	}, [getFriendList]);
 
 	return (
-		<div className="flex flex-1 rounded-lg bg-background shadow-sm">
+		<div className="bg-background flex flex-1 rounded-lg shadow-sm">
 			<div className="flex w-full gap-2">
 				<div
-					className={` ${selectedFriend ? 'hidden' : ''} h-full w-full rounded-lg border bg-card bg-slate-100 text-card-foreground shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
+					className={` ${selectedFriend ? 'hidden' : ''} bg-card text-card-foreground h-full w-full rounded-lg border bg-slate-100 shadow-sm md:max-w-[27rem] md:rounded-l-lg md:rounded-r-none`}
 				>
 					<div className="flex flex-col gap-3 space-y-1.5 p-3 md:h-32 md:p-6">
 						<div className="hidden text-2xl font-semibold leading-none tracking-tight md:flex">
 							Search for a Call
 						</div>
-						<div className="flex gap-7 text-sm text-muted-foreground">
+						<div className="text-muted-foreground flex gap-7 text-sm">
 							<Input
 								onChange={(event) => setUserName(event.target.value)}
 								placeholder="Name, email"
@@ -219,7 +219,7 @@ const CallRoom = () => {
 									friendList.map((friend) => (
 										<div
 											key={friend.id}
-											className="group flex w-full justify-between rounded-lg border p-2 transition-all duration-200 ease-in-out hover:bg-primary hover:text-white"
+											className="hover:bg-primary group flex w-full justify-between rounded-lg border p-2 transition-all duration-200 ease-in-out hover:text-white"
 											onClick={() => setSelectedFriend(friend)}
 										>
 											<div className="flex aspect-square h-[60px] w-fit items-center justify-center p-0 md:w-[60px]">
@@ -263,7 +263,7 @@ const CallRoom = () => {
 													<Button
 														size={'sm'}
 														onClick={() => handleSendFriend(friend.id)}
-														className="z-30 group-hover:bg-background group-hover:text-primary"
+														className="group-hover:bg-background group-hover:text-primary z-30"
 													>
 														<UserRoundPlus />
 													</Button>

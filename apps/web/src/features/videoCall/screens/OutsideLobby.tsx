@@ -29,7 +29,7 @@ const OutsideLobby = () => {
 		};
 	}, [router, setCurrentState, setLocalStream, stopMediaStream]);
 	return (
-		<div className="flex flex-1 rounded-lg bg-background p-4">
+		<div className="bg-background flex flex-1 rounded-lg p-4">
 			<div className="flex w-full flex-col items-center justify-center gap-5 rounded-lg p-5">
 				<div className="flex flex-col items-center justify-center gap-3">
 					<div className="flex items-center">

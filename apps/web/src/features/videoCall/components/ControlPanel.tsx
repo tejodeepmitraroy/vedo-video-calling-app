@@ -102,8 +102,8 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	);
 
 	return (
-		<div className="absolute bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 justify-between border-gray-200 px-8 dark:border-gray-600 dark:bg-gray-700 md:grid-cols-3">
-			<div className="hidden w-full items-center justify-start gap-3 text-white dark:text-gray-400 md:flex">
+		<div className="absolute bottom-0 left-0 z-50 grid h-16 w-full grid-cols-1 justify-between border-gray-200 px-8 md:grid-cols-3 dark:border-gray-600 dark:bg-gray-700">
+			<div className="hidden w-full items-center justify-start gap-3 text-white md:flex dark:text-gray-400">
 				<span>{roomId}</span>
 			</div>
 

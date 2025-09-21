@@ -77,14 +77,11 @@ const Room = () => {
 		}
 	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
 	return (
-		<>
-			<div className="flex h-full w-full">
-				{currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}
-				{currentScreen === 'Outside Lobby' && <OutsideLobby />}
-			</div>
-
+		<div className="flex h-full w-full">
+			{currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}
 			{currentScreen === 'Meeting Room' && <MeetingRoom roomId={roomId} />}
-		</>
+			{currentScreen === 'Outside Lobby' && <OutsideLobby />}
+		</div>
 	);
 };
 

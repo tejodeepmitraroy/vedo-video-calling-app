@@ -5,10 +5,10 @@ const SignUpPage = () => {
 	return (
 		<>
 			<div className="relative h-screen w-full lg:grid lg:grid-cols-2">
-				<div className="flex h-full w-full items-center justify-center bg-primary p-4 lg:w-1/2">
+				<div className="bg-primary flex h-full w-full items-center justify-center p-4 lg:w-1/2">
 					<SignUp path="/sign-up" signInUrl="/sign-in" />
 				</div>
-				<div className="hidden w-1/2 bg-muted lg:block">
+				<div className="bg-muted hidden w-1/2 lg:block">
 					<Image
 						src="/login-bg.jpg"
 						alt="Image"

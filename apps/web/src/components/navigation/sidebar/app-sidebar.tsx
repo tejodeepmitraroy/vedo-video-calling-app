@@ -26,8 +26,8 @@ const AppSidebar = () => {
 			),
 		},
 		{
-			label: 'Conference',
-			href: '/conference',
+			label: 'Meetings',
+			href: '/meetings',
 			icon: <Laptop className="h-6 w-6 flex-shrink-0 dark:text-neutral-200" />,
 		},
 	];

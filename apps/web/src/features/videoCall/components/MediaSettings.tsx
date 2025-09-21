@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import React from 'react';
-import { Mic, Video, Volume2 } from 'lucide-react';
+import { Check, Mic, Video, Volume2 } from 'lucide-react';
 import useDeviceStore from '@/store/useDeviceStore';
 import {
 	DropdownMenu,
@@ -10,6 +10,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 const MediaSettings = () => {
 	const mediaDevices = useDeviceStore((state) => state.mediaDevices);
@@ -27,12 +28,17 @@ const MediaSettings = () => {
 	);
 	const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
 	return (
-		<section className="w-full border">
+		<section className="mx-auto mt-6 grid w-full max-w-xl grid-cols-3 gap-5">
 			{/* Microphone */}
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="outline" className="rounded-full p-5">
-						<Mic className="h-6 w-7" />
+					<Button
+						variant="outline"
+						className="flex items-center justify-start gap-2 truncate rounded-full p-5 text-sm"
+					>
+						<span>
+							<Mic className="h-5 w-5" />
+						</span>
 						{selectedMicrophone.label || 'Select Microphone'}
 					</Button>
 				</DropdownMenuTrigger>
@@ -45,7 +51,20 @@ const MediaSettings = () => {
 						<DropdownMenuItem
 							key={microphone.deviceId}
 							onClick={() => setSelectedMicrophone(microphone.deviceId)}
+							className={cn(
+								'flex items-center gap-2',
+								selectedMicrophone.deviceId === microphone.deviceId &&
+									'text-primary'
+							)}
 						>
+							<Check
+								className={cn(
+									'h-5 w-5',
+									selectedMicrophone.deviceId === microphone.deviceId
+										? 'text-primary'
+										: 'opacity-0'
+								)}
+							/>
 							{microphone.label}
 						</DropdownMenuItem>
 					))}
@@ -53,8 +72,13 @@ const MediaSettings = () => {
 			</DropdownMenu>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="outline" className="p-5">
-						<Volume2 className="h-7 w-7" />
+					<Button
+						variant="outline"
+						className="flex items-center justify-start gap-2 truncate rounded-full p-5 text-sm"
+					>
+						<span>
+							<Volume2 className="h-5 w-5" />
+						</span>
 						{selectedSpeaker.label || 'Select Speaker'}
 					</Button>
 				</DropdownMenuTrigger>
@@ -67,7 +91,19 @@ const MediaSettings = () => {
 						<DropdownMenuItem
 							key={speaker.deviceId}
 							onClick={() => setSelectedSpeaker(speaker.deviceId)}
+							className={cn(
+								'flex items-center gap-2',
+								selectedSpeaker.deviceId === speaker.deviceId && 'text-primary'
+							)}
 						>
+							<Check
+								className={cn(
+									'h-5 w-5',
+									selectedSpeaker.deviceId === speaker.deviceId
+										? 'text-primary'
+										: 'opacity-0'
+								)}
+							/>
 							{speaker.label}
 						</DropdownMenuItem>
 					))}
@@ -76,8 +112,13 @@ const MediaSettings = () => {
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="outline" className="p-5">
-						<Video className="h-7 w-7" />
+					<Button
+						variant="outline"
+						className="flex items-center justify-start gap-2 truncate rounded-full p-5 text-sm"
+					>
+						<span>
+							<Video className="h-5 w-5" />
+						</span>
 						{selectedCamera.label || 'Select Camera'}
 					</Button>
 				</DropdownMenuTrigger>
@@ -90,7 +131,19 @@ const MediaSettings = () => {
 						<DropdownMenuItem
 							key={camera.deviceId}
 							onClick={() => setSelectedCamera(camera.deviceId)}
+							className={cn(
+								'flex items-center gap-2',
+								selectedCamera.deviceId === camera.deviceId && 'text-primary'
+							)}
 						>
+							<Check
+								className={cn(
+									'h-5 w-5',
+									selectedCamera.deviceId === camera.deviceId
+										? 'text-primary'
+										: 'opacity-0'
+								)}
+							/>
 							{camera.label}
 						</DropdownMenuItem>
 					))}

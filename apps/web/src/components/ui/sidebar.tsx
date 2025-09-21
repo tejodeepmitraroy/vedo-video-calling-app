@@ -96,7 +96,7 @@ export const DesktopSidebar = ({
 		<>
 			<motion.div
 				className={cn(
-					'bg hidden h-full w-[260px] flex-shrink-0 px-4 py-4 dark:bg-neutral-800 md:flex md:flex-col',
+					'bg hidden h-full w-[260px] flex-shrink-0 px-4 py-4 md:flex md:flex-col dark:bg-neutral-800',
 					className
 				)}
 				animate={{
@@ -215,7 +215,7 @@ export const SidebarButton = ({
 		<Link href={'/'} className="w-full">
 			<button
 				className={cn(
-					`group/sidebar flex w-full items-center justify-start gap-2 rounded-lg bg-primary px-2 py-2 text-white`,
+					`group/sidebar bg-primary flex w-full items-center justify-start gap-2 rounded-lg px-2 py-2 text-white`,
 					className
 				)}
 				{...props}

@@ -1,12 +1,13 @@
 'use client';
-import useScreenStateStore from '@/store/useScreenStateStore';
+// import useScreenStateStore from '@/store/useScreenStateStore';
 import React, { useCallback, useEffect } from 'react';
 import { Github, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import { useWebRTC } from '@/context/WebRTCContext';
+import UserProfile from '@/features/auth/components/UserProfile';
 
 const NavBar = () => {
-	const currentState = useScreenStateStore((state) => state.currentScreen);
+	// const currentState = useScreenStateStore((state) => state.currentScreen);
 	const webRTC = useWebRTC();
 
 	// Only try to use WebRTC if we're in a route where it's available
@@ -132,10 +133,10 @@ const NavBar = () => {
 	// }, [handleUserIsNotOnline, socketOff, socketOn]);
 
 	return (
-		<header className="relative hidden h-[50px] items-center justify-between gap-1 bg-neutral-100 px-4 md:flex md:h-[50px]">
-			<h1 className="text-xl font-semibold text-primary md:text-2xl">
+		<header className="relative hidden h-[50px] items-center justify-end gap-1 bg-neutral-100 px-4 md:flex md:h-[50px] md:px-10">
+			{/* <h1 className="text-xl font-semibold text-primary md:text-2xl">
 				{currentState}
-			</h1>
+			</h1> */}
 			<div className="flex items-center gap-2 pr-10">
 				<Link href={'https://x.com/tezomon_dev'}>
 					<div className="rounded-full border border-black bg-slate-100 p-1.5">
@@ -150,6 +151,7 @@ const NavBar = () => {
 					</div>
 				</Link>
 			</div>
+			<UserProfile />
 		</header>
 	);
 };

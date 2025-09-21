@@ -10,12 +10,12 @@ const SidebarWrapper = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<div
 			className={
-				` ${currentScreen === 'Meeting Room' && 'hidden'} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 dark:bg-neutral-800 md:flex-row` // for your use case, use `h-screen` instead of `h-[60vh]`
+				` ${currentScreen === 'Meeting Room' && 'hidden'} mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 md:flex-row dark:bg-neutral-800` // for your use case, use `h-screen` instead of `h-[60vh]`
 			}
 		>
 			<AppSidebar />
 
-			<div className="h-full w-full bg-background md:pb-[50px]">
+			<div className="bg-background h-full w-full md:pb-[50px]">
 				<NavBar />
 				<div className="flex h-full w-full flex-col justify-between">
 					{children}

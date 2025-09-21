@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
-import { nanoid } from 'nanoid';
 import prisma from '../lib/prismaClient';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
@@ -16,37 +15,44 @@ export const createInstantRoom = asyncHandler(
 				.json(new ApiError(401, 'Unauthorized: missing userId'));
 		}
 
-		const shortId = nanoid(8);
+		// const shortId = nanoid(8);
 
-		console.log('User Id========>>', userId);
+		// console.log('User Id========>>', userId);
 
 		try {
-			const meeting = await prisma.room.create({
-				data: {
-					shortId,
-					title: 'Instant Meeting',
-					description: `This is Instant Meeting. Created by ${userId} `,
-					createdById: userId!,
-				},
-				select: {
-					id: true,
-					shortId: true,
-					title: true,
-					type: true,
-					createdBy: true,
-					startTime: true,
+			const user = await prisma.user.findUnique({
+				where: {
+					id: userId!,
 				},
 			});
+			if (!user) {
+				response.status(404).json(new ApiError(404, 'User not found'));
+			} else {
+				const meeting = await prisma.room.create({
+					data: {
+						title: 'Instant Meeting',
+						description: `This is Instant Meeting. Created by ${userId} `,
+						createdById: userId!,
+					},
+					select: {
+						id: true,
+						title: true,
+						type: true,
+						createdBy: true,
+						startTime: true,
+					},
+				});
 
-			const url = `${process.env.FRONTEND_URL!}/room/${meeting.shortId}`;
+				const url = `${process.env.FRONTEND_URL!}/rm/${meeting.id}`;
 
-			const meetingDetails = {
-				...meeting,
-				url,
-			};
+				const meetingDetails = {
+					...meeting,
+					url,
+				};
 
-			console.log('meetingDetails', meetingDetails);
-			response.status(200).json(new ApiResponse(200, meetingDetails));
+				console.log('meetingDetails', meetingDetails);
+				response.status(200).json(new ApiResponse(200, meetingDetails));
+			}
 		} catch (error) {
 			console.log(error);
 			response.status(400).json(new ApiError(400, 'Error Happened', error));
@@ -63,12 +69,11 @@ export const getAllRooms = asyncHandler(
 			try {
 				const meetingData = await prisma.room.findUnique({
 					where: {
-						shortId: roomId,
+						id: roomId,
 						type: 'INSTANT',
 					},
 					select: {
 						id: true,
-						shortId: true,
 						type: true,
 						title: true,
 						createdBy: {
@@ -86,7 +91,7 @@ export const getAllRooms = asyncHandler(
 					},
 				});
 
-				const url = `${process.env.FRONTEND_URL!}/room/${meetingData?.shortId}`;
+				const url = `${process.env.FRONTEND_URL!}/rm/${meetingData?.id}`;
 
 				const meetingDetails = {
 					...meetingData,
@@ -205,7 +210,6 @@ export const getAllRooms = asyncHandler(
 export const createScheduleCall = asyncHandler(
 	async (request: Request, response: Response) => {
 		const { userId } = getAuth(request);
-		const shortId = nanoid(8);
 		const { title, description, startTime, endTime, participantIds } =
 			request.body;
 		console.log(request.body);
@@ -227,7 +231,6 @@ export const createScheduleCall = asyncHandler(
 			const meetingDetails = await prisma.room.create({
 				data: {
 					type: 'SCHEDULE',
-					shortId,
 					title,
 					description,
 					startTime,

@@ -130,7 +130,7 @@ export function DataTable<TData, TValue>({
 		<div className="">
 			<div className="flex w-full items-center pb-4">
 				<div className="hidden w-full gap-4 md:flex">
-					<div className="flex gap-2 text-sm text-muted-foreground">
+					<div className="text-muted-foreground flex gap-2 text-sm">
 						<Input
 							onChange={(event) => setRoomId(event.target.value)}
 							placeholder="Enter Room Code"
@@ -167,7 +167,7 @@ export function DataTable<TData, TValue>({
 					</Button>
 				</div>
 			</div>
-			<div className="rounded-md border bg-background">
+			<div className="bg-background rounded-md border">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (

@@ -33,7 +33,7 @@ const DeviceSelector = ({
 	onChange,
 }: DeviceSelectorProps) => (
 	<div className="space-y-2">
-		<Label className="text-sm font-medium text-muted-foreground">{label}</Label>
+		<Label className="text-muted-foreground text-sm font-medium">{label}</Label>
 		<Select value={value} onValueChange={onChange}>
 			<SelectTrigger className="w-full min-w-[250px]">
 				<SelectValue placeholder={`Select ${label.toLowerCase()}`} />

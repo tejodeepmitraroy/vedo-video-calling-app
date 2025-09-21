@@ -95,7 +95,7 @@ const BottomNavigation = () => {
 
 	return (
 		<div
-			className={`h-16 w-full border-t border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 md:hidden`}
+			className={`h-16 w-full border-t border-gray-200 bg-white md:hidden dark:border-gray-600 dark:bg-gray-700`}
 		>
 			<div className="mx-auto grid h-full max-w-lg grid-cols-4 font-medium">
 				<Link
@@ -108,7 +108,7 @@ const BottomNavigation = () => {
 						onClick={() => setCurrentState('Waiting Lobby')}
 					>
 						<Home
-							className={`${currentState === 'Waiting Lobby' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${currentState === 'Waiting Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
 							className={` ${currentState === 'Waiting Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
@@ -147,7 +147,7 @@ const BottomNavigation = () => {
 								className="inline-flex flex-col items-center justify-center"
 							>
 								<Plus
-									className={`mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500`}
+									className={`group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500`}
 								/>
 								<span
 									className={`text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
@@ -205,7 +205,7 @@ const BottomNavigation = () => {
 						onClick={() => setCurrentState('Outside Lobby')}
 					>
 						<Laptop
-							className={`${currentState === 'Outside Lobby' ? 'mb-1 h-6 w-12 rounded-md bg-primary text-background' : 'mb-1 h-6 w-6 text-gray-500 group-hover:text-primary dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${currentState === 'Outside Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
 							className={` ${currentState === 'Outside Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
