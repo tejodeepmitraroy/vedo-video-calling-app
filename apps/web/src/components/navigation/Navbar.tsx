@@ -5,6 +5,8 @@ import { Github, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import { useWebRTC } from '@/context/WebRTCContext';
 import UserProfile from '@/features/auth/components/UserProfile';
+import useScreenStateStore from '@/store/useScreenStateStore';
+import { cn } from '@/lib/utils';
 
 const NavBar = () => {
 	// const currentState = useScreenStateStore((state) => state.currentScreen);
@@ -131,9 +133,15 @@ const NavBar = () => {
 	// 		socketOff('notification:userIsNotOnline', handleUserIsNotOnline);
 	// 	};
 	// }, [handleUserIsNotOnline, socketOff, socketOn]);
+	const currentScreen = useScreenStateStore((state) => state.currentScreen);
 
 	return (
-		<header className="relative hidden h-[50px] items-center justify-end gap-1 bg-neutral-100 px-4 md:flex md:h-[50px] md:px-10">
+		<header
+			className={cn(
+				'relative h-[50px] items-center justify-end gap-1 bg-neutral-100 px-4 md:h-[50px] md:px-10',
+				currentScreen === 'Meeting Room' ? 'hidden' : 'hidden md:flex'
+			)}
+		>
 			{/* <h1 className="text-xl font-semibold text-primary md:text-2xl">
 				{currentState}
 			</h1> */}

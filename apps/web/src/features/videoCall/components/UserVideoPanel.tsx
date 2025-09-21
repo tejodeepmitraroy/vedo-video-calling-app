@@ -5,9 +5,41 @@ import React, { useEffect, useRef } from 'react';
 const UserVideoPanel = () => {
 	const localStream = useStreamStore((state) => state.localStream);
 	const videoRef = useRef<HTMLVideoElement>(null);
+	//   const isMounted = useRef(true);
 
 	useEffect(() => {
 		const video = videoRef.current;
+
+		// if (!video) return;
+
+		// // Set srcObject in a microtask to avoid race conditions
+		// const setSrc = () => {
+		// 	if (!isMounted.current) return;
+		// 	if (video.srcObject !== localStream) {
+		// 		video.srcObject = localStream;
+		// 	}
+		// };
+
+		// // Use requestAnimationFrame to ensure the video element is ready
+		// const raf = requestAnimationFrame(() => {
+		// 	if (isMounted.current) {
+		// 		setSrc();
+		// 		video.play().catch((e) => {
+		// 			if (e.name !== 'AbortError') {
+		// 				console.warn('Video play failed:', e);
+		// 			}
+		// 		});
+		// 	}
+		// });
+
+		// return () => {
+		// 	isMounted.current = false;
+		// 	cancelAnimationFrame(raf);
+		// 	if (video) {
+		// 		video.pause();
+		// 		video.srcObject = null;
+		// 	}
+		// };
 		if (video && localStream) {
 			video.srcObject = localStream;
 			video.play().catch((error) => {

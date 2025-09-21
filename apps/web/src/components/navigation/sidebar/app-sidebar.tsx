@@ -7,11 +7,14 @@ import { HomeIcon, Laptop } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import UserProfile from '@/features/auth/components/UserProfile';
 import { usePathname } from 'next/navigation';
+import useScreenStateStore from '@/store/useScreenStateStore';
+import { cn } from '@/lib/utils';
 
 const AppSidebar = () => {
 	const [open, setOpen] = useState<boolean>(false);
 	const { user } = useUser();
 
+	const currentScreen = useScreenStateStore((state) => state.currentScreen);
 	const navItems: Array<{
 		label: string;
 		href: string;
@@ -35,38 +38,40 @@ const AppSidebar = () => {
 	const pathname = usePathname();
 
 	return (
-		<Sidebar open={open} setOpen={setOpen}>
-			<SidebarBody className="justify-between gap-10">
-				<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-					<>
-						<Logo />
-					</>
-					<div className="mt-8 flex flex-col gap-2">
-						{navItems.map((screen, idx) => (
-							<SidebarLink
-								key={idx}
-								link={{
-									label: screen.label,
-									href: screen.href,
-									icon: screen.icon,
-									active: pathname === screen.href,
-								}}
-							/>
-						))}
+		<div className={cn(currentScreen === 'Meeting Room' ? 'hidden' : '')}>
+			<Sidebar open={open} setOpen={setOpen}>
+				<SidebarBody className={cn('justify-between gap-10')}>
+					<div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+						<>
+							<Logo />
+						</>
+						<div className="mt-8 flex flex-col gap-2">
+							{navItems.map((screen, idx) => (
+								<SidebarLink
+									key={idx}
+									link={{
+										label: screen.label,
+										href: screen.href,
+										icon: screen.icon,
+										active: pathname === screen.href,
+									}}
+								/>
+							))}
+						</div>
 					</div>
-				</div>
-				<div>
-					<SidebarLink
-						className="pl-2"
-						link={{
-							label: user?.fullName ? user.fullName : '',
-							href: '#',
-							icon: <UserProfile />,
-						}}
-					/>
-				</div>
-			</SidebarBody>
-		</Sidebar>
+					<div>
+						<SidebarLink
+							className="pl-2"
+							link={{
+								label: user?.fullName ? user.fullName : '',
+								href: '#',
+								icon: <UserProfile />,
+							}}
+						/>
+					</div>
+				</SidebarBody>
+			</Sidebar>
+		</div>
 	);
 };
 

@@ -76,6 +76,7 @@ const Room = () => {
 			stopMediaStream();
 		}
 	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
+
 	return (
 		<div className="flex h-full w-full">
 			{currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}

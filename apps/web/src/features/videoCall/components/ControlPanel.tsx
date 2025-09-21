@@ -110,7 +110,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 			<div className="flex w-full items-center justify-center gap-4">
 				<div className="mx-auto mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 					<Tooltip>
-						<TooltipTrigger>
+						<TooltipTrigger asChild>
 							<Button
 								variant={isCameraOn ? 'default' : 'destructive'}
 								onClick={() => toggleCamera()}
@@ -132,7 +132,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 					</Tooltip>
 
 					<Tooltip>
-						<TooltipTrigger>
+						<TooltipTrigger asChild>
 							<Button
 								data-tooltip-target="tooltip-camera"
 								variant={isMicrophoneOn ? 'default' : 'destructive'}
@@ -178,7 +178,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 
 					{currentUser?.host ? (
 						<Tooltip>
-							<TooltipTrigger>
+							<TooltipTrigger asChild>
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
 										<Button
@@ -208,7 +208,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						</Tooltip>
 					) : (
 						<Tooltip>
-							<TooltipTrigger>
+							<TooltipTrigger asChild>
 								<Button
 									variant={'destructive'}
 									data-tooltip-target="tooltip-microphone"
@@ -227,7 +227,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 					)}
 
 					<Tooltip>
-						<TooltipTrigger>
+						<TooltipTrigger asChild>
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
@@ -264,7 +264,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 					</Tooltip>
 
 					<Tooltip>
-						<TooltipTrigger>
+						<TooltipTrigger asChild>
 							<Popover>
 								<PopoverTrigger className="flex w-full items-center gap-1.5 text-sm">
 									<Button
