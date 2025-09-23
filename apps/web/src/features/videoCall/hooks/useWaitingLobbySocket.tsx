@@ -1,14 +1,10 @@
 'use client';
 import { useSocket } from '@/context/SocketContext';
 import { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { useAuth } from '@clerk/nextjs';
-
 import useGlobalStore from '@/store/useGlobalStore';
-import { getRoomDetails } from '@/features/videoCall/services';
 import useNotificationSocket from './useNotificationSocket';
 import useScreenStateStore from '@/store/useScreenStateStore';
-import { useRouter } from 'next/navigation';
 
 // interface Participant {
 // 	socketId: string;
@@ -23,48 +19,47 @@ import { useRouter } from 'next/navigation';
 export const useWaitingLobbySocket = (roomId: string) => {
 	const { socketOn, socketOff, socketEmit } = useSocket();
 	const [askToEnterLoading, setAskToEnterLoading] = useState(false);
-	const { getToken, userId } = useAuth();
+	const { userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
-	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
+
 	const setCurrentScreen = useScreenStateStore(
 		(state) => state.setCurrentScreen
 	);
-	const router = useRouter();
 
 	console.log('HOOOJK roomId--------->', roomId);
-	const roomDetailsFetch = useCallback(async () => {
-		const token = await getToken();
+	// const roomDetailsFetch = useCallback(async () => {
+	// 	const token = await getToken();
 
-		try {
-			const response = await getRoomDetails(token, roomId);
+	// 	try {
+	// 		const response = await getRoomDetails(token, roomId);
 
-			const roomDetails = response;
+	// 		const roomDetails = response;
 
-			console.log('roomDetails--------->', roomDetails);
+	// 		console.log('roomDetails--------->', roomDetails);
 
-			/////////////////////////////////////////////////////////////////////////////
-			const checkJoinedRoom = response.createdBy.id === userId;
+	// 		/////////////////////////////////////////////////////////////////////////////
+	// 		const checkJoinedRoom = response.createdBy.id === userId;
 
-			socketEmit('event:checkPreviouslyJoinedRoom', {
-				roomId,
-				hostUser: checkJoinedRoom,
-			});
+	// 		socketEmit('event:checkPreviouslyJoinedRoom', {
+	// 			roomId,
+	// 			hostUser: checkJoinedRoom,
+	// 		});
 
-			if (roomDetails) {
-				setRoomDetails(roomDetails);
-			} else {
-				router.push('/');
-			}
-		} catch (error) {
-			console.error('Error fetching room details:', error);
-			toast.error('Failed to fetch room details');
-			router.push('/');
-		}
-	}, [getToken, roomId, router, setRoomDetails, socketEmit, userId]);
+	// 		if (roomDetails) {
+	// 			setRoomDetails(roomDetails);
+	// 		} else {
+	// 			router.push('/');
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Error fetching room details:', error);
+	// 		toast.error('Failed to fetch room details');
+	// 		router.push('/');
+	// 	}
+	// }, [getToken, roomId, router, setRoomDetails, socketEmit, userId]);
 
-	useEffect(() => {
-		roomDetailsFetch();
-	}, [roomDetailsFetch]);
+	// useEffect(() => {
+	// 	roomDetailsFetch();
+	// }, [roomDetailsFetch]);
 
 	// --- User want to join Room ---
 

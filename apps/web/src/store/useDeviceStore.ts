@@ -57,41 +57,53 @@ const useDeviceStore = create<DeviceStore>()(
 					deviceId: mediaDevices.speakers[0].deviceId,
 				};
 			}
-			set(updates);
+			set(updates, false, 'setMediaDevices');
 		},
 		setSelectedCamera: (
 			devicesId: string | { label: string; deviceId: string }
 		) =>
-			set({
-				selectedCamera:
-					typeof devicesId === 'string'
-						? get().mediaDevices?.cameras.find(
-								(camera) => camera.deviceId === devicesId
-							) || { label: '', deviceId: devicesId }
-						: devicesId,
-			}),
+			set(
+				{
+					selectedCamera:
+						typeof devicesId === 'string'
+							? get().mediaDevices?.cameras.find(
+									(camera) => camera.deviceId === devicesId
+								) || { label: '', deviceId: devicesId }
+							: devicesId,
+				},
+				false,
+				'setSelectedCamera'
+			),
 		setSelectedMicrophone: (
 			devicesId: string | { label: string; deviceId: string }
 		) =>
-			set({
-				selectedMicrophone:
-					typeof devicesId === 'string'
-						? get().mediaDevices?.microphones.find(
-								(microphone) => microphone.deviceId === devicesId
-							) || { label: '', deviceId: devicesId }
-						: devicesId,
-			}),
+			set(
+				{
+					selectedMicrophone:
+						typeof devicesId === 'string'
+							? get().mediaDevices?.microphones.find(
+									(microphone) => microphone.deviceId === devicesId
+								) || { label: '', deviceId: devicesId }
+							: devicesId,
+				},
+				false,
+				'setSelectedMicrophone'
+			),
 		setSelectedSpeaker: (
 			devicesId: string | { label: string; deviceId: string }
 		) =>
-			set({
-				selectedSpeaker:
-					typeof devicesId === 'string'
-						? get().mediaDevices?.speakers.find(
-								(speaker) => speaker.deviceId === devicesId
-							) || { label: '', deviceId: devicesId }
-						: devicesId,
-			}),
+			set(
+				{
+					selectedSpeaker:
+						typeof devicesId === 'string'
+							? get().mediaDevices?.speakers.find(
+									(speaker) => speaker.deviceId === devicesId
+								) || { label: '', deviceId: devicesId }
+							: devicesId,
+				},
+				false,
+				'setSelectedSpeaker'
+			),
 	}))
 );
 

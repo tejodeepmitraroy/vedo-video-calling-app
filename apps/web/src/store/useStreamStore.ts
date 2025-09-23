@@ -1,6 +1,5 @@
 'use client';
 import { create } from 'zustand';
-
 import { devtools } from 'zustand/middleware';
 
 interface WebRTCStore {
@@ -26,12 +25,11 @@ const useStreamStore = create<WebRTCStore>()(
 		isScreenSharing: false,
 
 		setLocalStream: (stream) => {
-			// Stop any existing tracks when setting a new stream
 			const currentStream = get().localStream;
 			if (currentStream) {
 				currentStream.getTracks().forEach((track) => track.stop());
 			}
-			set({ localStream: stream });
+			set({ localStream: stream }, false, 'setLocalStream');
 		},
 
 		setLocalScreenStream: (stream) => {
@@ -39,7 +37,7 @@ const useStreamStore = create<WebRTCStore>()(
 			if (currentScreenStream) {
 				currentScreenStream.getTracks().forEach((track) => track.stop());
 			}
-			set({ localScreenStream: stream });
+			set({ localScreenStream: stream }, false, 'setLocalScreenStream');
 		},
 
 		toggleCamera: async () => {
@@ -50,7 +48,7 @@ const useStreamStore = create<WebRTCStore>()(
 			if (videoTracks.length > 0) {
 				const newState = !isCameraOn;
 				videoTracks[0].enabled = newState;
-				set({ isCameraOn: newState });
+				set({ isCameraOn: newState }, false, 'toggleCamera');
 			}
 		},
 
@@ -62,7 +60,7 @@ const useStreamStore = create<WebRTCStore>()(
 			if (audioTracks.length > 0) {
 				const newState = !isMicrophoneOn;
 				audioTracks[0].enabled = newState;
-				set({ isMicrophoneOn: newState });
+				set({ isMicrophoneOn: newState }, false, 'toggleMicrophone');
 			}
 		},
 
@@ -74,7 +72,11 @@ const useStreamStore = create<WebRTCStore>()(
 				if (localScreenStream) {
 					localScreenStream.getTracks().forEach((track) => track.stop());
 				}
-				set({ localScreenStream: null, isScreenSharing: false });
+				set(
+					{ localScreenStream: null, isScreenSharing: false },
+					false,
+					'stopScreenShare'
+				);
 				return;
 			}
 
@@ -84,15 +86,18 @@ const useStreamStore = create<WebRTCStore>()(
 					audio: true,
 				});
 
-				// Handle when user stops sharing from the browser UI
 				screenStream.getVideoTracks()[0].onended = () => {
 					get().toggleScreenShare();
 				};
 
-				set({ localScreenStream: screenStream, isScreenSharing: true });
+				set(
+					{ localScreenStream: screenStream, isScreenSharing: true },
+					false,
+					'startScreenShare'
+				);
 			} catch (error) {
 				console.error('Error starting screen share:', error);
-				set({ isScreenSharing: false });
+				set({ isScreenSharing: false }, false, 'screenShareError');
 			}
 		},
 
@@ -104,13 +109,17 @@ const useStreamStore = create<WebRTCStore>()(
 			if (localScreenStream) {
 				localScreenStream.getTracks().forEach((track) => track.stop());
 			}
-			set({
-				localStream: null,
-				localScreenStream: null,
-				isCameraOn: false,
-				isMicrophoneOn: false,
-				isScreenSharing: false,
-			});
+			set(
+				{
+					localStream: null,
+					localScreenStream: null,
+					isCameraOn: false,
+					isMicrophoneOn: false,
+					isScreenSharing: false,
+				},
+				false,
+				'stopAllTracks'
+			);
 		},
 	}))
 );

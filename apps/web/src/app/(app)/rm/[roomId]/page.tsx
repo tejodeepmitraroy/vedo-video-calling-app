@@ -7,20 +7,20 @@ import { useWebRTC } from '@/context/WebRTCContext';
 import MeetingRoom from '@/features/videoCall/screens/MeetingRoom';
 import WaitingLobby from '@/features/videoCall/screens/WaitingLobby';
 import OutsideLobby from '@/features/videoCall/screens/OutsideLobby';
+import useMainRoomSockets from '@/features/videoCall/hooks/useMainRoomSockets';
 
 const Room = () => {
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
-	const setCurrentScreen = useScreenStateStore(
-		(state) => state.setCurrentScreen
-	);
-
 	const { roomId } = useParams<{ roomId: string }>();
 
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
+	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 	const { getUserMedia, resetRemotePeers, getAllMediaDevices } = useWebRTC();
+
+	useMainRoomSockets(roomId!);
 
 	/////////////////////////////////////////////////////////////////////////
 
@@ -35,12 +35,13 @@ const Room = () => {
 			await getUserMedia({
 				camera: selectedCamera.deviceId,
 				microphone: selectedMicrophone.deviceId,
+				speaker: selectedSpeaker.deviceId,
 			});
 			console.log('Room: Media stream created successfully');
 		} catch (error) {
 			console.error('Room: Error creating media stream:', error);
 		}
-	}, [getUserMedia, selectedCamera, selectedMicrophone]);
+	}, [getUserMedia, selectedCamera, selectedMicrophone, selectedSpeaker]);
 
 	const stopMediaStream = useCallback(async () => {
 		console.log('Room: Stopping media stream');
@@ -76,12 +77,11 @@ const Room = () => {
 
 	useEffect(() => {
 		if (roomId) {
-			setCurrentScreen('Waiting Lobby');
 			getMediaStream();
 		} else {
 			stopMediaStream();
 		}
-	}, [getMediaStream, roomId, setCurrentScreen, stopMediaStream]);
+	}, [getMediaStream, roomId, stopMediaStream]);
 
 	return (
 		<div className="flex h-full w-full">

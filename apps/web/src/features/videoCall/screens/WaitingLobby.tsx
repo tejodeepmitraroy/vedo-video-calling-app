@@ -32,6 +32,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
+	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 	const localStream = useStreamStore((state) => state.localStream);
 
 	// Initialize media devices and get user media when component mounts
@@ -88,6 +89,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
+					speaker: selectedSpeaker.deviceId,
 				});
 			} else {
 				console.log('WaitingLobby: Using existing stream');
@@ -109,6 +111,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 		localStream,
 		selectedCamera.deviceId,
 		selectedMicrophone.deviceId,
+		selectedSpeaker.deviceId,
 	]);
 
 	console.log('Waiting Component mounted++++++++++');

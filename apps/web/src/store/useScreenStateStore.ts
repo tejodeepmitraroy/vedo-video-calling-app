@@ -11,8 +11,13 @@ interface useScreenStateStore {
 
 const useScreenStateStore = create<useScreenStateStore>()(
 	devtools((set) => ({
-		currentScreen: 'Meeting Room',
-		setCurrentScreen: (roomState) => set({ currentScreen: roomState }),
+		currentScreen: 'Waiting Lobby',
+		setCurrentScreen: (roomState) =>
+			set(
+				{ currentScreen: roomState },
+				false,
+				'setCurrentScreen - ' + roomState
+			),
 	}))
 );
 

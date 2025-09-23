@@ -63,10 +63,11 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const setSelectedMicrophone = useDeviceStore(
 		(state) => state.setSelectedMicrophone
 	);
-	// const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
+	const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
+	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
@@ -169,30 +170,60 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 									) : (
 										<MicOff className="h-6 w-6" />
 									)}
-									<span className="sr-only">Hide camera</span>
+									<span className="sr-only">Mute Microphone</span>
 								</Button>
 							</div>
 						</TooltipTrigger>
 						<TooltipContent>
-							<p>Microphone On/Off</p>
+							<p>Mute Microphone</p>
 						</TooltipContent>
 					</Tooltip>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button
-								variant={isCameraOn ? 'default' : 'destructive'}
-								onClick={() => toggleCamera()}
-								data-tooltip-target="tooltip-microphone"
-								type="button"
-								className="group rounded-2xl p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-							>
-								{isCameraOn ? (
-									<Video className="h-6 w-6" />
-								) : (
-									<VideoOff className="h-6 w-6" />
-								)}
-								<span className="sr-only">Mute microphone</span>
-							</Button>
+							<div className="flex items-center gap-1 rounded-2xl border pl-1">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<ChevronUp />
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="z-30 mb-6">
+										{mediaDevices?.cameras.map((camera) => (
+											<DropdownMenuItem
+												key={camera.deviceId}
+												onClick={() => setSelectedCamera(camera.deviceId)}
+												className={cn(
+													'flex items-center gap-2',
+													selectedCamera.deviceId === camera.deviceId &&
+														'text-primary'
+												)}
+											>
+												<Check
+													className={cn(
+														'h-5 w-5',
+														selectedCamera.deviceId === camera.deviceId
+															? 'text-primary'
+															: 'opacity-0'
+													)}
+												/>
+												{camera.label}
+											</DropdownMenuItem>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
+								<Button
+									data-tooltip-target="tooltip-camera"
+									variant={isCameraOn ? 'default' : 'destructive'}
+									onClick={() => toggleCamera()}
+									type="button"
+									className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+								>
+									{isCameraOn ? (
+										<Video className="h-6 w-6" />
+									) : (
+										<VideoOff className="h-6 w-6" />
+									)}
+									<span className="sr-only">Hide camera</span>
+								</Button>
+							</div>
 						</TooltipTrigger>
 						<TooltipContent>
 							<p>Camera On/Off</p>

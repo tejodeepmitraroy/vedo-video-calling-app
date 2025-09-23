@@ -17,6 +17,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
 	);
+	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 
 	// Initialise socket listeners
 	useMeetingRoomSocket();
@@ -38,6 +39,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
+					speaker: selectedSpeaker.deviceId,
 				});
 			}
 		};
@@ -49,6 +51,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		localStream,
 		selectedCamera.deviceId,
 		selectedMicrophone.deviceId,
+		selectedSpeaker.deviceId,
 	]);
 
 	console.log('Meeting Component mounted++++++++++');

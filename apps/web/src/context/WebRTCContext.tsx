@@ -35,6 +35,7 @@ interface IWebRTCContext {
 	}: {
 		camera: string;
 		microphone: string;
+		speaker: string;
 	}) => void;
 	disconnectPeer: ({ user }: { user: ServerStoreUser }) => void;
 	resetRemotePeers: () => void;
