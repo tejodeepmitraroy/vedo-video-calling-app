@@ -1,7 +1,6 @@
 'use client';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,11 +9,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -27,22 +21,35 @@ import useParticipantsStore from '@/store/useParticipantsStore';
 import useStreamStore from '@/store/useStreamStore';
 import { useAuth } from '@clerk/nextjs';
 
-import {
-	Mic,
-	Phone,
-	Video,
-	MicOff,
-	VideoOff,
-	EllipsisVertical,
-	Share2,
-	Users,
-	// ScreenShare,
-	// ScreenShareOff,
-} from 'lucide-react';
-import React, { useCallback } from 'react';
-import toast from 'react-hot-toast';
 import { RWebShare } from 'react-web-share';
 import SettingsDialog from './SettingsDialog';
+import {
+	Check,
+	ChevronUp,
+	EllipsisVertical,
+	Info,
+	Mic,
+	MicOff,
+	Phone,
+	ScreenShare,
+	ScreenShareOff,
+	Settings,
+	Share2,
+	Users,
+	Video,
+	VideoOff,
+} from 'lucide-react';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { useCallback } from 'react';
+import toast from 'react-hot-toast';
+import useDeviceStore from '@/store/useDeviceStore';
 
 const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const toggleCamera = useStreamStore((state) => state.toggleCamera);
@@ -50,8 +57,16 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 	const isCameraOn = useStreamStore((state) => state.isCameraOn);
 	const isMicrophoneOn = useStreamStore((state) => state.isMicrophoneOn);
 	const participants = useParticipantsStore((state) => state.participants);
-	// const isScreenSharing = useStreamStore((state) => state.isScreenSharing);
-	// const toggleScreenShare = useStreamStore((state) => state.toggleScreenShare);
+	const isScreenSharing = useStreamStore((state) => state.isScreenSharing);
+	const toggleScreenShare = useStreamStore((state) => state.toggleScreenShare);
+	const mediaDevices = useDeviceStore((state) => state.mediaDevices);
+	const setSelectedMicrophone = useDeviceStore(
+		(state) => state.setSelectedMicrophone
+	);
+	// const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
+	const selectedMicrophone = useDeviceStore(
+		(state) => state.selectedMicrophone
+	);
 
 	const { socketEmit } = useSocket();
 	const { userId } = useAuth();
@@ -111,17 +126,70 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 				<div className="mx-auto mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 					<Tooltip>
 						<TooltipTrigger asChild>
+							<div className="flex items-center gap-1 rounded-2xl border pl-1">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<ChevronUp />
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="z-30 mb-6">
+										{mediaDevices?.microphones.map((microphone) => (
+											<DropdownMenuItem
+												key={microphone.deviceId}
+												onClick={() =>
+													setSelectedMicrophone(microphone.deviceId)
+												}
+												className={cn(
+													'flex items-center gap-2',
+													selectedMicrophone.deviceId === microphone.deviceId &&
+														'text-primary'
+												)}
+											>
+												<Check
+													className={cn(
+														'h-5 w-5',
+														selectedMicrophone.deviceId === microphone.deviceId
+															? 'text-primary'
+															: 'opacity-0'
+													)}
+												/>
+												{microphone.label}
+											</DropdownMenuItem>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
+								<Button
+									data-tooltip-target="tooltip-camera"
+									variant={isMicrophoneOn ? 'default' : 'destructive'}
+									onClick={() => toggleMicrophone()}
+									type="button"
+									className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+								>
+									{isMicrophoneOn ? (
+										<Mic className="h-6 w-6" />
+									) : (
+										<MicOff className="h-6 w-6" />
+									)}
+									<span className="sr-only">Hide camera</span>
+								</Button>
+							</div>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>Microphone On/Off</p>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
 							<Button
 								variant={isCameraOn ? 'default' : 'destructive'}
 								onClick={() => toggleCamera()}
 								data-tooltip-target="tooltip-microphone"
 								type="button"
-								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
+								className="group rounded-2xl p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
 							>
 								{isCameraOn ? (
-									<Video className="h-7 w-7" />
+									<Video className="h-6 w-6" />
 								) : (
-									<VideoOff className="h-7 w-7" />
+									<VideoOff className="h-6 w-6" />
 								)}
 								<span className="sr-only">Mute microphone</span>
 							</Button>
@@ -132,29 +200,6 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 					</Tooltip>
 
 					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								data-tooltip-target="tooltip-camera"
-								variant={isMicrophoneOn ? 'default' : 'destructive'}
-								onClick={() => toggleMicrophone()}
-								type="button"
-								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
-							>
-								{isMicrophoneOn ? (
-									<Mic className="h-7 w-7" />
-								) : (
-									<MicOff className="h-7 w-7" />
-								)}
-								<span className="sr-only">Hide camera</span>
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Microphone On/Off</p>
-						</TooltipContent>
-					</Tooltip>
-
-					<SettingsDialog />
-					{/* <Tooltip>
 						<TooltipTrigger>
 							<Button
 								data-tooltip-target="tooltip-camera"
@@ -164,9 +209,9 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
 							>
 								{isScreenSharing ? (
-									<ScreenShareOff className="h-7 w-7" />
+									<ScreenShareOff className="h-6 w-6" />
 								) : (
-									<ScreenShare className="h-7 w-7" />
+									<ScreenShare className="h-6 w-6" />
 								)}
 								<span className="sr-only">Hide camera</span>
 							</Button>
@@ -174,7 +219,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 						<TooltipContent>
 							<p>Screen Sharing On/Off</p>
 						</TooltipContent>
-					</Tooltip> */}
+					</Tooltip>
 
 					{currentUser?.host ? (
 						<Tooltip>
@@ -238,7 +283,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 										<EllipsisVertical className="h-6 w-7" />
 									</Button>
 								</DropdownMenuTrigger>
-								<DropdownMenuContent>
+								<DropdownMenuContent className="w-full max-w-2xl">
 									<DropdownMenuLabel>Options</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 
@@ -251,10 +296,16 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 										onClick={() => console.log('roomUrl shared successfully!')}
 									>
 										<DropdownMenuItem className="w-full gap-1.5 text-sm">
-											<Share2 className="size-3.5" />
+											<Share2 className="h-6 w-6" />
 											Share
 										</DropdownMenuItem>
 									</RWebShare>
+									<SettingsDialog>
+										<DropdownMenuItem className="w-full gap-1.5 text-sm">
+											<Settings className="h-6 w-6" />
+											Settings
+										</DropdownMenuItem>
+									</SettingsDialog>
 								</DropdownMenuContent>
 							</DropdownMenu>
 						</TooltipTrigger>
@@ -262,11 +313,15 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 							<p>Options</p>
 						</TooltipContent>
 					</Tooltip>
+				</div>
+			</div>
 
+			<div className="flex w-full items-center justify-end gap-4">
+				<div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md px-4 py-2">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Popover>
-								<PopoverTrigger className="flex w-full items-center gap-1.5 text-sm">
+							<Dialog>
+								<DialogTrigger className="flex w-full items-center gap-1.5 text-sm">
 									<Button
 										data-tooltip-target="tooltip-microphone"
 										type="button"
@@ -274,9 +329,11 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 									>
 										<Users className="h-6 w-7" />
 									</Button>
-								</PopoverTrigger>
-								<PopoverContent className="flex flex-col gap-2">
-									<span className="text-lg font-semibold">Participants</span>
+								</DialogTrigger>
+								<DialogContent className="flex flex-col gap-2">
+									<DialogHeader>
+										<DialogTitle>Participants</DialogTitle>
+									</DialogHeader>
 									<Separator />
 
 									{participants.find(
@@ -388,23 +445,17 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 											))}
 										</ScrollArea>
 									)}
-								</PopoverContent>
-							</Popover>
+								</DialogContent>
+							</Dialog>
 						</TooltipTrigger>
 						<TooltipContent>
 							<p>Participants</p>
 						</TooltipContent>
 					</Tooltip>
-				</div>
-			</div>
-
-			<div className="flex w-full items-center justify-end gap-4">
-				{/* <div className="mb-4 flex h-fit items-center justify-center gap-4 rounded-md bg-white px-4 py-2">
 					<Tooltip>
 						<TooltipTrigger>
 							<Button
 								variant={'outline'}
-								onClick={() => toggleCamera()}
 								className="group rounded-full p-2.5 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:bg-gray-600 dark:hover:bg-gray-800 dark:focus:ring-gray-800"
 							>
 								<Info className="h-4 w-4" />
@@ -415,7 +466,7 @@ const ControlPanel = ({ roomId }: { roomId: string }) => {
 							<p>Show information</p>
 						</TooltipContent>
 					</Tooltip>
-				</div> */}
+				</div>
 			</div>
 		</div>
 	);

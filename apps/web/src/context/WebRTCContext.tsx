@@ -110,6 +110,40 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
 		async ({ camera, microphone }: { camera: string; microphone: string }) => {
 			try {
+				console.log('getUserMedia called with:', { camera, microphone });
+
+				// Check if the requested devices are the same as current stream devices
+				const currentVideoTrack = localStream.current?.getVideoTracks()[0];
+				const currentAudioTrack = localStream.current?.getAudioTracks()[0];
+				const currentVideoDeviceId =
+					currentVideoTrack?.getSettings?.()?.deviceId;
+				const currentAudioDeviceId =
+					currentAudioTrack?.getSettings?.()?.deviceId;
+
+				console.log('Current stream devices:', {
+					currentVideoDeviceId,
+					currentAudioDeviceId,
+				});
+				console.log('Requested devices:', { camera, microphone });
+
+				// If devices haven't changed and we have a valid stream, don't create a new one
+				// But be less strict - allow creation if we don't have current device info or if tracks are not ready
+				if (
+					localStream.current &&
+					camera === currentVideoDeviceId &&
+					microphone === currentAudioDeviceId &&
+					currentVideoTrack?.readyState === 'live' &&
+					currentAudioTrack?.readyState === 'live'
+				) {
+					console.log(
+						'Devices unchanged and tracks are ready, skipping getUserMedia'
+					);
+					return;
+				}
+
+				console.log(
+					'Devices changed, no stream, or tracks not ready - creating new stream'
+				);
 				const constraints: MediaStreamConstraints = {
 					video: {
 						...(camera && { deviceId: { exact: camera } }),
@@ -127,6 +161,8 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				}
 				localStream.current = newStream;
 				setLocalStream(newStream);
+
+				console.log('New stream created successfully');
 
 				// Debug logging
 				console.log(
@@ -177,6 +213,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 
 	const createPeerConnection = useCallback(
 		(userSocketId: string) => {
+			console.log('WebRTC: Creating peer connection for user:', userSocketId);
 			const configuration = {
 				iceServers: [
 					{
@@ -189,60 +226,41 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			};
 			const peerConnection = new RTCPeerConnection(configuration);
 
+			// Add local tracks immediately if stream is available
+			if (localStream.current) {
+				console.log('WebRTC: Adding local tracks to new peer connection');
+				localStream.current.getTracks().forEach((track) => {
+					console.log(
+						'Adding track to new connection:',
+						track.kind,
+						track.label
+					);
+					peerConnection.addTrack(track, localStream.current as MediaStream);
+				});
+			} else {
+				console.log(
+					'WebRTC: No local stream available when creating peer connection'
+				);
+			}
+
 			peerConnection.addEventListener('track', (event) => {
 				console.log('getting tracks================+>', event.streams[0]);
 				peerStreams.set(userSocketId, event.streams[0]);
+
+				// Update the streams state with all current remote streams
 				const usersStream = peerStreams?.values();
-				// const usersSocket = peerStreams?.keys();
 				const remoteStreams = Array.from(usersStream);
-				// const remoteSocketIds = Array.from(usersSocket);
-
-				// const updatedStream = remoteSocketIds.map((socketId) => {
-
-				// 	return {
-				// 		socketId: participant.socketId,
-				// 		userId: participant.userId,
-				// 		fullName: participant.fullName,
-				// 		imageUrl: participant.imageUrl,
-				// 		emailAddress: participant.emailAddress,
-				// 		host: participant.host,
-				// 		stream: peerStreams.get(participant.socketId)!,
-				// 	};
-				// } );
-
-				// const newStreams = participants.map((participant) => {
-				// 	if (peerStreams.get(participant.socketId)) {
-				// 		return {
-				// 			socketId: participant.socketId,
-				// 			userId: participant.userId,
-				// 			fullName: participant.fullName,
-				// 			imageUrl: participant.imageUrl,
-				// 			emailAddress: participant.emailAddress,
-				// 			host: participant.host,
-				// 			stream: peerStreams.get(participant.socketId)!,
-				// 		};
-				// 	} else {
-				// 		return {
-				// 			socketId: participant.socketId,
-				// 			userId: participant.userId,
-				// 			fullName: participant.fullName,
-				// 			imageUrl: participant.imageUrl,
-				// 			emailAddress: participant.emailAddress,
-				// 			host: participant.host,
-				// 			stream: localStream.current!,
-				// 		};
-				// 	}
-				// });
-
-				// setParticipantStreams(newStreams);
+				console.log(
+					'Updating streams state with:',
+					remoteStreams.length,
+					'streams'
+				);
 				setStreams(remoteStreams);
 			});
 
 			peerConnection.addEventListener('icecandidate', async (event) => {
 				if (event.candidate) {
-					// console.log(
-					// 	'=========================SEND Ice Candidate=================='
-					// );
+					console.log('Sending ICE candidate to user:', userSocketId);
 					socketEmit('event:sendIceCandidate', {
 						iceCandidate: event.candidate,
 						userSocketId,
@@ -250,30 +268,112 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				}
 			});
 
+			// Add connection state change logging
+			peerConnection.addEventListener('connectionstatechange', () => {
+				console.log(
+					'Peer connection state for',
+					userSocketId,
+					':',
+					peerConnection.connectionState
+				);
+
+				// If connection becomes connected and we have a local stream, ensure tracks are added
+				if (
+					peerConnection.connectionState === 'connected' &&
+					localStream.current
+				) {
+					console.log(
+						'WebRTC: Connection established, ensuring local tracks are added'
+					);
+					let hasTracks = false;
+					peerConnection.getSenders().forEach((sender) => {
+						if (sender.track) {
+							hasTracks = true;
+							console.log(
+								'Existing sender track:',
+								sender.track.kind,
+								sender.track.label
+							);
+						}
+					});
+
+					if (!hasTracks) {
+						console.log(
+							'WebRTC: No tracks found, adding local tracks to connected peer'
+						);
+						localStream.current.getTracks().forEach((track) => {
+							console.log(
+								'Adding track to connected peer:',
+								track.kind,
+								track.label
+							);
+							peerConnection.addTrack(
+								track,
+								localStream.current as MediaStream
+							);
+						});
+					}
+				}
+			});
+
 			peerConnections.set(userSocketId, peerConnection);
 
 			return peerConnection;
 		},
-		[peerConnections, peerStreams, socketEmit]
+		[peerConnections, peerStreams, socketEmit, localStream]
 	);
 
 	const handleCreateOffer = useCallback(
 		async ({ userSocketId }: { userSocketId: string }) => {
+			console.log('WebRTC: Creating offer for user:', userSocketId);
+			console.log('Local stream available:', !!localStream.current);
+
 			const peerConnection =
 				peerConnections.get(userSocketId) || createPeerConnection(userSocketId);
-			if (localStream.current) {
-				setLocalStream(localStream.current);
-				console.log('localStream.current=============>>', localStream.current);
-				localStream.current?.getTracks().forEach((track) => {
-					peerConnection.addTrack(track, localStream.current as MediaStream);
-				});
 
+			// Wait for local stream if not available
+			if (!localStream.current) {
+				console.log('WebRTC: No local stream available, waiting...');
+				// Wait for a short time for the stream to be ready
+				let attempts = 0;
+				while (!localStream.current && attempts < 50) {
+					// Wait up to 5 seconds
+					await new Promise((resolve) => setTimeout(resolve, 100));
+					attempts++;
+				}
+
+				if (!localStream.current) {
+					console.error(
+						'WebRTC: Local stream still not available after waiting'
+					);
+					return;
+				}
+			}
+
+			// Set the local stream for the store
+			setLocalStream(localStream.current);
+			console.log('localStream.current=============>>', localStream.current);
+
+			// Add local tracks to the peer connection
+			localStream.current?.getTracks().forEach((track) => {
+				console.log(
+					'Adding track to peer connection:',
+					track.kind,
+					track.label
+				);
+				peerConnection.addTrack(track, localStream.current as MediaStream);
+			});
+
+			try {
 				const offer = await peerConnection.createOffer();
 				await peerConnection.setLocalDescription(
 					new RTCSessionDescription(offer)
 				);
 
 				socketEmit('event:sendOffer', { offer, userSocketId });
+				console.log('WebRTC: Offer sent to user:', userSocketId);
+			} catch (error) {
+				console.error('WebRTC: Error creating offer:', error);
 			}
 		},
 		[createPeerConnection, peerConnections, setLocalStream, socketEmit]
@@ -287,21 +387,51 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			offer: RTCSessionDescriptionInit;
 			socketId: string;
 		}) => {
+			console.log('WebRTC: Creating answer for offer from:', socketId);
+			console.log('Local stream available:', !!localStream.current);
+
 			const peerConnection =
 				peerConnections.get(socketId) || createPeerConnection(socketId);
 
-			await peerConnection.setRemoteDescription(
-				new RTCSessionDescription(offer)
-			);
+			try {
+				await peerConnection.setRemoteDescription(
+					new RTCSessionDescription(offer)
+				);
+				console.log('WebRTC: Remote description set successfully');
 
-			if (localStream.current) {
-				console.log('localStream.current=============>>', localStream.current);
-				setLocalStream(localStream.current);
-				localStream.current
-					.getTracks()
-					.forEach((track) =>
-						peerConnection.addTrack(track, localStream.current as MediaStream)
+				// Wait for local stream if not available
+				if (!localStream.current) {
+					console.log(
+						'WebRTC: No local stream available for answer, waiting...'
 					);
+					let attempts = 0;
+					while (!localStream.current && attempts < 50) {
+						// Wait up to 5 seconds
+						await new Promise((resolve) => setTimeout(resolve, 100));
+						attempts++;
+					}
+
+					if (!localStream.current) {
+						console.error(
+							'WebRTC: Local stream still not available after waiting for answer'
+						);
+						return;
+					}
+				}
+
+				// Set the local stream for the store
+				setLocalStream(localStream.current);
+				console.log('localStream.current=============>>', localStream.current);
+
+				// Add local tracks to the peer connection
+				localStream.current?.getTracks().forEach((track) => {
+					console.log(
+						'Adding track to peer connection for answer:',
+						track.kind,
+						track.label
+					);
+					peerConnection.addTrack(track, localStream.current as MediaStream);
+				});
 
 				const answer = await peerConnection.createAnswer();
 				await peerConnection.setLocalDescription(
@@ -309,6 +439,9 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				);
 
 				socketEmit('event:sendAnswer', { answer, socketId });
+				console.log('WebRTC: Answer sent to user:', socketId);
+			} catch (error) {
+				console.error('WebRTC: Error creating answer:', error);
 			}
 		},
 		[createPeerConnection, peerConnections, setLocalStream, socketEmit]
@@ -322,11 +455,27 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			answer: RTCSessionDescriptionInit;
 			userSocketId: string;
 		}) => {
+			console.log(
+				'WebRTC: Setting remote description (answer) from user:',
+				userSocketId
+			);
 			const peerConnection = peerConnections.get(userSocketId);
 
-			await peerConnection?.setRemoteDescription(
-				new RTCSessionDescription(answer)
-			);
+			if (peerConnection) {
+				try {
+					await peerConnection.setRemoteDescription(
+						new RTCSessionDescription(answer)
+					);
+					console.log(
+						'WebRTC: Remote description set successfully for user:',
+						userSocketId
+					);
+				} catch (error) {
+					console.error('WebRTC: Error setting remote description:', error);
+				}
+			} else {
+				console.log('WebRTC: No peer connection found for user:', userSocketId);
+			}
 		},
 		[peerConnections]
 	);

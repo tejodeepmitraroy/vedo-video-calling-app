@@ -6,8 +6,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -19,7 +17,6 @@ const MediaSettings = () => {
 	);
 	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-
 	const setSelectedMicrophone = useDeviceStore(
 		(state) => state.setSelectedMicrophone
 	);
@@ -27,6 +24,25 @@ const MediaSettings = () => {
 		(state) => state.setSelectedSpeaker
 	);
 	const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
+
+	const handleDeviceChange = (
+		deviceType: 'camera' | 'microphone' | 'speaker',
+		deviceId: string
+	) => {
+		console.log('MediaSettings: Device change requested:', {
+			deviceType,
+			deviceId,
+		});
+
+		if (deviceType === 'camera') {
+			setSelectedCamera(deviceId);
+		} else if (deviceType === 'microphone') {
+			setSelectedMicrophone(deviceId);
+		} else {
+			setSelectedSpeaker(deviceId);
+		}
+	};
+
 	return (
 		<section className="mx-auto mt-6 grid w-full max-w-xl grid-cols-3 gap-5">
 			{/* Microphone */}
@@ -39,18 +55,18 @@ const MediaSettings = () => {
 						<span>
 							<Mic className="h-5 w-5" />
 						</span>
-						{selectedMicrophone.label || 'Select Microphone'}
+						<div className="truncate">
+							{selectedMicrophone.label || 'Select Microphone'}
+						</div>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuLabel>
-						{selectedMicrophone.label || 'Select Microphone'}
-					</DropdownMenuLabel>
-					<DropdownMenuSeparator />
 					{mediaDevices?.microphones.map((microphone) => (
 						<DropdownMenuItem
 							key={microphone.deviceId}
-							onClick={() => setSelectedMicrophone(microphone.deviceId)}
+							onClick={() =>
+								handleDeviceChange('microphone', microphone.deviceId)
+							}
 							className={cn(
 								'flex items-center gap-2',
 								selectedMicrophone.deviceId === microphone.deviceId &&
@@ -70,6 +86,7 @@ const MediaSettings = () => {
 					))}
 				</DropdownMenuContent>
 			</DropdownMenu>
+
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
@@ -79,18 +96,16 @@ const MediaSettings = () => {
 						<span>
 							<Volume2 className="h-5 w-5" />
 						</span>
-						{selectedSpeaker.label || 'Select Speaker'}
+						<div className="truncate">
+							{selectedSpeaker.label || 'Select Speaker'}
+						</div>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuLabel>
-						{selectedSpeaker.label || 'Select Speaker'}
-					</DropdownMenuLabel>
-					<DropdownMenuSeparator />
 					{mediaDevices?.speakers.map((speaker) => (
 						<DropdownMenuItem
 							key={speaker.deviceId}
-							onClick={() => setSelectedSpeaker(speaker.deviceId)}
+							onClick={() => handleDeviceChange('speaker', speaker.deviceId)}
 							className={cn(
 								'flex items-center gap-2',
 								selectedSpeaker.deviceId === speaker.deviceId && 'text-primary'
@@ -119,18 +134,16 @@ const MediaSettings = () => {
 						<span>
 							<Video className="h-5 w-5" />
 						</span>
-						{selectedCamera.label || 'Select Camera'}
+						<div className="truncate">
+							{selectedCamera.label || 'Select Camera'}
+						</div>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuLabel>
-						{selectedCamera.label || 'Select Camera'}
-					</DropdownMenuLabel>
-					<DropdownMenuSeparator />
 					{mediaDevices?.cameras.map((camera) => (
 						<DropdownMenuItem
 							key={camera.deviceId}
-							onClick={() => setSelectedCamera(camera.deviceId)}
+							onClick={() => handleDeviceChange('camera', camera.deviceId)}
 							className={cn(
 								'flex items-center gap-2',
 								selectedCamera.deviceId === camera.deviceId && 'text-primary'

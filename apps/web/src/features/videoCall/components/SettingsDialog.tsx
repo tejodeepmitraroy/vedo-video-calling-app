@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
 	Dialog,
 	DialogContent,
@@ -16,12 +16,15 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Settings, Mic, Video as VideoIcon } from 'lucide-react';
+
+import { MdOutlineSpeaker } from 'react-icons/md';
+import { IoVideocamOutline } from 'react-icons/io5';
+import useDeviceStore from '@/store/useDeviceStore';
+import { cn } from '@/lib/utils';
 
 interface DeviceSelectorProps {
 	label: string;
-	devices: MediaDeviceInfo[];
+	devices?: MediaDeviceInfo[];
 	value: string;
 	onChange: (deviceId: string) => void;
 }
@@ -32,15 +35,22 @@ const DeviceSelector = ({
 	value,
 	onChange,
 }: DeviceSelectorProps) => (
-	<div className="space-y-2">
+	<div className="space-y-5">
 		<Label className="text-muted-foreground text-sm font-medium">{label}</Label>
 		<Select value={value} onValueChange={onChange}>
 			<SelectTrigger className="w-full min-w-[250px]">
 				<SelectValue placeholder={`Select ${label.toLowerCase()}`} />
 			</SelectTrigger>
 			<SelectContent>
-				{devices.map((device) => (
-					<SelectItem key={device.deviceId} value={device.deviceId}>
+				{devices?.map((device) => (
+					<SelectItem
+						className={cn(
+							'flex items-center gap-2',
+							value === device.deviceId && 'text-primary'
+						)}
+						key={device.deviceId}
+						value={device.deviceId}
+					>
 						{device.label || `${label} ${device.deviceId.substring(0, 5)}`}
 					</SelectItem>
 				))}
@@ -49,84 +59,70 @@ const DeviceSelector = ({
 	</div>
 );
 
-const SettingsDialog = () => {
+const SettingsDialog = ({ children }: { children: React.ReactNode }) => {
 	const [open, setOpen] = useState(false);
 
-	const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-	const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
-	const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
+	const mediaDevices = useDeviceStore((state) => state.mediaDevices);
+	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
+	const selectedMicrophone = useDeviceStore(
+		(state) => state.selectedMicrophone
+	);
+	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 
-	const [selectedCamera, setSelectedCamera] = useState<string>('');
-	const [selectedMicrophone, setSelectedMicrophone] = useState<string>('');
-	const [selectedSpeaker, setSelectedSpeaker] = useState<string>('');
-
-	useEffect(() => {
-		const getDevices = async () => {
-			try {
-				const devices = await navigator.mediaDevices.enumerateDevices();
-				setCameras(devices.filter((d) => d.kind === 'videoinput'));
-				setMicrophones(devices.filter((d) => d.kind === 'audioinput'));
-				setSpeakers(devices.filter((d) => d.kind === 'audiooutput'));
-			} catch (err) {
-				console.error('Unable to enumerate devices', err);
-			}
-		};
-
-		getDevices();
-	}, []);
+	const setSelectedCamera = useDeviceStore((state) => state.setSelectedCamera);
+	const setSelectedMicrophone = useDeviceStore(
+		(state) => state.setSelectedMicrophone
+	);
+	const setSelectedSpeaker = useDeviceStore(
+		(state) => state.setSelectedSpeaker
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button
-					type="button"
-					variant="ghost"
-					className="rounded-full p-2.5"
-					aria-label="Settings"
-				>
-					<Settings className="h-6 w-6" />
-				</Button>
-			</DialogTrigger>
-			<DialogContent className="max-w-[800px]">
-				<DialogHeader>
-					<DialogTitle>Settings</DialogTitle>
-				</DialogHeader>
-				<div className="flex w-full gap-6">
-					<Tabs defaultValue="audio" className="flex w-full">
-						<TabsList className="mr-6 flex w-40 flex-col items-start gap-1 border-r pr-4">
+			<DialogTrigger>{children}</DialogTrigger>
+			<DialogContent className="h-[calc(100vh-20rem)] w-full max-w-[800px]">
+				<Tabs defaultValue="audio" className="grid h-full w-full grid-cols-3">
+					<section className="col-span-1 flex flex-col gap-3 border-r-2 pr-4">
+						<DialogHeader className="col-span-1 w-full">
+							<DialogTitle className="text-3xl font-semibold">
+								Settings
+							</DialogTitle>
+						</DialogHeader>
+
+						<TabsList className="bg-background flex h-full w-full flex-col justify-start gap-2">
 							<TabsTrigger value="audio" className="w-full justify-start gap-2">
-								<Mic className="size-4" /> Audio
+								<MdOutlineSpeaker className="size-7" /> Audio
 							</TabsTrigger>
 							<TabsTrigger value="video" className="w-full justify-start gap-2">
-								<VideoIcon className="size-4" /> Video
+								<IoVideocamOutline className="size-7" /> Video
 							</TabsTrigger>
 						</TabsList>
-						<div className="flex-1 overflow-y-auto">
-							<TabsContent value="audio" className="space-y-6">
-								<DeviceSelector
-									label="Microphone"
-									devices={microphones}
-									value={selectedMicrophone}
-									onChange={setSelectedMicrophone}
-								/>
-								<DeviceSelector
-									label="Speaker"
-									devices={speakers}
-									value={selectedSpeaker}
-									onChange={setSelectedSpeaker}
-								/>
-							</TabsContent>
-							<TabsContent value="video" className="space-y-6">
-								<DeviceSelector
-									label="Camera"
-									devices={cameras}
-									value={selectedCamera}
-									onChange={setSelectedCamera}
-								/>
-							</TabsContent>
-						</div>
-					</Tabs>
-				</div>
+					</section>
+					<section className="col-span-2 overflow-y-auto p-4">
+						<TabsContent value="audio" className="space-y-6">
+							<DeviceSelector
+								label="Microphone"
+								devices={mediaDevices?.microphones}
+								value={selectedMicrophone.deviceId}
+								onChange={setSelectedMicrophone}
+							/>
+							<DeviceSelector
+								label="Speaker"
+								devices={mediaDevices?.speakers}
+								value={selectedSpeaker.deviceId}
+								onChange={setSelectedSpeaker}
+							/>
+						</TabsContent>
+						<TabsContent value="video" className="space-y-6">
+							<DeviceSelector
+								label="Camera"
+								devices={mediaDevices?.cameras}
+								value={selectedCamera.deviceId}
+								onChange={setSelectedCamera}
+							/>
+						</TabsContent>
+					</section>
+				</Tabs>
 			</DialogContent>
 		</Dialog>
 	);

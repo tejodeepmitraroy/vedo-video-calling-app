@@ -22,28 +22,30 @@ const Room = () => {
 	);
 	const { getUserMedia, resetRemotePeers, getAllMediaDevices } = useWebRTC();
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////
 
 	// Set User Media Stream
 	const getMediaStream = useCallback(async () => {
-		getUserMedia({
+		console.log('Room: getMediaStream called with devices:', {
 			camera: selectedCamera.deviceId,
 			microphone: selectedMicrophone.deviceId,
 		});
+
+		try {
+			await getUserMedia({
+				camera: selectedCamera.deviceId,
+				microphone: selectedMicrophone.deviceId,
+			});
+			console.log('Room: Media stream created successfully');
+		} catch (error) {
+			console.error('Room: Error creating media stream:', error);
+		}
 	}, [getUserMedia, selectedCamera, selectedMicrophone]);
 
 	const stopMediaStream = useCallback(async () => {
+		console.log('Room: Stopping media stream');
 		resetRemotePeers();
 	}, [resetRemotePeers]);
-
-	// useEffect(() => {
-	// 	if (currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') {
-	// 		getMediaStream();
-	// 	} else {
-	// 		console.log('currentScreen===============>', currentScreen);
-	// 		stopMediaStream();
-	// 	}
-	// }, [currentScreen, getMediaStream, stopMediaStream]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +60,10 @@ const Room = () => {
 			(currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') &&
 			(roomId || currentScreen === 'Meeting Room')
 		) {
+			console.log(
+				'Room: Device changed, refreshing stream for screen:',
+				currentScreen
+			);
 			getMediaStream();
 		}
 	}, [

@@ -1,5 +1,6 @@
 'use client';
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 interface useScreenStateStore {
 	currentScreen: 'Waiting Lobby' | 'Meeting Room' | 'Outside Lobby' | null;
@@ -8,9 +9,11 @@ interface useScreenStateStore {
 	) => void;
 }
 
-const useScreenStateStore = create<useScreenStateStore>((set) => ({
-	currentScreen: 'Waiting Lobby',
-	setCurrentScreen: (roomState) => set({ currentScreen: roomState }),
-}));
+const useScreenStateStore = create<useScreenStateStore>()(
+	devtools((set) => ({
+		currentScreen: 'Meeting Room',
+		setCurrentScreen: (roomState) => set({ currentScreen: roomState }),
+	}))
+);
 
 export default useScreenStateStore;

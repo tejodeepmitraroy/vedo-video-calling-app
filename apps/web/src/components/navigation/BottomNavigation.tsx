@@ -24,9 +24,7 @@ import Link from 'next/link';
 
 const BottomNavigation = () => {
 	const [roomId, setRoomId] = useState<string>('');
-	const setCurrentState = useScreenStateStore(
-		(state) => state.setCurrentScreen
-	);
+
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 
 	const { getToken } = useAuth();
@@ -105,7 +103,6 @@ const BottomNavigation = () => {
 					<button
 						type="button"
 						className="inline-flex flex-col items-center justify-center"
-						onClick={() => setCurrentState('Waiting Lobby')}
 					>
 						<Home
 							className={`${currentState === 'Waiting Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
@@ -202,7 +199,6 @@ const BottomNavigation = () => {
 					<button
 						type="button"
 						className="inline-flex flex-col items-center justify-center"
-						onClick={() => setCurrentState('Outside Lobby')}
 					>
 						<Laptop
 							className={`${currentState === 'Outside Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}

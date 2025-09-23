@@ -9,42 +9,70 @@ const UserVideoPanel = () => {
 
 	useEffect(() => {
 		const video = videoRef.current;
+		if (!video || !localStream) {
+			console.log('UserVideoPanel: No video element or no local stream');
+			return;
+		}
 
-		// if (!video) return;
-
-		// // Set srcObject in a microtask to avoid race conditions
-		// const setSrc = () => {
-		// 	if (!isMounted.current) return;
-		// 	if (video.srcObject !== localStream) {
-		// 		video.srcObject = localStream;
-		// 	}
-		// };
-
-		// // Use requestAnimationFrame to ensure the video element is ready
-		// const raf = requestAnimationFrame(() => {
-		// 	if (isMounted.current) {
-		// 		setSrc();
-		// 		video.play().catch((e) => {
-		// 			if (e.name !== 'AbortError') {
-		// 				console.warn('Video play failed:', e);
-		// 			}
-		// 		});
-		// 	}
-		// });
-
-		// return () => {
-		// 	isMounted.current = false;
-		// 	cancelAnimationFrame(raf);
-		// 	if (video) {
-		// 		video.pause();
-		// 		video.srcObject = null;
-		// 	}
-		// };
-		if (video && localStream) {
+		// Only update if the stream has actually changed
+		if (video.srcObject !== localStream) {
+			console.log('UserVideoPanel: Setting new stream to video element');
 			video.srcObject = localStream;
-			video.play().catch((error) => {
-				console.error('Error playing video:', error);
-			});
+
+			// Ensure video is playing with better error handling
+			const playVideo = async () => {
+				try {
+					// Check if video is already playing or if there's a pending play request
+					if (video.readyState >= 2) {
+						// HAVE_CURRENT_DATA or higher
+						console.log('UserVideoPanel: Video ready, attempting to play');
+						await video.play();
+						console.log('UserVideoPanel: Video playing successfully');
+					} else {
+						console.log(
+							'UserVideoPanel: Video not ready, waiting for canplay event'
+						);
+						// Wait for the video to be ready
+						const handleCanPlay = () => {
+							video.removeEventListener('canplay', handleCanPlay);
+							video.play().catch((error) => {
+								console.error(
+									'UserVideoPanel: Error playing video after canplay:',
+									error
+								);
+							});
+						};
+						video.addEventListener('canplay', handleCanPlay);
+					}
+				} catch (error: any) {
+					if (
+						error.name === 'AbortError' ||
+						error.message.includes('interrupted')
+					) {
+						console.warn(
+							'UserVideoPanel: Play request was interrupted, this is normal:',
+							error.message
+						);
+					} else {
+						console.error('UserVideoPanel: Error playing video:', error);
+					}
+				}
+			};
+
+			playVideo();
+		} else {
+			console.log('UserVideoPanel: Stream unchanged, no update needed');
+		}
+
+		// Check if video tracks are enabled
+		const videoTracks = localStream.getVideoTracks();
+		if (videoTracks.length > 0) {
+			console.log(
+				'UserVideoPanel: Video track enabled:',
+				videoTracks[0].enabled,
+				'readyState:',
+				videoTracks[0].readyState
+			);
 		}
 
 		return () => {

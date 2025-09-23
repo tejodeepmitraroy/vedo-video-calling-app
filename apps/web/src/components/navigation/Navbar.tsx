@@ -9,7 +9,6 @@ import useScreenStateStore from '@/store/useScreenStateStore';
 import { cn } from '@/lib/utils';
 
 const NavBar = () => {
-	// const currentState = useScreenStateStore((state) => state.currentScreen);
 	const webRTC = useWebRTC();
 
 	// Only try to use WebRTC if we're in a route where it's available

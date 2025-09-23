@@ -5,7 +5,6 @@ interface useGlobalStore {
 	friendList: FriendListResponse[] | null;
 	roomDetails: MeetingDetails | RoomDetails | null;
 	onLineStatus: boolean;
-
 	setFriendList: (roomState: FriendListResponse[]) => void;
 	setRoomDetails: (roomDetails: MeetingDetails | RoomDetails | null) => void;
 	setOnLineStatus: (onLineStatus: boolean) => void;

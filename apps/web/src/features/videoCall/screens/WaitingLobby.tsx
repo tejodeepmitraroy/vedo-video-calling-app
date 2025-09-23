@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Share } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-// import { useAuth } from '@clerk/nextjs';
 import {
 	Card,
 	CardDescription,
@@ -10,7 +9,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-// import toast from 'react-hot-toast';
 import { useSocket } from '@/context/SocketContext';
 import { RWebShare } from 'react-web-share';
 import Spinner from '@/components/ui/spinner';
@@ -21,21 +19,14 @@ import MediaSettings from '@/features/videoCall/components/MediaSettings';
 import useDeviceStore from '@/store/useDeviceStore';
 import { useWebRTC } from '@/context/WebRTCContext';
 import useStreamStore from '@/store/useStreamStore';
-import useWaitingLobbySocket from '@/hooks/useWaitingLobbySocket';
+import useWaitingLobbySocket from '@/features/videoCall/hooks/useWaitingLobbySocket';
 
 const MediaControls = dynamic(() => import('../components/MediaControls'));
 
 const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const { socketOn, socketOff } = useSocket();
-	// const [askToEnter, setAskToEnter] = useState(false);
-	// const { userId } = useAuth();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
-	// const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
-	// const router = useRouter();
 	const [canJoin, setCanJoin] = useState<boolean>();
-	// const setCurrentScreen = useScreenStateStore(
-	// 	(state) => state.setCurrentScreen
-	// );
 	const { getUserMedia, getAllMediaDevices } = useWebRTC();
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
@@ -46,12 +37,60 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	// Initialize media devices and get user media when component mounts
 	useEffect(() => {
 		const initializeMedia = async () => {
+			console.log('WaitingLobby: Initializing media');
+			console.log('Selected camera:', selectedCamera.deviceId);
+			console.log('Selected microphone:', selectedMicrophone.deviceId);
+
 			await getAllMediaDevices();
-			if (!localStream) {
+
+			// Check if we need to get new media
+			const currentVideoTrack = localStream?.getVideoTracks()[0];
+			const currentAudioTrack = localStream?.getAudioTracks()[0];
+			const currentVideoDeviceId = currentVideoTrack?.getSettings?.()?.deviceId;
+			const currentAudioDeviceId = currentAudioTrack?.getSettings?.()?.deviceId;
+
+			console.log('Current stream devices:', {
+				currentVideoDeviceId,
+				currentAudioDeviceId,
+			});
+			console.log(
+				'Stream video track readyState:',
+				currentVideoTrack?.readyState
+			);
+			console.log(
+				'Stream audio track readyState:',
+				currentAudioTrack?.readyState
+			);
+
+			// Always get user media when entering WaitingLobby to ensure we have the correct devices
+			// This ensures that if user changed devices in MeetingRoom and came back, we get the right stream
+			const needsNewStream =
+				!localStream ||
+				selectedCamera.deviceId !== currentVideoDeviceId ||
+				selectedMicrophone.deviceId !== currentAudioDeviceId ||
+				currentVideoTrack?.readyState !== 'live' ||
+				currentAudioTrack?.readyState !== 'live' ||
+				!currentVideoDeviceId || // Force refresh if we don't have current device info
+				!currentAudioDeviceId;
+
+			if (needsNewStream) {
+				console.log('WaitingLobby: Getting new stream with devices:', {
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+				});
+				// Stop current stream if it exists
+				if (localStream) {
+					console.log(
+						'WaitingLobby: Stopping current stream before creating new one'
+					);
+					localStream.getTracks().forEach((track) => track.stop());
+				}
 				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
 				});
+			} else {
+				console.log('WaitingLobby: Using existing stream');
 			}
 		};
 
@@ -59,6 +98,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 		// Cleanup function to stop tracks when component unmounts
 		return () => {
+			console.log('WaitingLobby: Cleaning up media');
 			if (localStream) {
 				localStream.getTracks().forEach((track) => track.stop());
 			}
@@ -89,155 +129,6 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	const { handleJoinRoom, handleAskToJoin, askToEnterLoading } =
 		useWaitingLobbySocket(roomId);
-
-	// ////////////////////////////////////////////////////////////////////////////////////////////
-	// const getRoomDetails = useCallback(async () => {
-	// 	const token = await getToken();
-
-	// 	try {
-	// 		const { data } = await axios(
-	// 			`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room?roomId=${roomId}`,
-	// 			{
-	// 				headers: {
-	// 					'Content-Type': 'application/json',
-	// 					Authorization: `Bearer ${token}`,
-	// 				},
-	// 			}
-	// 		);
-	// 		const response = data.data;
-
-	// 		/////////////////////////////////////////////////////////////////////////////
-	// 		const checkJoinedRoom = response.createdById === userId;
-
-	// 		// console.log('checkPreviouslyJoinedRoom====>', checkJoinedRoom);
-	// 		socketEmit('event:checkPreviouslyJoinedRoom', {
-	// 			roomId,
-	// 			hostUser: checkJoinedRoom,
-	// 		});
-
-	// 		/////////////////////////////////////////////////////////////////////////////
-	// 		if (response) {
-	// 			setRoomDetails(response);
-	// 			// toast.success('Room Founded');
-	// 		} else {
-	// 			// toast.error('Room Id Not Existed');
-	// 			router.push('/');
-	// 		}
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 	}
-	// }, [getToken, roomId, router, setRoomDetails, socketEmit, userId]);
-
-	// /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// //// Previously joined User
-	// const handleDirectlyCanJoin = useCallback(
-	// 	({ directlyCanJoin }: { directlyCanJoin: boolean }) => {
-	// 		setCanJoin(directlyCanJoin);
-	// 	},
-	// 	[]
-	// );
-
-	// useEffect(() => {
-	// 	getRoomDetails();
-	// 	socketOn('event:directlyCanJoin', handleDirectlyCanJoin);
-	// 	return () => {
-	// 		socketOff('event:directlyCanJoin', handleDirectlyCanJoin);
-	// 	};
-	// }, [getRoomDetails, handleDirectlyCanJoin, socketOff, socketOn]);
-
-	/////////////////////////////////////////////////////////////////////////
-
-	//User join Room
-	// const handleJoinRoom = useCallback(async () => {
-	// 	const checkJoinedRoom = roomDetails?.createdById === userId;
-	// 	socketEmit('event:joinRoom', {
-	// 		roomId: roomId,
-	// 		hostUser: checkJoinedRoom,
-	// 	});
-	// }, [roomDetails?.createdById, roomId, socketEmit, userId]);
-
-	// //User ask join Room
-	// const handleAskToJoin = useCallback(async () => {
-	// 	socketEmit('event:askToJoin', {
-	// 		roomId,
-	// 	});
-
-	// 	setAskToEnter(true);
-	// }, [roomId, socketEmit]);
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// /////// All socket Notification Function are Define Here
-	// const roomEnterPermissionDenied = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.error("Sorry host don't want to enter you");
-	// }, [setAskToEnter]);
-
-	// const handleHostIsNotExistedInRoom = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.error(`Host is Not Existed in Room. Please wait`);
-	// }, [setAskToEnter]);
-
-	// const handleRoomLimitFull = useCallback(() => {
-	// 	setAskToEnter(false);
-	// 	toast.error(`Room Limit Full`);
-	// }, [setAskToEnter]);
-
-	// ////////////////////////////////////////////////////////////////////////////////////////////////////
-	// useEffect(() => {
-	// 	socketOn(
-	// 		'notification:hostIsNotExistedInRoom',
-	// 		handleHostIsNotExistedInRoom
-	// 	);
-	// 	socketOn(
-	// 		'notification:roomEnterPermissionDenied',
-	// 		roomEnterPermissionDenied
-	// 	);
-	// 	socketOn('notification:roomLimitFull', handleRoomLimitFull);
-	// 	return () => {
-	// 		socketOff(
-	// 			'notification:hostIsNotExistedInRoom',
-
-	// 			handleHostIsNotExistedInRoom
-	// 		);
-	// 		socketOff(
-	// 			'notification:roomEnterPermissionDenied',
-	// 			roomEnterPermissionDenied
-	// 		);
-	// 		socketOff('notification:roomLimitFull', handleRoomLimitFull);
-	// 	};
-	// }, [
-	// 	handleHostIsNotExistedInRoom,
-	// 	handleRoomLimitFull,
-	// 	roomEnterPermissionDenied,
-	// 	socketOff,
-	// 	socketOn,
-	// ]);
-
-	//// All socket Event Function are Define Here
-	// const joinRoom = useCallback(async () => {
-	// 	socketEmit('event:joinRoom', {
-	// 		roomId: roomId,
-	// 		hostUser: false,
-	// 	});
-	// }, [roomId, socketEmit]);
-
-	// const handleEnterRoom = useCallback(() => {
-	// 	setCurrentScreen('Meeting Room');
-	// }, [setCurrentScreen]);
-
-	// //// All socket Notification are Executed Here
-	// useEffect(() => {
-	// 	// console.log('Setup All Socket Events ------------->>>');
-	// 	socketOn('event:joinRoom', joinRoom);
-	// 	socketOn('event:enterRoom', handleEnterRoom);
-	// 	return () => {
-	// 		// console.log('Off All Socket Events ------------->>>');
-	// 		socketOff('event:joinRoom', joinRoom);
-	// 		socketOff('event:enterRoom', handleEnterRoom);
-	// 	};
-	// }, [joinRoom, handleEnterRoom, socketOff, socketOn]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (

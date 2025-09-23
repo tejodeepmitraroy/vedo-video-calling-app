@@ -5,22 +5,74 @@ import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from '../components/RemoteUserVideoPanel';
 import ControlPanel from '../components/ControlPanel';
 import { useUser } from '@clerk/nextjs';
-// import { MonitorUp } from 'lucide-react';
-// import { Button } from '@/components/ui/button';
 import useStreamStore from '@/store/useStreamStore';
-import useMeetingRoomSocket from '@/hooks/useMeetingRoomSocket';
+import useDeviceStore from '@/store/useDeviceStore';
+import useMeetingRoomSocket from '@/features/videoCall/hooks/useMeetingRoomSocket';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	const { streams } = useWebRTC();
+	const { streams, getUserMedia, getAllMediaDevices } = useWebRTC();
 	const { user } = useUser();
 	const localStream = useStreamStore((state) => state.localStream);
+	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
+	const selectedMicrophone = useDeviceStore(
+		(state) => state.selectedMicrophone
+	);
 
 	// Initialise socket listeners
 	useMeetingRoomSocket();
 
+	// Ensure we have a valid stream when entering meeting room
+	React.useEffect(() => {
+		const initializeMeetingStream = async () => {
+			// Get all devices first
+			await getAllMediaDevices();
+
+			// If no local stream or if devices don't match current stream devices, get new stream
+			if (
+				!localStream ||
+				selectedCamera.deviceId !==
+					localStream.getVideoTracks()[0]?.getSettings?.()?.deviceId ||
+				selectedMicrophone.deviceId !==
+					localStream.getAudioTracks()[0]?.getSettings?.()?.deviceId
+			) {
+				getUserMedia({
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+				});
+			}
+		};
+
+		initializeMeetingStream();
+	}, [
+		getUserMedia,
+		getAllMediaDevices,
+		localStream,
+		selectedCamera.deviceId,
+		selectedMicrophone.deviceId,
+	]);
+
 	console.log('Meeting Component mounted++++++++++');
 	console.log('Streams available:', streams.length);
 	console.log('Local stream available:', !!localStream);
+	console.log('Selected camera:', selectedCamera.deviceId);
+	console.log('Selected microphone:', selectedMicrophone.deviceId);
+
+	// Log stream details for debugging
+	if (streams.length > 0) {
+		console.log('Remote streams details:');
+		streams.forEach((stream, index) => {
+			console.log(`Stream ${index}:`, {
+				id: stream.id,
+				active: stream.active,
+				tracks: stream.getTracks().map((track) => ({
+					kind: track.kind,
+					label: track.label,
+					enabled: track.enabled,
+					readyState: track.readyState,
+				})),
+			});
+		});
+	}
 
 	return (
 		<main className="relative flex h-screen w-full overflow-hidden bg-[#222831]">
