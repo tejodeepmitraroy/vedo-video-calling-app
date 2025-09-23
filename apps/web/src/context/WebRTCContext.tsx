@@ -86,6 +86,25 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			}
 		}, [setMediaDevices]);
 
+	useEffect(() => {
+		// Function to fetch and update devices
+		// Run on mount
+		getAllMediaDevices();
+
+		// Listen for device changes
+		navigator.mediaDevices.addEventListener('devicechange', getAllMediaDevices);
+
+		// Cleanup on unmount
+		return () => {
+			navigator.mediaDevices.removeEventListener(
+				'devicechange',
+				getAllMediaDevices
+			);
+		};
+	}, [getAllMediaDevices]);
+
+	//////////////////////////////////////////////////////////////////////////
+
 	// Function to update all peer connections with the current stream
 	const updatePeerConnections = useCallback(
 		(stream: MediaStream) => {
@@ -561,7 +580,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			value={{
 				localStream: localStream.current,
 				streams,
-				// participantStreams,
 				getAllMediaDevices,
 				getUserMedia,
 				disconnectPeer,

@@ -27,7 +27,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const { socketOn, socketOff } = useSocket();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const [canJoin, setCanJoin] = useState<boolean>();
-	const { getUserMedia, getAllMediaDevices } = useWebRTC();
+	const { getUserMedia } = useWebRTC();
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
 	const selectedMicrophone = useDeviceStore(
 		(state) => state.selectedMicrophone
@@ -36,13 +36,14 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const localStream = useStreamStore((state) => state.localStream);
 
 	// Initialize media devices and get user media when component mounts
+
 	useEffect(() => {
 		const initializeMedia = async () => {
 			console.log('WaitingLobby: Initializing media');
 			console.log('Selected camera:', selectedCamera.deviceId);
 			console.log('Selected microphone:', selectedMicrophone.deviceId);
 
-			await getAllMediaDevices();
+			// await getAllMediaDevices();
 
 			// Check if we need to get new media
 			const currentVideoTrack = localStream?.getVideoTracks()[0];
@@ -106,7 +107,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 			}
 		};
 	}, [
-		getAllMediaDevices,
+		// getAllMediaDevices,
 		getUserMedia,
 		localStream,
 		selectedCamera.deviceId,

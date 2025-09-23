@@ -1,37 +1,21 @@
 'use client';
 // import useScreenStateStore from '@/store/useScreenStateStore';
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { Github, Twitter } from 'lucide-react';
 import Link from 'next/link';
-import { useWebRTC } from '@/context/WebRTCContext';
 import UserProfile from '@/features/auth/components/UserProfile';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import { cn } from '@/lib/utils';
 
 const NavBar = () => {
-	const webRTC = useWebRTC();
+	// const webRTC = useWebRTC();
 
 	// Only try to use WebRTC if we're in a route where it's available
-	const isRoomRoute =
-		typeof window !== 'undefined'
-			? window.location.pathname.startsWith('/rm')
-			: false;
+	// const isRoomRoute =
+	// 	typeof window !== 'undefined'
+	// 		? window.location.pathname.startsWith('/rm')
+	// 		: false;
 	///////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Get All Media Devices When Component Render
-	const getDevices = useCallback(() => {
-		if (isRoomRoute && webRTC?.getAllMediaDevices) {
-			try {
-				webRTC.getAllMediaDevices();
-			} catch (error) {
-				console.error('Error getting media devices:', error);
-			}
-		}
-	}, [isRoomRoute, webRTC]);
-
-	useEffect(() => {
-		getDevices();
-	}, [getDevices]);
 
 	/////////////////////////////////////////////////////////////////////
 	// Call Accept & Received

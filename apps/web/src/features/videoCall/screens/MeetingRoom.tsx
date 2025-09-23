@@ -10,7 +10,7 @@ import useDeviceStore from '@/store/useDeviceStore';
 import useMeetingRoomSocket from '@/features/videoCall/hooks/useMeetingRoomSocket';
 
 const MeetingRoom = ({ roomId }: { roomId: string }) => {
-	const { streams, getUserMedia, getAllMediaDevices } = useWebRTC();
+	const { streams, getUserMedia } = useWebRTC();
 	const { user } = useUser();
 	const localStream = useStreamStore((state) => state.localStream);
 	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
@@ -25,9 +25,6 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	// Ensure we have a valid stream when entering meeting room
 	React.useEffect(() => {
 		const initializeMeetingStream = async () => {
-			// Get all devices first
-			await getAllMediaDevices();
-
 			// If no local stream or if devices don't match current stream devices, get new stream
 			if (
 				!localStream ||
@@ -47,7 +44,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 		initializeMeetingStream();
 	}, [
 		getUserMedia,
-		getAllMediaDevices,
+
 		localStream,
 		selectedCamera.deviceId,
 		selectedMicrophone.deviceId,

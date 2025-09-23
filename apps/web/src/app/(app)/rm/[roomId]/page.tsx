@@ -18,7 +18,7 @@ const Room = () => {
 		(state) => state.selectedMicrophone
 	);
 	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
-	const { getUserMedia, resetRemotePeers, getAllMediaDevices } = useWebRTC();
+	const { getUserMedia, resetRemotePeers } = useWebRTC();
 
 	useMainRoomSockets(roomId!);
 
@@ -49,11 +49,6 @@ const Room = () => {
 	}, [resetRemotePeers]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Get media devices once on mount
-	useEffect(() => {
-		getAllMediaDevices();
-	}, [getAllMediaDevices]);
 
 	// Refresh media stream whenever selected camera or microphone changes while user is in media screens
 	useEffect(() => {

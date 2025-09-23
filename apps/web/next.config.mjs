@@ -10,7 +10,7 @@ const nextConfig = {
 			},
 		],
 	},
-	reactStrictMode: false,
+	reactStrictMode: true,
 	// typescript: {
 	// 	ignoreBuildErrors: true,
 	// },
