@@ -147,7 +147,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				console.log('Requested devices:', { camera, microphone });
 
 				// If devices haven't changed and we have a valid stream, don't create a new one
-				// But be less strict - allow creation if we don't have current device info or if tracks are not ready
+				// But be more strict - only allow creation if devices have changed or if tracks are not ready
 				if (
 					localStream.current &&
 					camera === currentVideoDeviceId &&
@@ -160,10 +160,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					);
 					return;
 				}
+				console.log('localStream.current--->', localStream.current);
 
 				console.log(
 					'Devices changed, no stream, or tracks not ready - creating new stream'
 				);
+				console.log('getUserMedia called with:', { camera, microphone });
 				const constraints: MediaStreamConstraints = {
 					video: {
 						...(camera && { deviceId: { exact: camera } }),
@@ -172,9 +174,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					},
 					audio: microphone ? { deviceId: { exact: microphone } } : true,
 				};
+
 				// Get new media stream with selected devices
 				const newStream =
 					await navigator.mediaDevices.getUserMedia(constraints);
+
+				console.log('New stream created successfully', newStream);
 				// Stop previous tracks if any
 				if (localStream.current) {
 					localStream.current.getTracks().forEach((track) => track.stop());
@@ -182,7 +187,15 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				localStream.current = newStream;
 				setLocalStream(newStream);
 
-				console.log('New stream created successfully');
+				console.log('New stream created successfully', newStream);
+
+				// Force a re-render by updating the context value
+				// This ensures components get the updated stream immediately
+				console.log('Updated localStream ref:', localStream.current);
+				console.log(
+					'Store should now have stream:',
+					useStreamStore.getState().localStream
+				);
 
 				// Debug logging
 				console.log(

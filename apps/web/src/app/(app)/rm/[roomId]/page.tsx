@@ -8,6 +8,7 @@ import MeetingRoom from '@/features/videoCall/screens/MeetingRoom';
 import WaitingLobby from '@/features/videoCall/screens/WaitingLobby';
 import OutsideLobby from '@/features/videoCall/screens/OutsideLobby';
 import useMainRoomSockets from '@/features/videoCall/hooks/useMainRoomSockets';
+import useStreamStore from '@/store/useStreamStore';
 
 const Room = () => {
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
@@ -19,6 +20,7 @@ const Room = () => {
 	);
 	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 	const { getUserMedia, resetRemotePeers } = useWebRTC();
+	const localStream = useStreamStore((state) => state.localStream);
 
 	useMainRoomSockets(roomId!);
 
@@ -29,19 +31,29 @@ const Room = () => {
 		console.log('Room: getMediaStream called with devices:', {
 			camera: selectedCamera.deviceId,
 			microphone: selectedMicrophone.deviceId,
+			speaker: selectedSpeaker.deviceId,
+			localStream,
 		});
 
 		try {
-			await getUserMedia({
-				camera: selectedCamera.deviceId,
-				microphone: selectedMicrophone.deviceId,
-				speaker: selectedSpeaker.deviceId,
-			});
-			console.log('Room: Media stream created successfully');
+			if (selectedCamera.deviceId && selectedMicrophone.deviceId) {
+				await getUserMedia({
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+					speaker: selectedSpeaker.deviceId,
+				});
+				console.log('Room: Media stream created successfully');
+			}
 		} catch (error) {
 			console.error('Room: Error creating media stream:', error);
 		}
-	}, [getUserMedia, selectedCamera, selectedMicrophone, selectedSpeaker]);
+	}, [
+		getUserMedia,
+		localStream,
+		selectedCamera.deviceId,
+		selectedMicrophone.deviceId,
+		selectedSpeaker.deviceId,
+	]);
 
 	const stopMediaStream = useCallback(async () => {
 		console.log('Room: Stopping media stream');
@@ -54,7 +66,11 @@ const Room = () => {
 	useEffect(() => {
 		if (
 			(currentScreen === 'Waiting Lobby' || currentScreen === 'Meeting Room') &&
-			(roomId || currentScreen === 'Meeting Room')
+			(roomId || currentScreen === 'Meeting Room') &&
+			selectedCamera.deviceId !== null &&
+			selectedCamera.deviceId !== undefined &&
+			selectedMicrophone.deviceId !== null &&
+			selectedMicrophone.deviceId !== undefined
 		) {
 			console.log(
 				'Room: Device changed, refreshing stream for screen:',
@@ -63,20 +79,32 @@ const Room = () => {
 			getMediaStream();
 		}
 	}, [
-		selectedCamera,
-		selectedMicrophone,
+		selectedCamera.deviceId,
+		selectedMicrophone.deviceId,
 		currentScreen,
 		roomId,
 		getMediaStream,
 	]);
 
 	useEffect(() => {
-		if (roomId) {
+		if (
+			roomId &&
+			currentScreen !== 'Outside Lobby' &&
+			selectedCamera.deviceId &&
+			selectedMicrophone.deviceId
+		) {
 			getMediaStream();
-		} else {
+		} else if (!roomId) {
 			stopMediaStream();
 		}
-	}, [getMediaStream, roomId, stopMediaStream]);
+	}, [
+		roomId,
+		currentScreen,
+		getMediaStream,
+		stopMediaStream,
+		selectedCamera.deviceId,
+		selectedMicrophone.deviceId,
+	]);
 
 	return (
 		<div className="flex h-full w-full">

@@ -16,8 +16,6 @@ import dynamic from 'next/dynamic';
 import UserVideoPanel from '@/features/videoCall/components/UserVideoPanel';
 import useGlobalStore from '@/store/useGlobalStore';
 import MediaSettings from '@/features/videoCall/components/MediaSettings';
-import useDeviceStore from '@/store/useDeviceStore';
-import { useWebRTC } from '@/context/WebRTCContext';
 import useStreamStore from '@/store/useStreamStore';
 import useWaitingLobbySocket from '@/features/videoCall/hooks/useWaitingLobbySocket';
 
@@ -27,95 +25,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 	const { socketOn, socketOff } = useSocket();
 	const roomDetails = useGlobalStore((state) => state.roomDetails);
 	const [canJoin, setCanJoin] = useState<boolean>();
-	const { getUserMedia } = useWebRTC();
-	const selectedCamera = useDeviceStore((state) => state.selectedCamera);
-	const selectedMicrophone = useDeviceStore(
-		(state) => state.selectedMicrophone
-	);
-	const selectedSpeaker = useDeviceStore((state) => state.selectedSpeaker);
 	const localStream = useStreamStore((state) => state.localStream);
-
-	// Initialize media devices and get user media when component mounts
-
-	useEffect(() => {
-		const initializeMedia = async () => {
-			console.log('WaitingLobby: Initializing media');
-			console.log('Selected camera:', selectedCamera.deviceId);
-			console.log('Selected microphone:', selectedMicrophone.deviceId);
-
-			// await getAllMediaDevices();
-
-			// Check if we need to get new media
-			const currentVideoTrack = localStream?.getVideoTracks()[0];
-			const currentAudioTrack = localStream?.getAudioTracks()[0];
-			const currentVideoDeviceId = currentVideoTrack?.getSettings?.()?.deviceId;
-			const currentAudioDeviceId = currentAudioTrack?.getSettings?.()?.deviceId;
-
-			console.log('Current stream devices:', {
-				currentVideoDeviceId,
-				currentAudioDeviceId,
-			});
-			console.log(
-				'Stream video track readyState:',
-				currentVideoTrack?.readyState
-			);
-			console.log(
-				'Stream audio track readyState:',
-				currentAudioTrack?.readyState
-			);
-
-			// Always get user media when entering WaitingLobby to ensure we have the correct devices
-			// This ensures that if user changed devices in MeetingRoom and came back, we get the right stream
-			const needsNewStream =
-				!localStream ||
-				selectedCamera.deviceId !== currentVideoDeviceId ||
-				selectedMicrophone.deviceId !== currentAudioDeviceId ||
-				currentVideoTrack?.readyState !== 'live' ||
-				currentAudioTrack?.readyState !== 'live' ||
-				!currentVideoDeviceId || // Force refresh if we don't have current device info
-				!currentAudioDeviceId;
-
-			if (needsNewStream) {
-				console.log('WaitingLobby: Getting new stream with devices:', {
-					camera: selectedCamera.deviceId,
-					microphone: selectedMicrophone.deviceId,
-				});
-				// Stop current stream if it exists
-				if (localStream) {
-					console.log(
-						'WaitingLobby: Stopping current stream before creating new one'
-					);
-					localStream.getTracks().forEach((track) => track.stop());
-				}
-				getUserMedia({
-					camera: selectedCamera.deviceId,
-					microphone: selectedMicrophone.deviceId,
-					speaker: selectedSpeaker.deviceId,
-				});
-			} else {
-				console.log('WaitingLobby: Using existing stream');
-			}
-		};
-
-		initializeMedia();
-
-		// Cleanup function to stop tracks when component unmounts
-		return () => {
-			console.log('WaitingLobby: Cleaning up media');
-			if (localStream) {
-				localStream.getTracks().forEach((track) => track.stop());
-			}
-		};
-	}, [
-		// getAllMediaDevices,
-		getUserMedia,
-		localStream,
-		selectedCamera.deviceId,
-		selectedMicrophone.deviceId,
-		selectedSpeaker.deviceId,
-	]);
-
-	console.log('Waiting Component mounted++++++++++');
 
 	//// Previously joined User
 	const handleDirectlyCanJoin = useCallback(
@@ -133,6 +43,24 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	const { handleJoinRoom, handleAskToJoin, askToEnterLoading } =
 		useWaitingLobbySocket(roomId);
+
+	useEffect(() => {
+		const initializeMedia = async () => {
+			if (localStream) {
+				const videoTracks = localStream.getVideoTracks();
+				const audioTracks = localStream.getAudioTracks();
+				if (videoTracks.length > 0 && audioTracks.length > 0) {
+					console.log('Stream is valid');
+				} else {
+					console.log('Stream is invalid');
+				}
+			} else {
+				console.log('No stream available');
+			}
+		};
+
+		initializeMedia();
+	}, [localStream]);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (

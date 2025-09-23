@@ -8,6 +8,7 @@ interface WebRTCStore {
 	isCameraOn: boolean;
 	isMicrophoneOn: boolean;
 	isScreenSharing: boolean;
+	isLoading: boolean;
 	setLocalStream: (stream: MediaStream | null) => void;
 	setLocalScreenStream: (stream: MediaStream | null) => void;
 	toggleCamera: () => Promise<void>;
@@ -23,6 +24,7 @@ const useStreamStore = create<WebRTCStore>()(
 		isCameraOn: true,
 		isMicrophoneOn: true,
 		isScreenSharing: false,
+		isLoading: false,
 
 		setLocalStream: (stream) => {
 			const currentStream = get().localStream;
@@ -116,6 +118,7 @@ const useStreamStore = create<WebRTCStore>()(
 					isCameraOn: false,
 					isMicrophoneOn: false,
 					isScreenSharing: false,
+					isLoading: false,
 				},
 				false,
 				'stopAllTracks'
