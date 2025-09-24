@@ -17,6 +17,17 @@ const UserVideoPanel = () => {
 		// Only update if the stream has actually changed
 		if (video.srcObject !== localStream) {
 			console.log('UserVideoPanel: Setting new stream to video element');
+			console.log('UserVideoPanel: Previous srcObject:', video.srcObject);
+			console.log('UserVideoPanel: New srcObject:', localStream);
+
+			// Stop any existing tracks before setting new stream
+			if (video.srcObject) {
+				const previousStream = video.srcObject as MediaStream;
+				previousStream.getTracks().forEach((track) => {
+					track.stop();
+				});
+			}
+
 			video.srcObject = localStream;
 
 			// Ensure video is playing with better error handling

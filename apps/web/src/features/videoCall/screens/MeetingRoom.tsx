@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import UserVideoPanel from '../components/UserVideoPanel';
 import { useWebRTC } from '@/context/WebRTCContext';
 import RemoteUserVideoPanel from '../components/RemoteUserVideoPanel';
@@ -23,28 +23,77 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 	useMeetingRoomSocket();
 
 	// Ensure we have a valid stream when entering meeting room
-	React.useEffect(() => {
+	useEffect(() => {
 		const initializeMeetingStream = async () => {
-			// If no local stream or if devices don't match current stream devices, get new stream
-			if (
-				!localStream ||
-				selectedCamera.deviceId !==
-					localStream.getVideoTracks()[0]?.getSettings?.()?.deviceId ||
-				selectedMicrophone.deviceId !==
-					localStream.getAudioTracks()[0]?.getSettings?.()?.deviceId
-			) {
+			if (!localStream) {
+				console.log('MeetingRoom: No local stream, getting new stream');
 				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
 					speaker: selectedSpeaker.deviceId,
 				});
+				return;
+			}
+
+			// Check if stream tracks are ready
+			const videoTracks = localStream.getVideoTracks();
+			const audioTracks = localStream.getAudioTracks();
+
+			if (videoTracks.length === 0 || audioTracks.length === 0) {
+				console.log(
+					'MeetingRoom: Stream tracks not available, getting new stream'
+				);
+				getUserMedia({
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+					speaker: selectedSpeaker.deviceId,
+				});
+				return;
+			}
+
+			// More robust device comparison
+			const currentVideoDeviceId = videoTracks[0]?.getSettings?.()?.deviceId;
+			const currentAudioDeviceId = audioTracks[0]?.getSettings?.()?.deviceId;
+
+			console.log('MeetingRoom: Device comparison:', {
+				selectedCamera: selectedCamera.deviceId,
+				currentVideoDeviceId,
+				selectedMicrophone: selectedMicrophone.deviceId,
+				currentAudioDeviceId,
+				videoTrackReady: videoTracks[0]?.readyState,
+				audioTrackReady: audioTracks[0]?.readyState,
+			});
+
+			// Only recreate stream if devices actually changed or tracks are not ready
+			if (
+				selectedCamera.deviceId !== currentVideoDeviceId ||
+				selectedMicrophone.deviceId !== currentAudioDeviceId ||
+				videoTracks[0]?.readyState !== 'live' ||
+				audioTracks[0]?.readyState !== 'live'
+			) {
+				console.log(
+					'MeetingRoom: Devices changed or tracks not ready, getting new stream'
+				);
+				getUserMedia({
+					camera: selectedCamera.deviceId,
+					microphone: selectedMicrophone.deviceId,
+					speaker: selectedSpeaker.deviceId,
+				});
+			} else {
+				console.log(
+					'MeetingRoom: Stream is valid and devices match, no need to recreate'
+				);
 			}
 		};
 
-		initializeMeetingStream();
+		// Add a small delay to ensure the component is fully mounted
+		const timeoutId = setTimeout(() => {
+			initializeMeetingStream();
+		}, 100);
+
+		return () => clearTimeout(timeoutId);
 	}, [
 		getUserMedia,
-
 		localStream,
 		selectedCamera.deviceId,
 		selectedMicrophone.deviceId,
@@ -53,7 +102,7 @@ const MeetingRoom = ({ roomId }: { roomId: string }) => {
 
 	console.log('Meeting Component mounted++++++++++');
 	console.log('Streams available:', streams.length);
-	console.log('Local stream available:', !!localStream);
+	console.log('Local stream available:', !!localStream, localStream);
 	console.log('Selected camera:', selectedCamera.deviceId);
 	console.log('Selected microphone:', selectedMicrophone.deviceId);
 

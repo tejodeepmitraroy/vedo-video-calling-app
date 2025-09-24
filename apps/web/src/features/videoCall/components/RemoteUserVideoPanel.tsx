@@ -2,6 +2,7 @@
 
 // import dynamic from 'next/dynamic';
 import React, { FC, useEffect, useRef } from 'react';
+
 // const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface RemoteUserVideoPanelProps {
@@ -23,17 +24,16 @@ const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
 		const video = videoRef.current;
 		if (!video) return;
 
-		const setSrc = () => {
-			if (!isMounted.current) return;
-			if (video.srcObject !== stream) {
-				video.srcObject = stream;
+		const handleStreamChange = (newStream: MediaStream) => {
+			if (video.srcObject !== newStream) {
+				video.srcObject = newStream;
 			}
 		};
 
 		// Use requestAnimationFrame to ensure the video element is ready
 		const raf = requestAnimationFrame(() => {
 			if (isMounted.current) {
-				setSrc();
+				handleStreamChange(stream);
 				video.play().catch((e: any) => {
 					if (e.name !== 'AbortError') {
 						console.warn('Remote video play failed:', e);
@@ -92,14 +92,14 @@ const RemoteUserVideoPanel: FC<RemoteUserVideoPanelProps> = ({ stream }) => {
 						height={'100%'}
 					/>
 				)} */}
-
 				<video
 					ref={videoRef}
 					autoPlay
 					playsInline
 					muted
 					className="h-full w-full object-cover"
-				/>
+				/>{' '}
+				*
 			</div>
 		</div>
 	);

@@ -6,7 +6,7 @@ import SidebarWrapper from '@/components/navigation/sidebar/SidebarWrapper';
 export const metadata: Metadata = {
 	title: 'VEDO - Video Call App',
 	description: 'This is Video calling App',
-	manifest: './manifest.json',
+
 	icons: {
 		apple: './icon-512x512.png',
 	},

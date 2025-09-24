@@ -160,7 +160,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					);
 					return;
 				}
-				console.log('localStream.current--->', localStream.current);
 
 				console.log(
 					'Devices changed, no stream, or tracks not ready - creating new stream'
@@ -187,15 +186,8 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				localStream.current = newStream;
 				setLocalStream(newStream);
 
-				console.log('New stream created successfully', newStream);
-
 				// Force a re-render by updating the context value
 				// This ensures components get the updated stream immediately
-				console.log('Updated localStream ref:', localStream.current);
-				console.log(
-					'Store should now have stream:',
-					useStreamStore.getState().localStream
-				);
 
 				// Debug logging
 				console.log(
@@ -298,6 +290,24 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 						iceCandidate: event.candidate,
 						userSocketId,
 					});
+				}
+			});
+
+			// Add negotiationneeded event listener to automatically create offers
+			peerConnection.addEventListener('negotiationneeded', async () => {
+				console.log('WebRTC: Negotiation needed for user:', userSocketId);
+				try {
+					const offer = await peerConnection.createOffer();
+					await peerConnection.setLocalDescription(
+						new RTCSessionDescription(offer)
+					);
+					socketEmit('event:sendOffer', { offer, userSocketId });
+					console.log(
+						'WebRTC: Offer created and sent automatically for user:',
+						userSocketId
+					);
+				} catch (error) {
+					console.error('WebRTC: Error in negotiationneeded handler:', error);
 				}
 			});
 
@@ -455,6 +465,13 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				// Set the local stream for the store
 				setLocalStream(localStream.current);
 				console.log('localStream.current=============>>', localStream.current);
+
+				// Remove existing tracks first to prevent duplicate sender error
+				peerConnection.getSenders().forEach((sender) => {
+					if (sender.track) {
+						peerConnection.removeTrack(sender);
+					}
+				});
 
 				// Add local tracks to the peer connection
 				localStream.current?.getTracks().forEach((track) => {

@@ -37,12 +37,15 @@ const Room = () => {
 
 		try {
 			if (selectedCamera.deviceId && selectedMicrophone.deviceId) {
-				await getUserMedia({
+				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
 					speaker: selectedSpeaker.deviceId,
 				});
 				console.log('Room: Media stream created successfully');
+			} else {
+				resetRemotePeers();
+				console.log('Room: Invalid devices, cannot create media stream');
 			}
 		} catch (error) {
 			console.error('Room: Error creating media stream:', error);
@@ -50,15 +53,16 @@ const Room = () => {
 	}, [
 		getUserMedia,
 		localStream,
+		resetRemotePeers,
 		selectedCamera.deviceId,
 		selectedMicrophone.deviceId,
 		selectedSpeaker.deviceId,
 	]);
 
-	const stopMediaStream = useCallback(async () => {
-		console.log('Room: Stopping media stream');
-		resetRemotePeers();
-	}, [resetRemotePeers]);
+	// const stopMediaStream = useCallback(async () => {
+	// 	console.log('Room: Stopping media stream');
+	// 	resetRemotePeers();
+	// }, [resetRemotePeers]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,25 +90,27 @@ const Room = () => {
 		getMediaStream,
 	]);
 
-	useEffect(() => {
-		if (
-			roomId &&
-			currentScreen !== 'Outside Lobby' &&
-			selectedCamera.deviceId &&
-			selectedMicrophone.deviceId
-		) {
-			getMediaStream();
-		} else if (!roomId) {
-			stopMediaStream();
-		}
-	}, [
-		roomId,
-		currentScreen,
-		getMediaStream,
-		stopMediaStream,
-		selectedCamera.deviceId,
-		selectedMicrophone.deviceId,
-	]);
+	// useEffect(() => {
+	// 	if (
+	// 		roomId &&
+	// 		currentScreen !== 'Outside Lobby' &&
+	// 		selectedCamera.deviceId &&
+	// 		selectedMicrophone.deviceId
+	// 	) {
+	// 		console.log('Room: Room ID and devices are valid, getting media stream in 2nd UseEffect');
+
+	// 	} else if (!roomId) {
+	// 		console.log('Room: Room ID is invalid, stopping media stream');
+	// 		stopMediaStream();
+	// 	}
+	// }, [
+	// 	roomId,
+	// 	currentScreen,
+	// 	getMediaStream,
+	// 	stopMediaStream,
+	// 	selectedCamera.deviceId,
+	// 	selectedMicrophone.deviceId,
+	// ]);
 
 	return (
 		<div className="flex h-full w-full">
