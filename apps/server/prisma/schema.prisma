@@ -58,7 +58,7 @@ model Room {
   type         RoomType             @default(INSTANT)
   title        String
   description  String?
-  startTime    DateTime?
+  startTime    DateTime? @default(now())
   endTime      DateTime?
   summary      String?
   chats        String?

@@ -183,7 +183,7 @@ export default function Dashboard() {
 						</div>
 					</section>
 				</section>
-				<section className="flex w-full flex-col items-center justify-center gap-5">
+				<section className="hidden w-full flex-col items-center justify-center gap-5 md:flex">
 					<Card className="w-full max-w-xl">
 						<CardHeader className="bg-primary rounded-t-lg text-white">
 							<DashboardClock />

@@ -13,13 +13,13 @@ interface RoomDetails {
 	shortId: string;
 	title: string;
 	description: string | null;
-	startTime: Date;
-	endTime: Date | null;
+	startTime: string | Date;
+	endTime: string | Date | null;
 	createdById: string;
 	createdBy: User;
 	participants: User[];
-	createdAt: Date | null;
-	updatedAt: Date | null;
+	createdAt: string | Date | null;
+	updatedAt: string | Date | null;
 }
 
 interface ApiResponse {

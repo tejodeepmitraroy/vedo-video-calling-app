@@ -8,7 +8,7 @@ const SidebarWrapper = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<div
 			className={
-				`mx-auto flex h-screen w-full flex-1 flex-col bg-gray-100 md:flex-row dark:bg-neutral-800` // for your use case, use `h-screen` instead of `h-[60vh]`
+				`mx-auto flex h-dvh w-full flex-1 flex-col bg-gray-100 md:flex-row dark:bg-neutral-800` // for your use case, use `h-screen` instead of `h-[60vh]`
 			}
 		>
 			<AppSidebar />

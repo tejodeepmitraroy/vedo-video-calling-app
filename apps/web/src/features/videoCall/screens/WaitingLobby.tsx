@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Share } from 'lucide-react';
+import { Share, Share2 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
 	Card,
@@ -18,6 +18,8 @@ import useGlobalStore from '@/store/useGlobalStore';
 import MediaSettings from '@/features/videoCall/components/MediaSettings';
 import useStreamStore from '@/store/useStreamStore';
 import useWaitingLobbySocket from '@/features/videoCall/hooks/useWaitingLobbySocket';
+import { Input } from '@/components/ui/input';
+import { CopyButton } from '@/components/ui/shadcn-io/copy-button';
 
 const MediaControls = dynamic(() => import('../components/MediaControls'));
 
@@ -64,7 +66,13 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	return (
-		<div className="flex h-full w-full flex-col p-4 sm:flex-row">
+		<section className="flex h-full w-full flex-col gap-10 overflow-y-auto p-4 md:flex-row">
+			{/* <section className="w-full sm:hidden">
+				<h1 className="relative flex h-full w-full flex-col items-center justify-center text-lg font-semibold sm:p-5 md:w-[50%] md:px-10">
+					{roomDetails ? roomDetails.title : <Spinner />}
+				</h1>
+			</section> */}
+
 			<div className="relative flex h-full w-full flex-col items-center justify-center sm:p-5 md:w-[50%] md:px-10">
 				<div className="relative aspect-video w-full">
 					<UserVideoPanel />
@@ -73,7 +81,52 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 				</div>
 			</div>
 			<div className="flex h-full w-full items-center justify-center md:w-[50%] md:justify-start md:p-5">
-				<Card className="w-full max-w-[400px] border border-dashed">
+				<section className="mt-10 flex w-full max-w-lg flex-col items-center justify-center gap-4 md:hidden">
+					<div>
+						{canJoin ? (
+							<Button
+								className="scale-130 rounded-2xl text-lg"
+								onClick={() => handleJoinRoom()}
+							>
+								Join Room
+							</Button>
+						) : (
+							<Button
+								className="scale-130 rounded-2xl text-lg"
+								disabled={askToEnterLoading}
+								onClick={() => handleAskToJoin()}
+							>
+								{askToEnterLoading ? <Spinner /> : <>ask to Join</>}
+							</Button>
+						)}
+					</div>
+					<div className="mt-6 flex w-full justify-between pr-2">
+						<span className="font-medium">Joining Information</span>
+						<RWebShare
+							data={{
+								text: `To join the meeting on VEDO Meet, click this link: ${window.location.href} Or open Meet and enter this code: ${roomId}`,
+								url: window.location.href,
+								title: 'roomUrl',
+							}}
+							onClick={() => console.log('roomUrl shared successfully!')}
+						>
+							<Share2 className="size-6" />
+						</RWebShare>
+					</div>
+					<section className="flex w-full flex-col items-center gap-2">
+						<div className="flex w-full items-center justify-between">
+							<h1 className="text-lg font-semibold">Meeting link</h1>
+						</div>
+						<div className="flex w-full items-center gap-3">
+							<Input value={window.location.href} readOnly />
+							<CopyButton
+								content={window.location.href}
+								onCopy={() => console.log('Link copied!')}
+							/>
+						</div>
+					</section>
+				</section>
+				<Card className="hidden w-full max-w-[400px] flex-col border border-dashed md:flex">
 					{roomDetails ? (
 						<>
 							<CardHeader>
@@ -126,7 +179,7 @@ const WaitingLobby = ({ roomId }: { roomId: string }) => {
 					)}
 				</Card>
 			</div>
-		</div>
+		</section>
 	);
 };
 

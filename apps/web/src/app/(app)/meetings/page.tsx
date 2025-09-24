@@ -1,58 +1,50 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+
 import { useAuth } from '@clerk/nextjs';
-import { DataTable } from '@/features/confererence/components/data-table';
-import { columns } from '@/features/confererence/components/columns';
+import { DataTable } from '@/features/meetings/components/data-table';
+import { columns } from '@/features/meetings/components/columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getAllRoomDetails } from '@/features/meetings/services';
+import { useQuery } from '@tanstack/react-query';
 
 const Conference = () => {
 	const { getToken } = useAuth();
 
-	const [allScheduledRoomsDetails, setAllScheduledRoomsDetails] = useState<
-		RoomDetails[]
-	>([]);
-
-	///////////////////////////////////////////////////////////////////////////////////////////
-
-	const getAllRoomDetails = useCallback(async () => {
+	const roomDetails = async () => {
 		const token = await getToken();
+		const response = await getAllRoomDetails(token);
+		return response;
+	};
 
-		try {
-			const { data } = await axios(
-				`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/room`,
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${token}`,
-					},
-				}
-			);
-			if (data.data.length !== 0) {
-				setAllScheduledRoomsDetails(data.data);
-			}
-		} catch (error) {
-			console.log(error);
-		}
-	}, [getToken]);
-
-	useEffect(() => {
-		getAllRoomDetails();
-	}, [getAllRoomDetails]);
+	const { data, isLoading, error } = useQuery({
+		queryKey: ['all-scheduled-rooms-details'],
+		queryFn: () => roomDetails(),
+	});
 
 	return (
-		<>
-			<ScrollArea className="hidden h-full w-full px-4 md:flex md:flex-1">
-				<div className="bg-card text-card-foreground m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg bg-slate-100 p-5">
-					<DataTable columns={columns} data={allScheduledRoomsDetails} />
+		<section className="flex h-full w-full flex-col items-start justify-start px-4 md:flex-1">
+			<section className="flex w-full items-start justify-start p-4">
+				<h1 className="text-3xl font-bold">Meetings</h1>
+			</section>
+			<section className="flex h-full w-full items-center justify-center md:flex-1">
+				{isLoading ? (
+					<p>Loading...</p>
+				) : error ? (
+					<p>Error: {error.message}</p>
+				) : (
+					<ScrollArea className="flex h-full w-full flex-1">
+						<DataTable columns={columns} data={data!} />
+					</ScrollArea>
+				)}
+				{/* <div className="flex h-full w-full md:hidden md:flex-1">
+				<div className="bg-card text-card-foreground m-4 mx-auto flex h-full w-full max-w-7xl flex-col gap-5 rounded-lg">
+					<DataTable columns={columns} data={data} />
 				</div>
-			</ScrollArea>
-			<div className="flex h-full w-full px-4 md:hidden md:flex-1">
-				<div className="bg-card text-card-foreground m-4 mx-auto flex w-full max-w-7xl flex-col gap-5 rounded-lg bg-slate-100 p-5">
-					<DataTable columns={columns} data={allScheduledRoomsDetails} />
-				</div>
-			</div>
-		</>
+				{/* <MeetingsList meetings={allScheduledRoomsDetails} /> 
+				</div> */}
+			</section>
+		</section>
 	);
 };
 

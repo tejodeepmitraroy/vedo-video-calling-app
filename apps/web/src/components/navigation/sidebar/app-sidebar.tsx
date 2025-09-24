@@ -4,15 +4,14 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { HomeIcon, Laptop } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
-import UserProfile from '@/features/auth/components/UserProfile';
+
 import { usePathname } from 'next/navigation';
 import useScreenStateStore from '@/store/useScreenStateStore';
 import { cn } from '@/lib/utils';
 
 const AppSidebar = () => {
 	const [open, setOpen] = useState<boolean>(false);
-	const { user } = useUser();
+	// const { user } = useUser();
 
 	const currentScreen = useScreenStateStore((state) => state.currentScreen);
 	const navItems: Array<{
@@ -59,7 +58,7 @@ const AppSidebar = () => {
 							))}
 						</div>
 					</div>
-					<div>
+					{/* <div>
 						<SidebarLink
 							className="pl-2"
 							link={{
@@ -68,7 +67,7 @@ const AppSidebar = () => {
 								icon: <UserProfile />,
 							}}
 						/>
-					</div>
+					</div> */}
 				</SidebarBody>
 			</Sidebar>
 		</div>

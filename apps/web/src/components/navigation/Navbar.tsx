@@ -121,7 +121,7 @@ const NavBar = () => {
 	return (
 		<header
 			className={cn(
-				'relative h-[50px] items-center justify-end gap-1 bg-neutral-100 px-4 md:h-[50px] md:px-10',
+				'relative h-[50px] items-center justify-end gap-1 bg-neutral-100 px-4 md:h-[55px] md:px-10',
 				currentScreen === 'Meeting Room' ? 'hidden' : 'hidden md:flex'
 			)}
 		>
@@ -142,7 +142,9 @@ const NavBar = () => {
 					</div>
 				</Link>
 			</div>
-			<UserProfile />
+			<div className="scale-120 flex items-center justify-center">
+				<UserProfile />
+			</div>
 		</header>
 	);
 };

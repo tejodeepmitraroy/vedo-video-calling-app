@@ -156,6 +156,8 @@ export const getAllRooms = asyncHandler(
 						description: room.description,
 						createdById: room.createdById,
 						createdAt: room.createdAt,
+						startTime: room.startTime,
+						endTime: room.endTime,
 						participants: room.participants.map((item) => item.user),
 					};
 				});

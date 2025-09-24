@@ -8,7 +8,7 @@ import { Input } from '../ui/input';
 import { useAuth } from '@clerk/nextjs';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
 	Dialog,
 	DialogClose,
@@ -21,9 +21,12 @@ import {
 import { Separator } from '../ui/separator';
 
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const BottomNavigation = () => {
 	const [roomId, setRoomId] = useState<string>('');
+
+	const pathName = usePathname();
 
 	const currentState = useScreenStateStore((state) => state.currentScreen);
 
@@ -93,7 +96,10 @@ const BottomNavigation = () => {
 
 	return (
 		<div
-			className={`h-16 w-full border-t border-gray-200 bg-white md:hidden dark:border-gray-600 dark:bg-gray-700`}
+			className={cn(
+				`h-16 w-full border-t border-gray-200 bg-white md:hidden dark:border-gray-600 dark:bg-gray-700`,
+				currentState === 'Meeting Room' && 'hidden'
+			)}
 		>
 			<div className="mx-auto grid h-full max-w-lg grid-cols-4 font-medium">
 				<Link
@@ -105,10 +111,10 @@ const BottomNavigation = () => {
 						className="inline-flex flex-col items-center justify-center"
 					>
 						<Home
-							className={`${currentState === 'Waiting Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${pathName === '/' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
-							className={` ${currentState === 'Waiting Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+							className={` ${pathName === '/' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
 						>
 							Home
 						</span>
@@ -153,7 +159,7 @@ const BottomNavigation = () => {
 								</span>
 							</button>
 						</DialogTrigger>
-						<DialogContent className="sm:max-w-[425px]">
+						<DialogContent className="w-full max-w-sm">
 							<DialogHeader>
 								<DialogTitle>Create a New Conference Room</DialogTitle>
 							</DialogHeader>
@@ -193,7 +199,7 @@ const BottomNavigation = () => {
 					</Dialog>
 				</Link>
 				<Link
-					href={'/'}
+					href={'/meetings'}
 					className="group flex items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800"
 				>
 					<button
@@ -201,10 +207,10 @@ const BottomNavigation = () => {
 						className="inline-flex flex-col items-center justify-center"
 					>
 						<Laptop
-							className={`${currentState === 'Outside Lobby' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
+							className={`${pathName === '/meetings' ? 'bg-primary text-background mb-1 h-6 w-12 rounded-md' : 'group-hover:text-primary mb-1 h-6 w-6 text-gray-500 dark:text-gray-400 dark:group-hover:text-blue-500'} `}
 						/>
 						<span
-							className={` ${currentState === 'Outside Lobby' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
+							className={` ${pathName === '/meetings' ? 'font-bold' : ''} text-sm text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-500`}
 						>
 							Meeting
 						</span>

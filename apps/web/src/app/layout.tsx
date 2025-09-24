@@ -17,6 +17,8 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	// Create a client
+
 	return (
 		<ClerkProvider
 			appearance={{
