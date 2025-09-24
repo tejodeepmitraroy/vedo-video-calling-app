@@ -98,7 +98,7 @@ const ScheduleCallForm = () => {
 			<DialogTrigger asChild>
 				<Button
 					variant={'outline'}
-					className="flex w-full items-center justify-center gap-3 border py-10 text-center text-base shadow-sm hover:text-primary"
+					className="hover:text-primary flex w-full items-center justify-center gap-3 border py-10 text-center text-base shadow-sm"
 				>
 					<Video />
 					Create a Room for later

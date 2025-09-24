@@ -176,7 +176,7 @@ export const callNoAnswer = asyncHandler(
 						],
 					},
 					data: {
-						status: 'NOANSWER',
+						status: 'NO_ANSWER',
 					},
 				});
 				return response

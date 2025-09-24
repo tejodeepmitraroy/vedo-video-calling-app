@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import asyncHandler from '../utils/asyncHandler';
-import { nanoid } from 'nanoid';
 import prisma from '../lib/prismaClient';
 import ApiResponse from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
@@ -16,34 +15,44 @@ export const createInstantRoom = asyncHandler(
 				.json(new ApiError(401, 'Unauthorized: missing userId'));
 		}
 
-		const shortId = nanoid(8);
+		// const shortId = nanoid(8);
 
-		console.log('User Id========>>', userId);
+		// console.log('User Id========>>', userId);
 
 		try {
-			const meetingDetails = await prisma.room.create({
-				data: {
-					id: shortId,
-					title: 'Instant Meeting',
-					description: `This is Instant Meeting. Created by ${userId} `,
-					type: 'INSTANT',
-					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
-					createdById: userId!,
-					hostById: userId!,
-					startTime: new Date(),
-				},
-				select: {
-					id: true,
-					title: true,
-					type: true,
-					url: true,
-					createdBy: true,
-					startTime: true,
+			const user = await prisma.user.findUnique({
+				where: {
+					id: userId!,
 				},
 			});
+			if (!user) {
+				response.status(404).json(new ApiError(404, 'User not found'));
+			} else {
+				const meeting = await prisma.room.create({
+					data: {
+						title: 'Instant Meeting',
+						description: `This is Instant Meeting. Created by ${userId} `,
+						createdById: userId!,
+					},
+					select: {
+						id: true,
+						title: true,
+						type: true,
+						createdBy: true,
+						startTime: true,
+					},
+				});
 
-			console.log('meetingDetails', meetingDetails);
-			response.status(200).json(new ApiResponse(200, meetingDetails));
+				const url = `${process.env.FRONTEND_URL!}/rm/${meeting.id}`;
+
+				const meetingDetails = {
+					...meeting,
+					url,
+				};
+
+				console.log('meetingDetails', meetingDetails);
+				response.status(200).json(new ApiResponse(200, meetingDetails));
+			}
 		} catch (error) {
 			console.log(error);
 			response.status(400).json(new ApiError(400, 'Error Happened', error));
@@ -66,23 +75,30 @@ export const getAllRooms = asyncHandler(
 					select: {
 						id: true,
 						type: true,
-						url: true,
 						title: true,
 						createdBy: {
 							select: {
 								id: true,
-								image_url: true,
-								first_name: true,
+								imageUrl: true,
+								firstName: true,
 							},
 						},
-						description: true,
 						startTime: true,
+						endTime: true,
+						description: true,
 						createdById: true,
 						createdAt: true,
 					},
 				});
 
-				response.status(200).json(new ApiResponse(200, meetingData));
+				const url = `${process.env.FRONTEND_URL!}/rm/${meetingData?.id}`;
+
+				const meetingDetails = {
+					...meetingData,
+					url,
+				};
+
+				response.status(200).json(new ApiResponse(200, meetingDetails));
 			} catch (error) {
 				response
 					.status(400)
@@ -100,7 +116,7 @@ export const getAllRooms = asyncHandler(
 							{
 								participants: {
 									some: {
-										user_id: userId!,
+										userId: userId!,
 									},
 								},
 							},
@@ -109,20 +125,20 @@ export const getAllRooms = asyncHandler(
 					select: {
 						id: true,
 						type: true,
-						url: true,
 						title: true,
 						createdBy: {
 							select: {
 								id: true,
-								image_url: true,
-								first_name: true,
-								last_name: true,
+								imageUrl: true,
+								firstName: true,
+								lastName: true,
 							},
 						},
 						description: true,
-						startTime: true,
 						createdById: true,
 						createdAt: true,
+						startTime: true,
+						endTime: true,
 						participants: {
 							select: {
 								user: true,
@@ -135,24 +151,20 @@ export const getAllRooms = asyncHandler(
 					return {
 						id: room.id,
 						type: room.type,
-						url: room.url,
 						title: room.title,
 						createdBy: room.createdBy,
 						description: room.description,
-						startTime: room.startTime,
 						createdById: room.createdById,
 						createdAt: room.createdAt,
+						startTime: room.startTime,
+						endTime: room.endTime,
 						participants: room.participants.map((item) => item.user),
 					};
 				});
 
-				return response
-					.status(200)
-					.json(new ApiResponse(200, ModifyRoomDetails));
+				response.status(200).json(new ApiResponse(200, ModifyRoomDetails));
 			} catch (error) {
-				return response
-					.status(400)
-					.json(new ApiError(400, 'Error Happened', error));
+				response.status(400).json(new ApiError(400, 'Error Happened', error));
 			}
 		}
 	}
@@ -200,7 +212,6 @@ export const getAllRooms = asyncHandler(
 export const createScheduleCall = asyncHandler(
 	async (request: Request, response: Response) => {
 		const { userId } = getAuth(request);
-		const shortId = nanoid(8);
 		const { title, description, startTime, endTime, participantIds } =
 			request.body;
 		console.log(request.body);
@@ -221,20 +232,17 @@ export const createScheduleCall = asyncHandler(
 
 			const meetingDetails = await prisma.room.create({
 				data: {
-					id: shortId,
 					type: 'SCHEDULE',
 					title,
 					description,
 					startTime,
 					endTime,
 					createdById: userId!,
-					hostById: userId!,
 					invitedUsers: {
 						createMany: {
-							data: inviteUserIds.map((id: string) => ({ user_id: id })),
+							data: inviteUserIds.map((id: string) => ({ userId: id })),
 						},
 					},
-					url: `${process.env.FRONTEND_URL!}/room/${shortId}`,
 				},
 			});
 
@@ -262,18 +270,19 @@ export const getAllScheduledRoomsDetails = asyncHandler(
 				select: {
 					id: true,
 					type: true,
-					url: true,
+
 					title: true,
 					createdBy: {
 						select: {
 							id: true,
-							image_url: true,
-							first_name: true,
-							last_name: true,
+							imageUrl: true,
+							firstName: true,
+							lastName: true,
 						},
 					},
 					description: true,
 					startTime: true,
+					endTime: true,
 					createdById: true,
 					createdAt: true,
 				},
@@ -281,11 +290,9 @@ export const getAllScheduledRoomsDetails = asyncHandler(
 
 			console.log('Schedule Rooms---->>>', rooms);
 
-			return response.status(200).json(new ApiResponse(200, rooms));
+			response.status(200).json(new ApiResponse(200, rooms));
 		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+			response.status(400).json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );
@@ -312,18 +319,15 @@ export const updateScheduledRoom = asyncHandler(
 				},
 			});
 
-			return response.status(200).json(new ApiResponse(200, updatedRoom));
+			response.status(200).json(new ApiResponse(200, updatedRoom));
 		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+			response.status(400).json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );
 
 export const deleteScheduledRoom = asyncHandler(
 	async (request: Request, response: Response) => {
-		// const roomId = request.params.roomId;
 		const roomId = request.query.roomId;
 		console.log(roomId);
 
@@ -336,14 +340,12 @@ export const deleteScheduledRoom = asyncHandler(
 					},
 				});
 
-				return response.status(200).json(new ApiResponse(200, deleteRoom));
+				response.status(200).json(new ApiResponse(200, deleteRoom));
 			} catch (error) {
-				return response
-					.status(400)
-					.json(new ApiError(400, 'Error Happened', error));
+				response.status(400).json(new ApiError(400, 'Error Happened', error));
 			}
 		} else {
-			return response
+			response
 				.status(400)
 				.json(new ApiError(400, 'Query Parameter is invalid'));
 		}
@@ -362,11 +364,9 @@ export const getScheduledRoom = asyncHandler(
 				},
 			});
 
-			return response.status(200).json(new ApiResponse(200, rooms));
+			response.status(200).json(new ApiResponse(200, rooms));
 		} catch (error) {
-			return response
-				.status(400)
-				.json(new ApiError(400, 'Error Happened', error));
+			response.status(400).json(new ApiError(400, 'Error Happened', error));
 		}
 	}
 );

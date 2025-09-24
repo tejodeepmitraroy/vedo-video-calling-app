@@ -17,7 +17,7 @@ import { UserProfile } from '@clerk/nextjs';
 
 const TopSection = () => {
 	return (
-		<header className="flex h-14 items-center justify-end gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+		<header className="bg-muted/40 flex h-14 items-center justify-end gap-4 border-b px-4 lg:h-[60px] lg:px-6">
 			<Sheet>
 				<SheetTrigger asChild>
 					<Button variant="outline" size="icon" className="shrink-0 md:hidden">
@@ -36,14 +36,14 @@ const TopSection = () => {
 						</Link>
 						<Link
 							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							className="text-muted-foreground hover:text-foreground mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2"
 						>
 							<Home className="h-5 w-5" />
 							Dashboard
 						</Link>
 						<Link
 							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
+							className="bg-muted text-foreground hover:text-foreground mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2"
 						>
 							<ShoppingCart className="h-5 w-5" />
 							Orders
@@ -53,21 +53,21 @@ const TopSection = () => {
 						</Link>
 						<Link
 							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							className="text-muted-foreground hover:text-foreground mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2"
 						>
 							<Package className="h-5 w-5" />
 							Products
 						</Link>
 						<Link
 							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							className="text-muted-foreground hover:text-foreground mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2"
 						>
 							<Users className="h-5 w-5" />
 							Customers
 						</Link>
 						<Link
 							href="#"
-							className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+							className="text-muted-foreground hover:text-foreground mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2"
 						>
 							<LineChart className="h-5 w-5" />
 							Analytics

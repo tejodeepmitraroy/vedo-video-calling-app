@@ -135,7 +135,8 @@ export function roomConnections(
 						}
 					>(),
 				};
-				console.log('Host User socket Id is add');
+				console.log('Host User socket Id is add', roomDetails);
+
 				rooms.set(roomId, roomDetails);
 			}
 
@@ -161,17 +162,19 @@ export function roomConnections(
 
 			roomInUsers.set(socket.id, socketIdToUserMap.get(socket.id)!);
 
+			console.log('User Id is', socketIdToUserMap.get(socket.id)!.userId);
 			const meeting = await prisma.participantsInRoom.upsert({
 				where: {
-					user_id_room_id: {
-						room_id: roomId,
-						user_id: socketIdToUserMap.get(socket.id)!.userId,
+					userId_roomId: {
+						userId: socketIdToUserMap.get(socket.id)!.userId,
+						roomId,
 					},
 				},
 				update: {},
 				create: {
-					room_id: roomId,
-					user_id: socketIdToUserMap.get(socket.id)!.userId,
+					roomId,
+					userId: socketIdToUserMap.get(socket.id)!.userId,
+					isHost: socketIdToUserMap.get(socket.id)!.host,
 				},
 			});
 

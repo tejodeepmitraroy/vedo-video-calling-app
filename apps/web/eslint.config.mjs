@@ -16,6 +16,11 @@ export default [
 		ignores: ['.next'],
 	},
 	{
+		settings: {
+			react: {
+				version: 'detect', // ✅ fixes React version warning + crash
+			},
+		},
 		plugins: {
 			'react-hooks': pluginReactHooks,
 		},
@@ -25,6 +30,8 @@ export default [
 			'react/prop-types': 'off',
 			'react-hooks/rules-of-hooks': 'error',
 			'react-hooks/exhaustive-deps': 'warn',
+			
+			'@typescript-eslint/triple-slash-reference': 'off',
 		},
 	},
 ];

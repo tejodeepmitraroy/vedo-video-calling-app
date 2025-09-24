@@ -65,7 +65,6 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 			if (socket.connected) {
 				toast.dismiss();
 				toast.success('Connected');
-
 				setOnLineStatus(true);
 			} else {
 				toast.error('Not Connected');
@@ -96,9 +95,6 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [handleGetOnlineUser, handleUserConnected, socketOff, socketOn]);
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	////// Conference Rooms all Socket  Notification Function👇
 
 	const handleInformAllNewUserAdded = useCallback(
@@ -118,7 +114,7 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 				toast.success(`You Left the Room`);
 				setLocalStream(null);
 				resetRemotePeers();
-				setCurrentScreen('OutSide Lobby');
+				setCurrentScreen('Outside Lobby');
 			} else {
 				disconnectPeer({ user });
 				// removeParticipant(user);
@@ -131,7 +127,7 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 	const handleRemoveEveryoneFromRoom = useCallback(async () => {
 		toast(`Host End the Room`);
 		resetRemotePeers();
-		setCurrentScreen('OutSide Lobby');
+		setCurrentScreen('Outside Lobby');
 	}, [resetRemotePeers, setCurrentScreen]);
 
 	const handleUserKickedFromTheRoom = useCallback(
@@ -140,7 +136,7 @@ export const SocketLayerProvider = ({ children }: { children: ReactNode }) => {
 				toast.success(`You Left the Room`);
 				setLocalStream(null);
 				resetRemotePeers();
-				setCurrentScreen('OutSide Lobby');
+				setCurrentScreen('Outside Lobby');
 			} else {
 				disconnectPeer({ user });
 				toast(`${user.fullName} is kicked from the Room`);

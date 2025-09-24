@@ -32,19 +32,19 @@
 		"globals": "^16.4.0",
 		"jiti": "^2.5.1",
 		"prettier": "^3.3.2",
-		"prisma": "^5.15.0",
+		"prisma": "^6.16.2",
 		"tsc-watch": "^6.2.0",
 		"typescript": "^5.4.5",
 		"typescript-eslint": "^8.43.0"
 	},
 	"dependencies": {
 		"@clerk/express": "^1.7.31",
-		"@prisma/client": "^5.15.0",
+		"@prisma/client": "^6.16.2",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
 		"dotenv": "^17.2.2",
 		"express": "^4.19.2",
-		"nanoid": "3.1.21",
+		"nanoid": "^5.1.5",
 		"socket.io": "^4.7.5",
 		"ts-node": "^10.9.2"
 	}
