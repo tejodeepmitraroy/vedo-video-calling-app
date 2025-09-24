@@ -36,7 +36,11 @@ const Room = () => {
 		});
 
 		try {
-			if (selectedCamera.deviceId && selectedMicrophone.deviceId) {
+			if (
+				selectedCamera.deviceId &&
+				selectedMicrophone.deviceId &&
+				selectedSpeaker.deviceId
+			) {
 				getUserMedia({
 					camera: selectedCamera.deviceId,
 					microphone: selectedMicrophone.deviceId,
@@ -59,10 +63,10 @@ const Room = () => {
 		selectedSpeaker.deviceId,
 	]);
 
-	// const stopMediaStream = useCallback(async () => {
-	// 	console.log('Room: Stopping media stream');
-	// 	resetRemotePeers();
-	// }, [resetRemotePeers]);
+	const stopMediaStream = useCallback(async () => {
+		console.log('Room: Stopping media stream');
+		resetRemotePeers();
+	}, [resetRemotePeers]);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,28 +94,11 @@ const Room = () => {
 		getMediaStream,
 	]);
 
-	// useEffect(() => {
-	// 	if (
-	// 		roomId &&
-	// 		currentScreen !== 'Outside Lobby' &&
-	// 		selectedCamera.deviceId &&
-	// 		selectedMicrophone.deviceId
-	// 	) {
-	// 		console.log('Room: Room ID and devices are valid, getting media stream in 2nd UseEffect');
-
-	// 	} else if (!roomId) {
-	// 		console.log('Room: Room ID is invalid, stopping media stream');
-	// 		stopMediaStream();
-	// 	}
-	// }, [
-	// 	roomId,
-	// 	currentScreen,
-	// 	getMediaStream,
-	// 	stopMediaStream,
-	// 	selectedCamera.deviceId,
-	// 	selectedMicrophone.deviceId,
-	// ]);
-
+	useEffect(() => {
+		return () => {
+			stopMediaStream();
+		};
+	}, [stopMediaStream]);
 	return (
 		<div className="flex h-full w-full">
 			{currentScreen === 'Waiting Lobby' && <WaitingLobby roomId={roomId!} />}

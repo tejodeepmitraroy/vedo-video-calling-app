@@ -16,7 +16,6 @@ const useMainRoomSockets = (roomId: string) => {
 	const router = useRouter();
 	const setRoomDetails = useGlobalStore((state) => state.setRoomDetails);
 
-	console.log('HOOOJK roomId--------->', roomId);
 	const roomDetailsFetch = useCallback(async () => {
 		const token = await getToken();
 

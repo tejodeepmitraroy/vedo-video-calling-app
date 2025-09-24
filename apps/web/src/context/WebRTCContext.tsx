@@ -13,21 +13,10 @@ import {
 import { useSocket } from './SocketContext';
 import useStreamStore from '@/store/useStreamStore';
 import useDeviceStore from '@/store/useDeviceStore';
-// import useParticipantsStore from '@/store/useParticipantsStore';
 
-// interface Participant {
-// 	socketId: string;
-// 	userId: string;
-// 	fullName: string;
-// 	imageUrl: string;
-// 	emailAddress: string;
-// 	host: boolean;
-// 	stream: MediaStream;
-// }
 interface IWebRTCContext {
 	localStream: MediaStream | null;
 	streams: MediaStream[];
-	// participantStreams: Participant[];
 	getAllMediaDevices: () => void;
 	getUserMedia: ({
 		camera,
@@ -51,9 +40,6 @@ export const useWebRTC = () => {
 
 export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 	const [streams, setStreams] = useState<MediaStream[]>([]);
-	// const [participantStreams, setParticipantStreams] = useState<Participant[]>(
-	// 	[]
-	// );
 	const localStream = useRef<MediaStream | null>(null);
 	const peerStreams = useMemo(() => new Map<string, MediaStream>(), []);
 	const peerConnections = useMemo(
@@ -61,7 +47,12 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		[]
 	);
 
-	// const participants = useParticipantsStore((state) => state.participants);
+	// ICE queue for candidates that arrive before PC exists / remote desc set
+	const iceCandidateQueues = useMemo(
+		() => new Map<string, RTCIceCandidateInit[]>(),
+		[]
+	);
+
 	const { socketEmit, socketOn, socketOff } = useSocket();
 
 	const setLocalStream = useStreamStore((state) => state.setLocalStream);
@@ -87,14 +78,8 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		}, [setMediaDevices]);
 
 	useEffect(() => {
-		// Function to fetch and update devices
-		// Run on mount
 		getAllMediaDevices();
-
-		// Listen for device changes
 		navigator.mediaDevices.addEventListener('devicechange', getAllMediaDevices);
-
-		// Cleanup on unmount
 		return () => {
 			navigator.mediaDevices.removeEventListener(
 				'devicechange',
@@ -103,28 +88,82 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [getAllMediaDevices]);
 
-	//////////////////////////////////////////////////////////////////////////
+	// Add or replace tracks on a peer connection cleanly
+	// const addOrReplaceTracks = useCallback(
+	// 	(connection: RTCPeerConnection, stream: MediaStream) => {
+	// 		// For each outgoing track kind (audio/video), try to replace existing sender track,
+	// 		// otherwise add a new track.
+	// 		stream.getTracks().forEach((newTrack) => {
+	// 			const sender = connection
+	// 				.getSenders()
+	// 				.find((s) => s.track && s.track.kind === newTrack.kind);
+	// 			if (sender) {
+	// 				// try {
+	// 				// replaceTrack returns a Promise in some implementations
+	// 				sender.replaceTrack(newTrack);
+	// 				console.log('Replaced existing sender track of kind', newTrack.kind);
+	// 				// } catch (err) {
+	// 				// 	// Some browsers might not support replaceTrack on all senders; fallback to addTrack
+	// 				// 	console.warn('replaceTrack failed, falling back to addTrack', err);
+	// 				// 	connection.addTrack(newTrack, stream);
+	// 				// }
+	// 			} else {
+	// 				connection.addTrack(newTrack, stream);
+	// 				console.log('Added track to connection:', newTrack.kind);
+	// 			}
+	// 		});
+	// 	},
+	// 	[]
+	// );
 
-	// Function to update all peer connections with the current stream
+	// new code
+	const addOrReplaceTracks = useCallback(
+		async (connection: RTCPeerConnection, stream: MediaStream) => {
+			for (const newTrack of stream.getTracks()) {
+				const sender = connection
+					.getSenders()
+					.find((s) => s.track && s.track.kind === newTrack.kind);
+				if (sender) {
+					try {
+						// Some implementations return Promise; await if they do.
+						const maybePromise = sender.replaceTrack(
+							newTrack as MediaStreamTrack | null
+						);
+						if (
+							maybePromise &&
+							typeof (maybePromise as any).then === 'function'
+						) {
+							await (maybePromise as Promise<void>);
+						}
+						console.log(
+							'Replaced existing sender track of kind',
+							newTrack.kind
+						);
+					} catch (err) {
+						console.warn('replaceTrack failed, falling back to addTrack', err);
+						connection.addTrack(newTrack, stream);
+					}
+				} else {
+					connection.addTrack(newTrack, stream);
+					console.log('Added track to connection:', newTrack.kind);
+				}
+			}
+		},
+		[]
+	);
+
+	// Update all existing peer connections with a new stream (use replaceTrack when possible)
 	const updatePeerConnections = useCallback(
 		(stream: MediaStream) => {
-			peerConnections.forEach((connection) => {
-				// Remove all existing tracks
-				connection.getSenders().forEach((sender) => {
-					if (sender.track) {
-						connection.removeTrack(sender);
-					}
-				});
-
-				// Add new tracks
-				stream.getTracks().forEach((track) => {
-					if (connection.connectionState === 'connected') {
-						connection.addTrack(track, stream);
-					}
-				});
+			peerConnections.forEach(async (connection, id) => {
+				try {
+					addOrReplaceTracks(connection, stream);
+				} catch (err) {
+					console.error('updatePeerConnections error for', id, err);
+				}
 			});
 		},
-		[peerConnections]
+		[peerConnections, addOrReplaceTracks]
 	);
 
 	const getUserMedia: IWebRTCContext['getUserMedia'] = useCallback(
@@ -132,7 +171,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			try {
 				console.log('getUserMedia called with:', { camera, microphone });
 
-				// Check if the requested devices are the same as current stream devices
 				const currentVideoTrack = localStream.current?.getVideoTracks()[0];
 				const currentAudioTrack = localStream.current?.getAudioTracks()[0];
 				const currentVideoDeviceId =
@@ -140,14 +178,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				const currentAudioDeviceId =
 					currentAudioTrack?.getSettings?.()?.deviceId;
 
-				console.log('Current stream devices:', {
-					currentVideoDeviceId,
-					currentAudioDeviceId,
-				});
-				console.log('Requested devices:', { camera, microphone });
-
-				// If devices haven't changed and we have a valid stream, don't create a new one
-				// But be more strict - only allow creation if devices have changed or if tracks are not ready
+				// If devices unchanged and tracks live, skip
 				if (
 					localStream.current &&
 					camera === currentVideoDeviceId &&
@@ -161,10 +192,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					return;
 				}
 
-				console.log(
-					'Devices changed, no stream, or tracks not ready - creating new stream'
-				);
-				console.log('getUserMedia called with:', { camera, microphone });
 				const constraints: MediaStreamConstraints = {
 					video: {
 						...(camera && { deviceId: { exact: camera } }),
@@ -174,68 +201,59 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					audio: microphone ? { deviceId: { exact: microphone } } : true,
 				};
 
-				// Get new media stream with selected devices
 				const newStream =
 					await navigator.mediaDevices.getUserMedia(constraints);
-
 				console.log('New stream created successfully', newStream);
-				// Stop previous tracks if any
-				if (localStream.current) {
-					localStream.current.getTracks().forEach((track) => track.stop());
-				}
+
+				// Stop old tracks safely
+				// if (localStream.current) {
+				// 	localStream.current.getTracks().forEach((t) => t.stop());
+				// }
+
 				localStream.current = newStream;
 				setLocalStream(newStream);
 
-				// Force a re-render by updating the context value
-				// This ensures components get the updated stream immediately
-
-				// Debug logging
 				console.log(
 					'Video tracks:',
-					newStream.getVideoTracks().map((track) => ({
-						enabled: track.enabled,
-						readyState: track.readyState,
-						kind: track.kind,
-						label: track.label,
-						muted: track.muted,
+					newStream.getVideoTracks().map((t) => ({
+						enabled: t.enabled,
+						readyState: t.readyState,
+						kind: t.kind,
+						label: t.label,
 					}))
 				);
-
 				console.log(
 					'Audio tracks:',
-					newStream.getAudioTracks().map((track) => ({
-						enabled: track.enabled,
-						readyState: track.readyState,
-						kind: track.kind,
-						label: track.label,
-						muted: track.muted,
+					newStream.getAudioTracks().map((t) => ({
+						enabled: t.enabled,
+						readyState: t.readyState,
+						kind: t.kind,
+						label: t.label,
 					}))
 				);
 
-				// // Replace tracks in all active peer connections so remote users get the updated media
-				// peerConnections.forEach((connection) => {
-				// 	newStream.getTracks().forEach((newTrack) => {
-				// 		const sender = connection
-				// 			.getSenders()
-				// 			.find((s) => s.track && s.track.kind === newTrack.kind);
-				// 		if (sender) {
-				// 			sender.replaceTrack(newTrack);
-				// 		} else {
-				// 			connection.addTrack(newTrack, newStream);
-				// 		}
-				// 	});
-				// });
+				// Replace tracks on all existing peer connections (no destructive removeTrack)
 				updatePeerConnections(newStream);
+
+				// Force renegotiation so all peers get the updated tracks
+				peerConnections.forEach(async (pc, id) => {
+					try {
+						const offer = await pc.createOffer();
+						await pc.setLocalDescription(offer);
+						socketEmit('event:sendOffer', { offer, userSocketId: id });
+					} catch (err) {
+						console.error('Error sending renegotiation offer to', id, err);
+					}
+				});
 			} catch (error) {
 				console.error('Error accessing media devices:', error);
 				return null;
 			}
 		},
-		[setLocalStream, updatePeerConnections]
+		[peerConnections, setLocalStream, socketEmit, updatePeerConnections]
 	);
 
-	////////////////////////////////////////////////////////////////////////////
-
+	// Create RTCPeerConnection and wire events. Important: DO NOT remove tracks here.
 	const createPeerConnection = useCallback(
 		(userSocketId: string) => {
 			console.log('WebRTC: Creating peer connection for user:', userSocketId);
@@ -249,43 +267,24 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 					},
 				],
 			};
-			const peerConnection = new RTCPeerConnection(configuration);
+			const pc = new RTCPeerConnection(configuration);
 
-			// Add local tracks immediately if stream is available
+			// If we already have a local stream, add or replace tracks for this new connection
 			if (localStream.current) {
-				console.log('WebRTC: Adding local tracks to new peer connection');
-				localStream.current.getTracks().forEach((track) => {
-					console.log(
-						'Adding track to new connection:',
-						track.kind,
-						track.label
-					);
-					peerConnection.addTrack(track, localStream.current as MediaStream);
-				});
-			} else {
-				console.log(
-					'WebRTC: No local stream available when creating peer connection'
-				);
+				addOrReplaceTracks(pc, localStream.current);
 			}
 
-			peerConnection.addEventListener('track', (event) => {
-				console.log('getting tracks================+>', event.streams[0]);
-				peerStreams.set(userSocketId, event.streams[0]);
-
-				// Update the streams state with all current remote streams
-				const usersStream = peerStreams?.values();
-				const remoteStreams = Array.from(usersStream);
-				console.log(
-					'Updating streams state with:',
-					remoteStreams.length,
-					'streams'
-				);
-				setStreams(remoteStreams);
+			pc.addEventListener('track', (event) => {
+				// event.streams[0] contains the remote stream for this incoming track
+				const remote = event.streams[0];
+				if (remote) {
+					peerStreams.set(userSocketId, remote);
+					setStreams(Array.from(peerStreams.values()));
+				}
 			});
 
-			peerConnection.addEventListener('icecandidate', async (event) => {
+			pc.addEventListener('icecandidate', (event) => {
 				if (event.candidate) {
-					console.log('Sending ICE candidate to user:', userSocketId);
 					socketEmit('event:sendIceCandidate', {
 						iceCandidate: event.candidate,
 						userSocketId,
@@ -293,133 +292,83 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 				}
 			});
 
-			// Add negotiationneeded event listener to automatically create offers
-			peerConnection.addEventListener('negotiationneeded', async () => {
-				console.log('WebRTC: Negotiation needed for user:', userSocketId);
+			// When negotiation is needed (e.g. new local track added), create and send an offer
+			pc.addEventListener('negotiationneeded', async () => {
+				console.log('negotiationneeded for', userSocketId);
 				try {
-					const offer = await peerConnection.createOffer();
-					await peerConnection.setLocalDescription(
-						new RTCSessionDescription(offer)
-					);
+					const offer = await pc.createOffer();
+					await pc.setLocalDescription(offer);
 					socketEmit('event:sendOffer', { offer, userSocketId });
-					console.log(
-						'WebRTC: Offer created and sent automatically for user:',
-						userSocketId
-					);
-				} catch (error) {
-					console.error('WebRTC: Error in negotiationneeded handler:', error);
+				} catch (err) {
+					console.error('negotiationneeded error:', err);
 				}
 			});
 
-			// Add connection state change logging
-			peerConnection.addEventListener('connectionstatechange', () => {
-				console.log(
-					'Peer connection state for',
-					userSocketId,
-					':',
-					peerConnection.connectionState
-				);
+			// Debug logging
+			pc.addEventListener('connectionstatechange', () => {
+				console.log('Connection state for', userSocketId, pc.connectionState);
+			});
 
-				// If connection becomes connected and we have a local stream, ensure tracks are added
-				if (
-					peerConnection.connectionState === 'connected' &&
-					localStream.current
-				) {
-					console.log(
-						'WebRTC: Connection established, ensuring local tracks are added'
-					);
-					let hasTracks = false;
-					peerConnection.getSenders().forEach((sender) => {
-						if (sender.track) {
-							hasTracks = true;
-							console.log(
-								'Existing sender track:',
-								sender.track.kind,
-								sender.track.label
-							);
-						}
-					});
+			peerConnections.set(userSocketId, pc);
 
-					if (!hasTracks) {
-						console.log(
-							'WebRTC: No tracks found, adding local tracks to connected peer'
+			// If there were queued ICE candidates for this peer, flush them now
+			const queued = iceCandidateQueues.get(userSocketId);
+			if (queued && queued.length > 0) {
+				queued.forEach((c) => {
+					try {
+						pc.addIceCandidate(c).catch((e) =>
+							console.warn('addIceCandidate queued failed', e)
 						);
-						localStream.current.getTracks().forEach((track) => {
-							console.log(
-								'Adding track to connected peer:',
-								track.kind,
-								track.label
-							);
-							peerConnection.addTrack(
-								track,
-								localStream.current as MediaStream
-							);
-						});
+					} catch (e) {
+						console.warn('error adding queued candidate', e);
 					}
-				}
-			});
+				});
+				iceCandidateQueues.delete(userSocketId);
+			}
 
-			peerConnections.set(userSocketId, peerConnection);
-
-			return peerConnection;
+			return pc;
 		},
-		[peerConnections, peerStreams, socketEmit, localStream]
+		[
+			peerConnections,
+			peerStreams,
+			socketEmit,
+			addOrReplaceTracks,
+			iceCandidateQueues,
+		]
 	);
 
 	const handleCreateOffer = useCallback(
 		async ({ userSocketId }: { userSocketId: string }) => {
-			console.log('WebRTC: Creating offer for user:', userSocketId);
-			console.log('Local stream available:', !!localStream.current);
-
-			const peerConnection =
+			console.log('Creating offer for', userSocketId);
+			const pc =
 				peerConnections.get(userSocketId) || createPeerConnection(userSocketId);
 
-			// Wait for local stream if not available
+			// Ensure we have local stream (wait briefly if needed)
 			if (!localStream.current) {
-				console.log('WebRTC: No local stream available, waiting...');
-				// Wait for a short time for the stream to be ready
 				let attempts = 0;
 				while (!localStream.current && attempts < 50) {
-					// Wait up to 5 seconds
-					await new Promise((resolve) => setTimeout(resolve, 100));
+					await new Promise((r) => setTimeout(r, 100));
 					attempts++;
 				}
-
 				if (!localStream.current) {
-					console.error(
-						'WebRTC: Local stream still not available after waiting'
-					);
+					console.error('No local stream when creating offer');
 					return;
 				}
 			}
 
-			// Set the local stream for the store
-			setLocalStream(localStream.current);
-			console.log('localStream.current=============>>', localStream.current);
-
-			// Add local tracks to the peer connection
-			localStream.current?.getTracks().forEach((track) => {
-				console.log(
-					'Adding track to peer connection:',
-					track.kind,
-					track.label
-				);
-				peerConnection.addTrack(track, localStream.current as MediaStream);
-			});
+			// Ensure senders are wired to current tracks
+			addOrReplaceTracks(pc, localStream.current!);
 
 			try {
-				const offer = await peerConnection.createOffer();
-				await peerConnection.setLocalDescription(
-					new RTCSessionDescription(offer)
-				);
-
+				const offer = await pc.createOffer();
+				await pc.setLocalDescription(offer);
 				socketEmit('event:sendOffer', { offer, userSocketId });
-				console.log('WebRTC: Offer sent to user:', userSocketId);
-			} catch (error) {
-				console.error('WebRTC: Error creating offer:', error);
+				console.log('Offer sent to', userSocketId);
+			} catch (err) {
+				console.error('createOffer error', err);
 			}
 		},
-		[createPeerConnection, peerConnections, setLocalStream, socketEmit]
+		[createPeerConnection, peerConnections, addOrReplaceTracks, socketEmit]
 	);
 
 	const handleCreateAnswer = useCallback(
@@ -430,71 +379,57 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			offer: RTCSessionDescriptionInit;
 			socketId: string;
 		}) => {
-			console.log('WebRTC: Creating answer for offer from:', socketId);
-			console.log('Local stream available:', !!localStream.current);
-
-			const peerConnection =
+			console.log('Creating answer for offer from', socketId);
+			const pc =
 				peerConnections.get(socketId) || createPeerConnection(socketId);
 
 			try {
-				await peerConnection.setRemoteDescription(
-					new RTCSessionDescription(offer)
-				);
-				console.log('WebRTC: Remote description set successfully');
+				// Set remote description (the incoming offer)
+				await pc.setRemoteDescription(new RTCSessionDescription(offer));
+				console.log('Remote description set');
 
-				// Wait for local stream if not available
+				// Ensure local stream is available and wired before creating answer
 				if (!localStream.current) {
-					console.log(
-						'WebRTC: No local stream available for answer, waiting...'
-					);
 					let attempts = 0;
 					while (!localStream.current && attempts < 50) {
-						// Wait up to 5 seconds
-						await new Promise((resolve) => setTimeout(resolve, 100));
+						await new Promise((r) => setTimeout(r, 100));
 						attempts++;
 					}
-
 					if (!localStream.current) {
-						console.error(
-							'WebRTC: Local stream still not available after waiting for answer'
-						);
+						console.error('No local stream for creating answer');
 						return;
 					}
 				}
 
-				// Set the local stream for the store
-				setLocalStream(localStream.current);
-				console.log('localStream.current=============>>', localStream.current);
+				// Instead of removing all senders, replace or add tracks so the answer includes media
+				addOrReplaceTracks(pc, localStream.current!);
 
-				// Remove existing tracks first to prevent duplicate sender error
-				peerConnection.getSenders().forEach((sender) => {
-					if (sender.track) {
-						peerConnection.removeTrack(sender);
-					}
-				});
-
-				// Add local tracks to the peer connection
-				localStream.current?.getTracks().forEach((track) => {
-					console.log(
-						'Adding track to peer connection for answer:',
-						track.kind,
-						track.label
-					);
-					peerConnection.addTrack(track, localStream.current as MediaStream);
-				});
-
-				const answer = await peerConnection.createAnswer();
-				await peerConnection.setLocalDescription(
-					new RTCSessionDescription(answer)
-				);
+				const answer = await pc.createAnswer();
+				await pc.setLocalDescription(answer);
 
 				socketEmit('event:sendAnswer', { answer, socketId });
-				console.log('WebRTC: Answer sent to user:', socketId);
-			} catch (error) {
-				console.error('WebRTC: Error creating answer:', error);
+				console.log('Answer sent to', socketId);
+			} catch (err) {
+				console.error('handleCreateAnswer error', err);
 			}
 		},
-		[createPeerConnection, peerConnections, setLocalStream, socketEmit]
+		[peerConnections, createPeerConnection, addOrReplaceTracks, socketEmit]
+	);
+
+	const flushIceQueue = useCallback(
+		(socketId: string) => {
+			const pc = peerConnections.get(socketId);
+			if (!pc) return;
+			const queued = iceCandidateQueues.get(socketId) || [];
+			if (!queued.length) return;
+			queued.forEach((c) => {
+				pc.addIceCandidate(c).catch((e) =>
+					console.warn('addIceCandidate (queued) failed', e)
+				);
+			});
+			iceCandidateQueues.delete(socketId);
+		},
+		[iceCandidateQueues, peerConnections]
 	);
 
 	const setRemoteDescription = useCallback(
@@ -505,29 +440,21 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			answer: RTCSessionDescriptionInit;
 			userSocketId: string;
 		}) => {
-			console.log(
-				'WebRTC: Setting remote description (answer) from user:',
-				userSocketId
-			);
-			const peerConnection = peerConnections.get(userSocketId);
+			const pc = peerConnections.get(userSocketId);
+			if (!pc) {
+				console.warn('setRemoteDescription: no pc for', userSocketId);
+				return;
+			}
+			try {
+				await pc.setRemoteDescription(new RTCSessionDescription(answer));
+				console.log('Remote description (answer) set for', userSocketId);
 
-			if (peerConnection) {
-				try {
-					await peerConnection.setRemoteDescription(
-						new RTCSessionDescription(answer)
-					);
-					console.log(
-						'WebRTC: Remote description set successfully for user:',
-						userSocketId
-					);
-				} catch (error) {
-					console.error('WebRTC: Error setting remote description:', error);
-				}
-			} else {
-				console.log('WebRTC: No peer connection found for user:', userSocketId);
+				flushIceQueue(userSocketId);
+			} catch (err) {
+				console.error('Error setting remote description', err);
 			}
 		},
-		[peerConnections]
+		[peerConnections, flushIceQueue]
 	);
 
 	const handleAddIceCandidate = useCallback(
@@ -538,51 +465,46 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
 			iceCandidate: any;
 			socketId: string;
 		}) => {
-			const peerConnection = peerConnections.get(socketId);
-			if (iceCandidate) {
+			const pc = peerConnections.get(socketId);
+			if (pc && pc.remoteDescription?.type) {
 				try {
-					// console.log(
-					// 	'=========================Get Ice Candidate=================='
-					// );
-
-					await peerConnection?.addIceCandidate(iceCandidate);
-				} catch (error) {
-					console.error('Error adding received ice candidate', error);
+					await pc.addIceCandidate(iceCandidate);
+				} catch (err) {
+					console.error('Error adding ICE candidate to pc', err);
 				}
+			} else {
+				// Queue candidate until pc exists
+				const queue = iceCandidateQueues.get(socketId) || [];
+				queue.push(iceCandidate);
+				iceCandidateQueues.set(socketId, queue);
+				console.log('Queued ICE candidate for', socketId);
 			}
 		},
-		[peerConnections]
+		[peerConnections, iceCandidateQueues]
 	);
-
-	///////////////////////////////////////////////////////////////////////////////
 
 	const disconnectPeer: IWebRTCContext['disconnectPeer'] = useCallback(
 		({ user }) => {
 			const socketId = user.socketId;
-			const peerConnection = peerConnections.get(socketId);
-			peerConnection?.close();
+			const pc = peerConnections.get(socketId);
+			pc?.close();
 			peerStreams.delete(socketId);
-			const AllUsers = peerStreams?.values();
-			const remoteStreams = Array.from(AllUsers);
-			setStreams(remoteStreams);
-			peerConnections.delete(user.socketId);
+			setStreams(Array.from(peerStreams.values()));
+			peerConnections.delete(socketId);
+			iceCandidateQueues.delete(socketId);
 		},
-		[peerConnections, peerStreams]
+		[iceCandidateQueues, peerConnections, peerStreams]
 	);
 
 	const resetRemotePeers: IWebRTCContext['resetRemotePeers'] =
 		useCallback(() => {
 			if (localStream.current) {
-				console.log('Reseting Peer======================>');
-				peerConnections.forEach((value) => {
-					value.close();
-				});
+				console.log('Resetting peers');
+				peerConnections.forEach((value) => value.close());
 				localStream.current.getTracks().forEach((track) => track.stop());
 				setLocalStream(null);
 			}
 		}, [peerConnections, setLocalStream]);
-
-	///////////////////////////////////////////////////////////////////////////////////////////
 
 	useEffect(() => {
 		socketOn('event:user-connected', handleCreateOffer);

@@ -26,7 +26,6 @@ export const useWaitingLobbySocket = (roomId: string) => {
 		(state) => state.setCurrentScreen
 	);
 
-	console.log('HOOOJK roomId--------->', roomId);
 	// const roomDetailsFetch = useCallback(async () => {
 	// 	const token = await getToken();
 
@@ -147,64 +146,6 @@ export const useWaitingLobbySocket = (roomId: string) => {
 	// 		setRoomReady(true);
 	// 	},
 	// 	[]
-	// );
-
-	// // --- Someone asks to join ---
-	// const userWantToEnter = useCallback(
-	// 	async ({
-	// 		username,
-	// 		profilePic,
-	// 		socketId,
-	// 	}: {
-	// 		username: string;
-	// 		profilePic: string;
-	// 		socketId: string;
-	// 	}) => {
-	// 		toast(
-	// 			(t) => (
-	// 				<div className="w-full">
-	// 					<div className="flex">
-	// 						<div className="flex w-[20%] items-center justify-center">
-	// 							<Image
-	// 								src={profilePic}
-	// 								width={30}
-	// 								height={30}
-	// 								className="rounded-full"
-	// 								alt={'Profile Pic'}
-	// 							/>
-	// 						</div>
-	// 						<div className="w-[80%]">{username} wants to enter</div>
-	// 					</div>
-	// 					<div className="flex justify-evenly">
-	// 						<Button
-	// 							size={'sm'}
-	// 							variant={'default'}
-	// 							onClick={() => {
-	// 								toast.dismiss(t.id);
-	// 								acceptUser(socketId);
-	// 							}}
-	// 						>
-	// 							Accept
-	// 						</Button>
-	// 						<Button
-	// 							size={'sm'}
-	// 							variant={'destructive'}
-	// 							onClick={() => {
-	// 								toast.dismiss(t.id);
-	// 								denyUser(socketId);
-	// 							}}
-	// 						>
-	// 							Reject
-	// 						</Button>
-	// 					</div>
-	// 				</div>
-	// 			),
-	// 			{
-	// 				duration: 60000, // 1 minute to respond
-	// 			}
-	// 		);
-	// 	},
-	// 	[acceptUser, denyUser]
 	// );
 
 	// // --- Handle participant updates ---
